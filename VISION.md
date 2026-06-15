@@ -1,15 +1,19 @@
 # DreamTree Vision
-*Draft 1 — March 2026*
+*Draft 1 — March 2026 (refined 2026-05-06)*
+
+*The working application code lives at `/home/b/DreamTree/dreamtree/` (Next.js 15 + Cloudflare Workers, deployed at dreamtree.org). This document is the wallet/mission frame; the app is the dogfood vehicle. See `/home/b/DreamTree/CLAUDE.md` for the codebase-level orientation.*
 
 ---
 
 ## What DreamTree Is
 
-DreamTree is a wallet for who you are.
+DreamTree is a wallet for who you are. We refer to it as DTW.
 
 Not a financial wallet. An identity wallet — a place where everything verifiable about you lives, in a form you own, that can speak for you without you having to repeat yourself. Drop in your resume. Have a conversation. Grant access to your work documents. The wallet fills itself. You confirm what it gets right. From then on, it represents you.
 
 The wallet holds your skills, your values, your work history, your credentials, your references — already gathered, already verified, ready to travel anywhere you go.
+
+**DTW is the brand and the mission.** The career-coaching workbook that the dreamtree-app currently delivers is no longer the product — it is *a* course that runs on top of the wallet. dreamtree.org's job is the wallet itself, with a course catalog (the workbook + data literacy + "how to use your DTW" + future wallet-aligned courses) running alongside it as the dogfood and the on-ramp.
 
 ---
 
@@ -82,6 +86,19 @@ The economy is about to need this for machines for the same reasons it needs it 
 
 ---
 
+## How It Connects to Telekora
+
+DTW is built once and used everywhere. The Telekora engine — tool registry, ontology, connections, smart-content engine, course delivery — embeds DTW as the silent backbone for every learner. Every Telekora user is a DTW instance from day zero, whether they know it or not. Credentials, badges, and attestations land in the wallet as the user moves through courses. When the user is later ready to bring in external attestations or carry credentials to an employer, the wallet is already populated, and the upgrade path is "make explicit what was always there."
+
+The same engine powers two distinct product surfaces:
+
+- **Telekora-the-LMS** (telekora.com) — gamified, fixed-layout, B2B LMS conventions. Sells to managers, MLMs, corporate L&D.
+- **dreamtree.org** — sovereign-feeling, anti-gamification, conversational, user-owned aesthetic. Serves wallet management plus the wallet-aligned course catalog. This is where the workbook lives.
+
+Same ontology. Same connections. Same smart-content commitment. Different UX grammar. The workbook is dogfooded against the engine but directed to dreamtree.org's UX, because gamification and "user-owned aesthetic" are not the same product as the LMS view a B2B buyer wants.
+
+---
+
 ## What the Old App Got Right
 
 The DreamTree workbook — the extended coaching experience built in 2024-2025 — got something important right even if the implementation was wrong.
@@ -138,5 +155,5 @@ That's the long bet.
 
 ---
 
-*Last updated: 2026-03-06*
-*Status: Research phase — do not build yet*
+*Last updated: 2026-05-06*
+*Status: DTW is being lifted out of the workbook app. The shipped dreamtree-app's components redistribute as Telekora-engine tool registry entries, the v0 wallet ontology (the 40-table schema), and dreamtree.org's sovereign delivery surface. Workbook content survives as the inaugural course in the dreamtree.org catalog, alongside data-literacy and DTW-education courses still to be built.*
