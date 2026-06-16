@@ -1,8 +1,8 @@
 # DreamTree Data Model
 
 - **Status:** Working design — *not a finished spec.* Layers 1–2 settled (the atom + the
-  thing); Layer 3 (resolution) settled through `decay` — the `read` step is open; layers 4–6
-  sketched. We derive one layer at a time, getting each right before the next.
+  thing); Layer 3 (resolution / the Inhabited Library) fully settled; layers 4–6 sketched. We
+  derive one layer at a time, getting each right before the next.
 - **Date:** 2026-06-05
 - **Owner:** Braedon
 
@@ -152,10 +152,10 @@ anchors the same referent." Everywhere else is solid.
 **Deferred to Layer 3:** *how* `sameAs` is decided — when it's proposed, how its confidence is
 computed, how it decays, and mint-vs-reuse on ingest. Layer 2 only fixes *what a thing is*.
 
-## Layer 3 — Identity / resolution (the Inhabited Library)  *(settled through `decay`, 2026-06-16)*
+## Layer 3 — Identity / resolution (the Inhabited Library)  *(settled 2026-06-16)*
 
 The full resolution lifecycle: **mint → propose → score → decay → read.** All of it is *derived*
-over the log — resolution is a reading, never a mutation. The first four are settled; `read` is open.
+over the log — resolution is a reading, never a mutation. All five steps are settled.
 
 **mint — what anchors exist.** Mint-vs-reuse is a property of the handle's *namespace*, not a
 judgment call:
@@ -215,8 +215,28 @@ open-ended claims. A thing **"stays itself" by continued attestation**; **forget
 never a deletion** — read as-of any time and the old reading is fully intact. It all stays timeless
 underneath: `sₐ(t)` is a derived reading, so a better outcome-model re-derives every `sₐ(T)` and re-reads.
 
-**read — OPEN.** The thing = the `sameAs`-connected-component under a confidence cut — the one place in
-the whole model a threshold is allowed (a downstream reading, never in the data). *Next.*
+**read — the thing, finally.** A thing is read by **clustering anchors at a consumer-chosen confidence
+cut `θ`, as-of `now`** — and it is emphatically **not** transitive-closure connected-components (that
+snowballs: `A~B~C~…~Z` fuses two real things through one weak link — exactly how every KG rots). The
+read **honors both signs** (correlation-clustering in spirit): `sameAs` pulls together, `differentFrom`
+pushes apart, confidences are the edge weights, and a cluster containing *any* strong `differentFrom`
+pair is forbidden — cut at its weakest links, never fused. A thing is a **dense, sign-consistent
+cluster, not a thin chain.** Connected-components is the degenerate case that ignores the negatives; we
+refuse it (that's the whole reason `differentFrom` is first-class).
+
+Three consequences:
+- **The cut is per-consumer, not global.** The wallet (sovereign, careful) reads at a conservative `θ`;
+  an explorer reads loose. *Same log, different things, by choice.* "Established vs provisional" is just
+  cluster cohesion at the chosen cut — the extend-the-wiki split made exact. The threshold is real but
+  lives entirely in the read; it is never written.
+- **The read is recursive aggregation.** The scoring law first clusters the anchors (`sameAs`); then,
+  *inside* the cluster, the *same* law aggregates each attribute over the merged bag for current-best
+  values (name, FKs…). One law, two levels. Output = `{ cluster, merged bag, current-best attributes,
+  cohesion, as-of now }`.
+- **Stability lives in the anchor; flicker lives in the fringe.** Near the cut, clusters split/merge as
+  evidence and decay shift — honest, since the thing genuinely *is* uncertain there. But the anchor
+  never moves (Layer 2), so anything needing durable identity (the wallet's "you") pins to the anchor /
+  the high-cohesion core, never the provisional fringe.
 
 ## Layers ahead — sketched, not defined
 4. **Relationships & events.** Observations whose referent is a relationship or event.
@@ -238,6 +258,7 @@ the whole model a threshold is allowed (a downstream reading, never in the data)
 
 - ~~Confirm the **C vs S** division.~~ **Settled 2026-06-15** (Layer 1).
 - ~~Derive **layer 2** (the referent / thing).~~ **Settled 2026-06-16** (Layer 2).
-- **Layer 3** — identity / resolution: `mint → propose → score → decay` **settled 2026-06-16**;
-  the `read` step (the confidence-cut connected component) is **next**.
-- Then layer 4 (relationships & events), 5 (dynamics), 6 (value).
+- ~~Derive **layer 3** (identity / resolution).~~ **Settled 2026-06-16** — full lifecycle
+  `mint → propose → score → decay → read` (sign-honoring clustering at a per-read cut).
+- Next: **layer 4** (relationships & events) — though much of it is already implied by Layer 1
+  (events are referents, participation predicated on the party). 5 (dynamics), 6 (value).
