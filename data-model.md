@@ -1,8 +1,8 @@
 # DreamTree Data Model
 
 - **Status:** Working design — *not a finished spec.* Layers 1–2 settled (the atom + the
-  thing); layers 3–6 sketched, not defined. We derive one layer at a time, getting each right
-  before the next.
+  thing); Layer 3 (resolution) settled through `decay` — the `read` step is open; layers 4–6
+  sketched. We derive one layer at a time, getting each right before the next.
 - **Date:** 2026-06-05
 - **Owner:** Braedon
 
@@ -152,12 +152,73 @@ anchors the same referent." Everywhere else is solid.
 **Deferred to Layer 3:** *how* `sameAs` is decided — when it's proposed, how its confidence is
 computed, how it decays, and mint-vs-reuse on ingest. Layer 2 only fixes *what a thing is*.
 
-## Layers ahead — sketched, not defined
+## Layer 3 — Identity / resolution (the Inhabited Library)  *(settled through `decay`, 2026-06-16)*
 
-3. **Identity.** How the ball stays itself: the **Inhabited Library**, not the Archive —
-   maintenance, decay (`λ_standing`), outcome-detachment. Real-world referent is the identity;
-   FKs/QIDs are *attachments* to it, replaceable, not the thing. *(Subsumes the deferred
-   `sameAs` mechanics from Layer 2.)*
+The full resolution lifecycle: **mint → propose → score → decay → read.** All of it is *derived*
+over the log — resolution is a reading, never a mutation. The first four are settled; `read` is open.
+
+**mint — what anchors exist.** Mint-vs-reuse is a property of the handle's *namespace*, not a
+judgment call:
+- **strong handle** — from a uniqueness-guaranteeing authority (FEC id, SEC CIK, QID, DOI, *or our
+  own minted ids*) → **content-addressed:** same handle = same anchor, deterministically, forever.
+  We *inherit* the uniqueness; we don't assert it.
+- **weak handle** — no uniqueness guarantee (a bare name) → **mint a fresh provisional anchor every
+  occurrence.** Never presume two weak handles are the same thing at write.
+
+Ingest stays dumb and deterministic — *zero fuzzy decisions at write* — and all "is this the same?"
+mess is quarantined into `sameAs`. Strong handles → a few solid content-addressed anchors (the
+grounding); weak handles → a cloud of cheap provisional anchors that resolution pulls together (the
+substrate). Matches what gnosis converged on: FK → deterministic, FK-less → scored.
+
+**propose — which pairs to consider.** Candidate generation is just *reading the log*: index anchors
+by shared features (name tokens, claimed ids, neighbors); any two in a feature-block are candidates.
+Recall-oriented, reprocessable, heuristics-OK (it's a reading, not data). Two signal classes, unequal:
+- **resemblance** — they *look* alike. Cheap, high-recall, low-trust (two John Smiths). Only ever *proposes.*
+- **bridge** — a *shared grounded reference* ties them: same strong id reached two ways, a shared
+  *unique* neighbor, an authority **crosswalk**. Evidence of shared *identity* — nearly self-scoring.
+
+Privilege bridges over resemblance (ground in authority; don't trust looks). **Crosswalks aren't
+candidates** — an authority's `FEC:C001 = QID:Q123` enters as a *settled* `sameAs` via normal ingest.
+Propose/score exists only for pairs no authority has linked.
+
+**score — how sure.** We don't build a `sameAs` scorer; a `sameAs` is a claim, scored by the model's
+one law:
+```
+confidence = 1 − ∏(1 − sₐ · specificity · decay)   over sameAs attestations, net of differentFrom
+```
+- **standing `sₐ`** = authority vs guesser (the system resolver is just a low-standing attestor — A is a C).
+- **specificity** = step 2's bridge-vs-resemblance, *quantified* (shared "chairs fund X" → big; shared
+  "lives in the US" → ~0). Not a separate mechanism — just where evidence sits on the axis.
+- **decay** = recency.
+
+Resolution self-improves: the resolver's standing is learned from whether its past `sameAs` survived
+(outcome feedback → Layer 5); re-aggregate → links sharpen; the log never moves. **No special veto:**
+an authoritative `differentFrom` (two distinct FEC ids) simply carries overwhelming negative weight in
+the same aggregation and dominates. The veto falls out of the formula.
+
+**decay — the Inhabited Library.** Decay isn't an operation; it's the *time-dependence of the reading*
+(taken as-of `now`). Three time-dependent things, kept separate:
+1. **claim authority `= sₐ(T)`** — standing *at attestation time*, **frozen forever.** A 1970 expert's
+   1970 claim is weighted by their 1970 standing, permanently; the past is never retroactively rewritten.
+2. **claim present-relevance `= decay(now − T)`** — a separate axis. The 1970 claim keeps full authority,
+   but its contribution to *"what's true now"* ages.
+3. **standing `sₐ(t)`** — a time-series that rises on outcomes and **drifts toward a neutral baseline**
+   without renewal (decision: neutral, not zero — redemption real, no permanent crown *or* damnation;
+   anti-capture). Death = renewal ceases; *go-forward* standing drifts neutral, but the 1970 attestation
+   is untouched. This is why "the same claim made at a different time carries different weight" — a later
+   attestation uses `sₐ(later)`.
+
+So historical value `= sₐ(T) · specificity` is **fixed**; present contribution `= · decay(now − T)`.
+**Decay rate is a grounded property of the predicate** (`birthdate` ≈ none; `job` / `price` ≈ fast), and
+composes with explicit **validity intervals** (CEO 2017–2023): the interval governs truth, decay handles
+open-ended claims. A thing **"stays itself" by continued attestation**; **forgetting is a vantage point,
+never a deletion** — read as-of any time and the old reading is fully intact. It all stays timeless
+underneath: `sₐ(t)` is a derived reading, so a better outcome-model re-derives every `sₐ(T)` and re-reads.
+
+**read — OPEN.** The thing = the `sameAs`-connected-component under a confidence cut — the one place in
+the whole model a threshold is allowed (a downstream reading, never in the data). *Next.*
+
+## Layers ahead — sketched, not defined
 4. **Relationships & events.** Observations whose referent is a relationship or event.
    *Involvement* (observed) vs *effect* (asserted + graded + data-proven). Time lives on events.
 5. **Dynamics.** Standing / legitimacy / decay / outcome-propagation. Gravity is a *derived
@@ -177,5 +238,6 @@ computed, how it decays, and mint-vs-reuse on ingest. Layer 2 only fixes *what a
 
 - ~~Confirm the **C vs S** division.~~ **Settled 2026-06-15** (Layer 1).
 - ~~Derive **layer 2** (the referent / thing).~~ **Settled 2026-06-16** (Layer 2).
-- Derive **layer 3** — identity / resolution: how `sameAs` is decided, scored, and decays;
-  mint-vs-reuse on ingest; how the ball stays itself over time (the Inhabited Library). One step.
+- **Layer 3** — identity / resolution: `mint → propose → score → decay` **settled 2026-06-16**;
+  the `read` step (the confidence-cut connected component) is **next**.
+- Then layer 4 (relationships & events), 5 (dynamics), 6 (value).
