@@ -2,7 +2,8 @@
 
 - **Status:** Working design — *not a finished spec.* Layers 1–2 settled (the atom + the
   thing); Layers 3–4 settled (resolution / the Inhabited Library; relationships & events);
-  layers 5–6 sketched. We derive one layer at a time, getting each right before the next.
+  layers 5–6 sketched; cross-cutting concerns (visibility/sovereignty, σ, retraction, literals)
+  settled. We derive one layer at a time, getting each right before the next.
 - **Date:** 2026-06-05
 - **Owner:** Braedon
 
@@ -30,7 +31,7 @@ See `gnosis: docs/specs/extend-the-wiki.md` for that survey.
 3. **The log is the only ground truth.** Everything else — things, edges, identity, gravity,
    value — is a **derived, recomputable projection** over the observation log. An entity isn't
    a stored fact; it's a current *reading*. Better resolver / better gravity function →
-   re-derive; the log never changes. **Reprocessing is structural and free.**
+   re-derive; the log never changes. **Reprocessing is structurally free** — practically, readings are materialized and cached.
 
 ## Layer 1 — The atom: the observation  *(settled, locked to the paper)*
 
@@ -278,6 +279,50 @@ its causes as a *transparent function over the graph* — every credit-unit trac
 attestations that left the crumbs (attribution-as-conservation, literally). Outcome-propagation
 along these edges is **L5**.
 
+## Cross-cutting resolutions  *(settled 2026-06-16)*
+
+These touch every layer; settled alongside L1–L4. *Why* sovereignty matters — and the GDPR-leverage
+strategy — lives in `VISION.md`; here is the mechanism.
+
+**Visibility & sovereignty — `#1`.** Visibility is **not a field on the atom.** It's realized two
+ways, both already in the grammar:
+- **consent is observations** — "U grants V read-access to X" is a crumb authored by U, revocable by
+  a superseding crumb; the consent-graph lives *in* the log;
+- **enforcement is cryptographic** — a private observation is encrypted to the owner's key
+  (server-blind); sharing re-keys per consent. The log stays *logically* access-agnostic; the wallet
+  gates reads.
+
+Every crumb carries **two ownerships, not one:** **author-rights** (integrity — who said it can't be
+forged or erased; this is all "map the crumbs / can't censor" protects) and **subject-rights** (the
+referent's inalienable stake — a copy, consent over propagation/use, dispute, and a share of derived
+value). Sovereignty is the *subject* half, and it is **proactive + two-tier:**
+- **Tier 1 — what you track yourself** (first-person observations you author about your own activity,
+  capture as `σ`): unassailably yours — authored by you *and* about you;
+- **Tier 2 — what others derive about you** (you can't author it): your Tier-1 record is the
+  *leverage* to compel and verify it — proof to negotiate from when regulation presses.
+
+Rights are *derived* from being author / referent + the consent-crumbs; the substrate stays pure (no
+ACL field).
+
+**σ structure — `#2`.** σ has two parts: **source** = a `→C` (the document / dataset / measurement is
+itself a referent — its reliability is attestable, identical sources dedupe), and **binding** = proof
+that A really said it (cryptographic **signature** for self-attestations; **provenance-attribution**
+for ingested third-party claims — "this text was at this archived URL"). Binding-strength is a
+gradient that folds into **σ-quality** (the continuous weight from L4). For first-person tracking,
+σ = the **capture artifact** (signed client event / screenshot / network trace + timestamp). The
+signing *mechanism* is the wallet/chain's; the model only names the seam.
+
+**Retraction / dispute / correction — `#3`.** All just observations. **Dispute** = a counter-crumb
+anyone may leave (`A2` attests `¬S`), weighed by their standing as negative evidence. **Retraction** =
+the *original author* supersedes their own crumb. **Correction** = supersede with a new value. Nothing
+deletes (immutable); the present reading nets for / against / superseded. Anyone may dispute; only the
+author may retract.
+
+**Literals — `#5`.** The leaf-space is tiny by design: **literals are bare scalars only** — number,
+string, boolean, timestamp. Anything with *meaning* — a unit, a currency, a category — is a `→C`,
+never part of the literal. So `$1M` is not a literal; it is `{ amount:[1000000], unit:→USD }`, where
+`USD` is a currency-referent. All meaning lives in the one-law graph.
+
 ## Layers ahead — sketched, not defined
 5. **Dynamics.** Standing / legitimacy / decay / outcome-propagation. Gravity is a *derived
    reading* — and the only place a threshold could ever live (downstream, never in the data).
@@ -300,5 +345,7 @@ along these edges is **L5**.
   `mint → propose → score → decay → read` (sign-honoring clustering at a per-read cut).
 - ~~Derive **layer 4** (relationships & events).~~ **Settled 2026-06-16** — involvement vs
   effect; spine = *map the crumbs, never make the claim*; σ continuous-substrate / categorical-at-read.
+- ~~Non-5/6 gaps (visibility/sovereignty, σ, retraction, literals, "reprocessing-free" overclaim).~~
+  **Settled 2026-06-16** — see Cross-cutting resolutions; strategy in `VISION.md`.
 - Next: **layer 5** (dynamics — standing, decay, outcome-propagation; much already derived in
   L3), then **layer 6** (value / attribution — the DreamTree economy).

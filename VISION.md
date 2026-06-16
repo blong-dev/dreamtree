@@ -1,7 +1,7 @@
 # DreamTree Vision
 *Draft 1 — March 2026 (refined 2026-05-06)*
 
-*The working application code lives at `/home/b/DreamTree/dreamtree/` (Next.js 15 + Cloudflare Workers, deployed at dreamtree.org). This document is the wallet/mission frame; the app is the dogfood vehicle. See `/home/b/DreamTree/CLAUDE.md` for the codebase-level orientation.*
+*This document is the wallet/mission frame, and it now lives in the DTW repo (`blong-dev/dreamtree`) alongside the data model and protocol it serves. The old workbook app (Next.js 15 + Cloudflare Workers, dreamtree.org) is archived at `blong-dev/DreamTree-oldsource` as the dogfood/cannibalization source — not active dev.*
 
 ---
 
@@ -14,6 +14,29 @@ Not a financial wallet. An identity wallet — a place where everything verifiab
 The wallet holds your skills, your values, your work history, your credentials, your references — already gathered, already verified, ready to travel anywhere you go.
 
 **DTW is the brand and the mission.** The career-coaching workbook that the dreamtree-app currently delivers is no longer the product — it is *a* course that runs on top of the wallet. dreamtree.org's job is the wallet itself, with a course catalog (the workbook + data literacy + "how to use your DTW" + future wallet-aligned courses) running alongside it as the dogfood and the on-ramp.
+
+---
+
+## The Wider Frame — Your Handshake with the Tech World
+
+The education-to-employment handshake is the first instance, not the whole. DreamTree is meant to be the **individual's handshake with the entire tech and AI world** — a *secular* layer (neutral, owned by no platform) that sits between a person and everything that wants their data or attention, and shakes hands on their behalf.
+
+Three things it does:
+
+- **Protects and organizes.** Your verified self, kept by you, in one place — not scattered across a hundred services that each own a sliver and sell it.
+- **Harnesses agents to serve you.** Your wallet is the trustworthy, machine-readable context any agent needs to understand you *as you need to be understood* — and then go produce value for you, on whatever surface and in whatever avenue fits. The same verified record powers a job application, a research agent, a negotiation, a course. One harness, every surface.
+- **Brings you the best models, cheaply.** Part of the portal is matching individuals to the highest-end models their need calls for, at the lowest cost — democratized frontier capability, brokered *for the person* rather than rented from a platform.
+
+Underneath, **DTW reshapes how information is stored and verified** — provenance-complete, attributed, AI-native — so the thing the early internet promised (find what's true, trust what you find) finally becomes feasible for both people and machines. The current stack — the workbook, Telekora, gnosis — is **scaffolding** toward that.
+
+### Sovereignty is proactive, and it's leverage
+
+Sovereignty isn't waiting for platforms to hand your data back. It's **keeping your own record, first.** DreamTree tracks your side proactively: *I was here, I did this, this was shown to me, at these times* — first-person observations you author, with the capture as proof. Two tiers follow:
+
+- **What you track yourself** is unassailably yours — authored by you, about you, receipted.
+- **What platforms derive about you** you can't author — but your own record is the **leverage** to get it. "I can prove I was there and this happened" means that when GDPR (and what comes after it) presses a platform, you hold independent receipts: their disclosure can be audited for completeness, and you negotiate from proof instead of asking nicely.
+
+That's the bet underneath the data-marketplace and attribution use-cases below: **arm individuals with verified receipts ahead of where the law is already walking.** Good faith becomes both sides holding evidence that checks out.
 
 ---
 
@@ -155,5 +178,5 @@ That's the long bet.
 
 ---
 
-*Last updated: 2026-05-06*
+*Last updated: 2026-06-16 (added "The Wider Frame" — the handshake with the tech world, the agent-harness, proactive two-tier sovereignty, and cheap model access).*
 *Status: DTW is being lifted out of the workbook app. The shipped dreamtree-app's components redistribute as Telekora-engine tool registry entries, the v0 wallet ontology (the 40-table schema), and dreamtree.org's sovereign delivery surface. Workbook content survives as the inaugural course in the dreamtree.org catalog, alongside data-literacy and DTW-education courses still to be built.*
