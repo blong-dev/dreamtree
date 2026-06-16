@@ -1,8 +1,8 @@
 # DreamTree Data Model
 
-- **Status:** Working design — *not a finished spec.* Layer 1 (the atom) is settled and
-  locked to the paper; layers 2–5 are sketched, not defined. We derive one layer at a time,
-  getting each right before the next.
+- **Status:** Working design — *not a finished spec.* Layers 1–2 settled (the atom + the
+  thing); layers 3–6 sketched, not defined. We derive one layer at a time, getting each right
+  before the next.
 - **Date:** 2026-06-05
 - **Owner:** Braedon
 
@@ -103,13 +103,61 @@ The atom is exactly the attestation tuple from the attribution paper
   **derived projections** (the log is the only ground truth; everything else re-derives); a
   participation is a *raw* atom only when the source genuinely asserts about the party.
 
+## Layer 2 — The referent / thing  *(settled 2026-06-16)*
+
+A thing is its observations — but with a **spine**, not a loose cloud. "Just a bag of
+observations" is too loose; solidity is real, it's *earned*, and it has a precise home.
+
+**Structure of a thing:**
+- **anchor** — a minted, immutable, *contentless* internal id. A permanent address that
+  observations resolve to; it carries no claims (no name, no FK). *This is the solid part:
+  append-only, it never moves.*
+- **bag** — the observations resolved to the anchor. The body.
+- **grounding** — the strongest authoritative proof in the bag (CIK / FEC id / QID / KYC). It
+  rides *on top* as observations — never the spine — and it *sets the solidity level*.
+- **reading** — the materialized current-best entity (name, attributes), a re-derivable
+  projection. The solid-*feeling* surface apps query.
+
+There is no privileged *meaning*-kernel (FKs stay observations, per Layer 1) — but there **is** a
+solid *locus*. The anchor is a minted internal id, **not** the strongest FK — so a thing can
+exist *before* it's grounded, survive wrong / contested / multiple FKs, and float as provisional
+substrate until it earns a proof.
+
+**Solidity is a gradient you earn, not a thing you assume:**
+- ungrounded bag (loose mentions) → genuinely provisional, floating — **we refuse to fake
+  solidity here** (blank > wrong);
+- anchored to an authority → **solid as its source**;
+- a KYC-verified human → maximal.
+
+The real-world referent is the solid identity (*human-is-the-identity*); our data is its
+reflection. We never claim more solidity than we've grounded.
+
+**Birth, union, death:**
+- A thing is **born** by minting an anchor (on a referent not yet seen).
+- Two anchors become **one thing** not by merging but by a **`sameAs` observation between them** —
+  resolution is itself attestation, with its own author, confidence, and decay:
+  ```
+  (C=→anchor#7, A=→resolver, T, S={ →sameAs:→anchor#12 }, σ)
+  ```
+- A **thing = the connected component of anchors under `sameAs`**, read on demand.
+- **Merges never destroy.** A bad merge is outvoted or decays — attest `differentFrom`, the
+  component re-reads, every original anchor still intact. **Splits are free. Reprocessing is
+  free.** Destructive merges are irreversible and are how KGs rot; we never do them.
+
+**The hard / soft split (what makes it not-loose):** the **anchor, the log, and the proof are
+hard** (permanent, immutable). Only the **grouping flexes** (confidence-weighted `sameAs`).
+Uncertainty is quarantined to the one thing that genuinely *is* uncertain — "are these two
+anchors the same referent." Everywhere else is solid.
+
+**Deferred to Layer 3:** *how* `sameAs` is decided — when it's proposed, how its confidence is
+computed, how it decays, and mint-vs-reuse on ingest. Layer 2 only fixes *what a thing is*.
+
 ## Layers ahead — sketched, not defined
 
-2. **Referent / thing.** A thing is the accreted, maintained mass of observations about a C —
-   the "sticky ball." Identity *is* the entity.
 3. **Identity.** How the ball stays itself: the **Inhabited Library**, not the Archive —
    maintenance, decay (`λ_standing`), outcome-detachment. Real-world referent is the identity;
-   FKs/QIDs are *attachments* to it, replaceable, not the thing.
+   FKs/QIDs are *attachments* to it, replaceable, not the thing. *(Subsumes the deferred
+   `sameAs` mechanics from Layer 2.)*
 4. **Relationships & events.** Observations whose referent is a relationship or event.
    *Involvement* (observed) vs *effect* (asserted + graded + data-proven). Time lives on events.
 5. **Dynamics.** Standing / legitimacy / decay / outcome-propagation. Gravity is a *derived
@@ -127,5 +175,7 @@ The atom is exactly the attestation tuple from the attribution paper
 
 ## Open / next
 
-- ~~Confirm the **C vs S** division.~~ **Settled 2026-06-15** (see Layer 1 above).
-- Derive **layer 2** — the referent / thing (the sticky ball). One step.
+- ~~Confirm the **C vs S** division.~~ **Settled 2026-06-15** (Layer 1).
+- ~~Derive **layer 2** (the referent / thing).~~ **Settled 2026-06-16** (Layer 2).
+- Derive **layer 3** — identity / resolution: how `sameAs` is decided, scored, and decays;
+  mint-vs-reuse on ingest; how the ball stays itself over time (the Inhabited Library). One step.
