@@ -1,8 +1,8 @@
 # DreamTree Data Model
 
 - **Status:** Working design — *not a finished spec.* Layers 1–2 settled (the atom + the
-  thing); Layer 3 (resolution / the Inhabited Library) fully settled; layers 4–6 sketched. We
-  derive one layer at a time, getting each right before the next.
+  thing); Layers 3–4 settled (resolution / the Inhabited Library; relationships & events);
+  layers 5–6 sketched. We derive one layer at a time, getting each right before the next.
 - **Date:** 2026-06-05
 - **Owner:** Braedon
 
@@ -238,9 +238,47 @@ Three consequences:
   never moves (Layer 2), so anything needing durable identity (the wallet's "you") pins to the anchor /
   the high-cohesion core, never the provisional fringe.
 
+## Layer 4 — Relationships & events  *(settled 2026-06-16)*
+
+Most of this was already built in L1 — events are referents, participation is predicated on the
+party, relationships fall out of co-reference, and a standing relationship is just an event-C with
+a validity interval (`employed-at, 2017–2023`) instead of an instant. What L4 adds is the
+**involvement / effect** distinction and one governing principle.
+
+**The spine — map the crumbs, never make the claim.** The system has no first-person voice. It
+never asserts `X caused Y`; it records that *someone* attested it, and maps the trail. `A` is
+always *someone* — even the resolver's `sameAs` guesses (L3) are crumbs left by a labeled,
+low-standing attestor. There is no unattributed, oracular truth anywhere in the model. Our whole
+job: **record who left which crumb, measure the trail** (aggregate weight, who corroborated, who
+disputed), **and surface it.** The consumer draws the conclusion. A cartographer of attestations,
+not an oracle.
+
+**Involvement vs effect — a difference of epistemic type, not of machinery:**
+- **involvement** — *observed* participation (donor, attendee, employee). Near-factual; you saw it.
+- **effect** — a *causal* claim: an observation whose referent is a relation between two events
+  (`cause-event → outcome-event`), where the outcome is its own event-C, `caused` is a predicate-C,
+  and S carries a **grade** (magnitude + valence). Causation can never be *observed*, only
+  *asserted* — so effect leans entirely on the scoring law (standing, corroboration, σ-quality).
+
+Both are just crumbs. The system maps both, asserts neither.
+
+**σ-quality is continuous in the substrate, categorical only at read.** A data-proven effect (a
+measurement attached as σ) is just a *very-high-σ crumb*, not a privileged class — it weighs more
+in the same aggregation, nothing more. Making data-proof a *category* would put a threshold in the
+data, which is never allowed. Any hard line — "σ ≥ data-proof, nothing less" — lives in the
+consumer's read-cut `θ` (L3), never in the substrate. Continuous underneath; the reader may cut.
+
+**The grade is measured, not assumed.** An effect's magnitude/valence is asserted per-crumb and
+aggregated like everything else — the "true" grade is a derived reading over graded attestations,
+never a stored number.
+
+**Seam to L5/L6.** Causation is **n-to-n** (one cause → many outcomes; one outcome → many causes).
+That crumb-graph is the raw material for **L6 attribution**, which divides an outcome's grade among
+its causes as a *transparent function over the graph* — every credit-unit traceable back to the
+attestations that left the crumbs (attribution-as-conservation, literally). Outcome-propagation
+along these edges is **L5**.
+
 ## Layers ahead — sketched, not defined
-4. **Relationships & events.** Observations whose referent is a relationship or event.
-   *Involvement* (observed) vs *effect* (asserted + graded + data-proven). Time lives on events.
 5. **Dynamics.** Standing / legitimacy / decay / outcome-propagation. Gravity is a *derived
    reading* — and the only place a threshold could ever live (downstream, never in the data).
 6. **Value.** Attribution / settlement — the DreamTree economy — on top of the clean
@@ -260,5 +298,7 @@ Three consequences:
 - ~~Derive **layer 2** (the referent / thing).~~ **Settled 2026-06-16** (Layer 2).
 - ~~Derive **layer 3** (identity / resolution).~~ **Settled 2026-06-16** — full lifecycle
   `mint → propose → score → decay → read` (sign-honoring clustering at a per-read cut).
-- Next: **layer 4** (relationships & events) — though much of it is already implied by Layer 1
-  (events are referents, participation predicated on the party). 5 (dynamics), 6 (value).
+- ~~Derive **layer 4** (relationships & events).~~ **Settled 2026-06-16** — involvement vs
+  effect; spine = *map the crumbs, never make the claim*; σ continuous-substrate / categorical-at-read.
+- Next: **layer 5** (dynamics — standing, decay, outcome-propagation; much already derived in
+  L3), then **layer 6** (value / attribution — the DreamTree economy).
