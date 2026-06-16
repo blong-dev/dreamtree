@@ -66,10 +66,42 @@ The atom is exactly the attestation tuple from the attribution paper
   frozen onto the observation (standing changes and decays; freezing it would lie).
 - **C's referent-time** — a property of the referent, derived/asserted, not an atom field.
 
-**C vs S (the interface that matters at this layer):** C identifies *which* thing happened
-(the noun — it points at the referent); S is *what is asserted* about it (the claim). One C
-accretes many S from many A — which is the sticky ball beginning to form.  *[Division to
-confirm before climbing to layer 2.]*
+**C vs S — settled (2026-06-15).** Resolving the division collapsed the whole atom to one rule.
+
+- **C is a pointer, not an identity.** At observation time C is an unresolved *referent-handle* —
+  whatever A pointed at (a name, an external id, an ambiguous string). Turning many handles into
+  one thing is Layer 2/3, derived and reprocessable. Putting resolved identity on the atom would
+  smuggle Layer 3 into Layer 1 (the regress) and make "same C" a *stored fact* instead of a
+  reading. Handle now; identity derived.
+
+- **One C per atom; an event/relationship is a referent in its own right.** A transaction has no
+  intrinsic "subject" — picking a party as C imports an angle reality doesn't have. So the *event*
+  is its own C, and each party's involvement is a separate single-C observation **predicated on the
+  party** (so it accretes onto the party's ball, where identity needs it):
+
+  ```
+  event:          (C=→event#123, A=→Reuters, T, S={ →kind:→donation, →magnitude:[$1M], →when:[2025-01-20] }, σ)
+  participation:  (C=→Lacy,      A=→Reuters, T, S={ →role:→donor,     →in:→event#123 }, σ)
+  participation:  (C=→fund,      A=→Reuters, T, S={ →role:→recipient, →in:→event#123 }, σ)
+  ```
+
+  The Lacy↔fund relationship is *derived* from co-reference of `→event#123` — symmetric, n-ary,
+  direction recoverable but never privileged. The edge is never stored.
+
+- **Everything is a C or a literal — one law.** The subject is a →C; the attestor **A is a →C**
+  (an entity like any other — the recursion is real); every value in S is a literal or a →C.
+  **Types, roles, predicates** (`kind`, `role`, `in`, `donor`, `donation`) are *all* Cs — grounded
+  if known, provisional if not. There is no special "structural vocabulary"; common predicates are
+  just Cs with high grounding (gravity). Nothing is enumerated; everything grounds the same way.
+
+- **The grammar of S (the Layer-1 lock):** `S = { →C : value }`, where `value` is a **literal** or
+  a **→C**. A value is a literal or a pointer to a C — period.
+
+- **Raw vs derived (follows from the axiom).** *C = what the attestation is about.* Record A's
+  attestation at its natural C and never reshape it — a donation *report* is about the event, so its
+  raw atom is `C=event`; a source about Lacy herself is natively `C=Lacy`. Participations are
+  **derived projections** (the log is the only ground truth; everything else re-derives); a
+  participation is a *raw* atom only when the source genuinely asserts about the party.
 
 ## Layers ahead — sketched, not defined
 
@@ -95,5 +127,5 @@ confirm before climbing to layer 2.]*
 
 ## Open / next
 
-- Confirm the **C vs S** division.
-- Then derive **layer 2** (the referent / thing) — one step.
+- ~~Confirm the **C vs S** division.~~ **Settled 2026-06-15** (see Layer 1 above).
+- Derive **layer 2** — the referent / thing (the sticky ball). One step.
