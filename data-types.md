@@ -139,7 +139,15 @@ Note: `dt.skill.transferable`/`soft`/`knowledge` are distinct subcategories rath
 
 ### `dt.credential.*` — issued credentials (W3C VC 2.0)
 
-**These are W3C Verifiable Credentials. The payload IS the full VC document.** The wallet stores the canonical signed JSON; verification is local (no resolver needed) since issuer + receiver DIDs are `did:key:z6Mk…` (the DID encodes the key).
+**These are W3C Verifiable Credentials. The payload IS the full VC document.** The wallet stores the canonical signed JSON.
+
+**Verification is two checks, not one — do not conflate them.** The `did:key` embeds its public key, so *signature integrity* ("these exact bytes were signed by the key named in the proof") needs no resolver. But that is only half of verification. It does **not** establish *issuer authenticity* — that the named key actually belongs to Telekora-tenant-Acme rather than to whoever generated the credential. A `did:key` is self-asserting: anyone can mint a keypair, sign a VC claiming `issuer: did:key:<their-key>` + `"…attested by tenant Acme"`, and it passes a signature-only check. Authenticity requires resolving the issuer DID against a **trusted issuer registry** and confirming that issuer has standing to attest the claim (e.g. owns the referenced course). Concretely, a verifier must:
+
+1. **Signature** — verify each proof against the key in its `did:key` (no resolver; local).
+2. **Issuer authenticity** — resolve the issuer DID against the issuer registry; reject DIDs that aren't registered issuers, and confirm standing (issuer's tenant owns the referenced course/claim).
+3. **Proof completeness** — require BOTH proofs present and role-bound: exactly one `assertionMethod` proof whose DID is the (registered) issuer, and exactly one `authentication` proof whose DID equals `credentialSubject.id`. A single-proof or wrong-role credential must fail.
+
+The **issuer registry is a resolver with a swappable backend**, in increasing order of decentralization: **v0** — the issuer's keystore (Telekora `issuer_keys` / `receiver_keys`), so verification through the platform is sound today; **vNext** — a published `did:web` / signed issuer registry, verifiable off-platform without trusting a platform API; **vision** — the public provenance ledger (per `ARCHITECTURE.md`, the Library, not the per-wallet chain) as the issuer + attestation registry. Same interface; the ledger is one backend, not a prerequisite. Design verification against this interface now — a credential minted with a stable issuer DID, a standard proof suite, and a content-addressable id (the merkle tree already provides this) is registry-portable and can be adopted by the ledger later with no re-issue. *This corrects the earlier "verification is local, no resolver needed" framing, which described only step 1 and would ship a forgery hole (self-signed credentials pass) into the wallet-v0 build. See Telekora `verifiable-credentials.md` and the credential-trust-anchor work (gnosis GNS-810); the stable-DID choice is the `did:webvh`-vs-`did:key` question in GNS-808.*
 
 | key | payload | PII | external | source |
 |---|---|---|---|---|
@@ -148,6 +156,18 @@ Note: `dt.skill.transferable`/`soft`/`knowledge` are distinct subcategories rath
 | `dt.attestation@1` | a generic W3C VC envelope for non-course attestations (manager vouches, peer review, etc.) | yes-at-rest | **W3C VC 2.0** | future — protocol-spec attestation layer |
 
 Note: **encrypted-at-rest in the wallet by default** even though VCs are externally verifiable, because the wallet's owner-sovereignty stance says cleartext-on-server is the wrong default (per `wallet-spec.md` L2 Q5 hosted-with-blindness-when-logged-out). At presentation time the holder decrypts and presents (or in v1+, uses selective disclosure to present subsets). This is the wallet's privacy posture above and beyond the VC's signature properties.
+
+### `dt.outcome.*` — outcomes (validating or refuting prior attestations)
+
+Outcomes are themselves attestations, signed by a reporter who has standing to observe the outcome — the hospital reporting a patient outcome, the employer reporting a hire's performance, the appellate court overturning the trial court. Per `protocol-spec.md` §Reputation Dynamics, outcomes use the same machinery as any attestation (review window, cred recursion, paper-shape aggregation, time horizons) — special only in what they do to R: they trigger the `M_O` propagation chain (contributor + the attestation chain that staked on them). Outcomes can themselves be refuted; the 2× asymmetry recurses (a refuted outcome reverses + penalizes the original reporter).
+
+| key | payload sketch | PII | external | source |
+|---|---|---|---|---|
+| `dt.outcome.validated@1` | `{ subject_attestation_ref, contributor_wallet_id, description, evidence?: text, observed_at }` — confirms the underlying attestation / work | yes-at-rest (context-dependent; default encrypted) | **W3C VC 2.0** (outcomes can be issued as VCs) | protocol-spec §Outcome propagation + `M_O` |
+| `dt.outcome.refuted@1` | same payload + `refutation_reason: text` — refutes the underlying attestation | yes-at-rest | **W3C VC 2.0** | protocol-spec |
+| `dt.outcome.partial@1` | same + `partial_scope: text` — partial confirmation/refutation. Deferred to v1; v0 forces binary. | yes-at-rest | **W3C VC 2.0** | future |
+
+Note: an outcome's `M_O` magnitude is **computed by the protocol** (formula in `protocol-spec.md` §Reputation Dynamics), not declared by the reporter — the reporter can include a `magnitude_hint`, but the protocol clamps it to `min(M_cap, β · S(att, t_issuance) · √cred(reporter))`.
 
 ### `dt.identity.*` — identity proof (the human-as-key anchor)
 
