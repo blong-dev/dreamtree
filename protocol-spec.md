@@ -267,6 +267,38 @@ Outcome O on contributor c, magnitude M_O:
 
 Contributor moves most; everyone who staked R on them moves proportionally. This makes betting on people rewarding when right, costly when wrong — and makes shell institutions decay as their graduates underperform.
 
+### Outcome magnitude `M_O` (resolved 2026-06-24)
+
+The magnitude of an outcome event — what plugs into the propagation formulas above:
+
+```
+M_O = min(M_cap, β · S(att, t_issuance) · √cred(reporter))
+```
+
+Five clarifications make the formula behave correctly:
+
+**1. `S(att, t_issuance)`, not `t_outcome`.** Use the attestation's strength **when it was made**, not its decayed strength when the outcome lands. The teacher's 1990 student-quality bet that pays out in 2026 should pay *big*, not tiny — that's the appreciation-compounding mechanic the framework promises. Using current strength would dilute it into nothing for any long-validated bet.
+
+**2. Multiple outcome reports aggregate paper-shape, not sum.** If 10 reporters file the same outcome (the surgeon's case went badly), `M_O` should not 10×. Same aggregation as attestations:
+
+```
+M_O_total = M_cap · [1 − Π(1 − M_O_i / M_cap)]
+```
+
+Diminishing returns; Sybil-resistant by construction.
+
+**3. Self-reports → `cred ≈ 0`.** A contributor reporting an outcome on their *own* work has cred near zero (the cred-recursion already gives no second-hop endorsement of yourself, but it's worth being explicit). Self-attestation never carries full outcome weight — Akerlof's lemons logic.
+
+**4. Outcomes ARE attestations (a subclass), not a special path.** An outcome is an attestation with `data_type = dt.outcome.*` (validated / refuted / partial). It hits the review window `τ(M)`, the `cred(source)` recursion, the paper-shape aggregation, the time horizons — same machinery. Special *only* in what it does to R: triggers the `M_O` propagation chain (contributor + direct attestors + chain hops + hiring/evaluating party, per the propagation block above).
+
+**5. Outcomes can themselves be refuted, and the 2× asymmetry recurses.** A counter-outcome from a higher-cred source — the medical examiner overruling the hospital, the appellate court overturning the trial court — does two things: it **reverses** the original `M_O` (un-applies it across the contributor + chain + hiring party) **and** hits the original reporter with a **2× R penalty** (their refuted outcome was itself a bad attestation). Without this, false outcomes are sticky and the math is irreversible.
+
+**Stand-ins** (levers, see [`parameters.md`](./parameters.md)):
+- `β = 1.0` — when the reporter is baseline-cred (KYC-verified but unaccumulated), `M_O ≈ S(att, t_issuance)`.
+- `M_cap = 5 · S(att, t_issuance)` — a single outcome can multiply the original bet by up to 5×, no more. Protects against single-event reputation kills; persistent bad behavior still tanks R because there's no floor.
+
+Both tunable, governance-evolved.
+
 ### Plural truth
 
 No single entity is "the" outcome authority. Multiple reputation networks coexist (e.g., AMA and integrative-medicine bodies both attest, each with their own R in their own domains). The protocol surfaces weighted consensus and explicit contradiction; buyers choose which networks to weight. The protocol surfaces evidence; it does not arbitrate worldviews.
@@ -334,11 +366,46 @@ A long validated track record decays slowly; a one-hit wonder decays fast. **Dec
 
 Validated outcomes contribute durable R (half-life ~25 yr stand-in); unvalidated attestations decay at the proof-type rate. Validation locks in standing — this is the appreciation-compounding mechanism. A teacher's 1990 assessment decays as an *attestation*, but once the student's career validated it, the teacher's R as a talent-judge took a durable bump that persists for decades.
 
+### Saturation point — log-dampening on R (resolved 2026-06-24)
+
+R is unbounded but log-dampened past a per-domain saturation point. Two-piece linear + log:
+
+```
+effective_R(R) =
+  R                                       if R ≤ S
+  S + k · log(1 + (R − S) / S)            if R > S
+```
+
+- `S` = `reputation.saturation_point` — where compression starts. **Per-domain** (mirrors `domain.obsolescence_multiplier`); each node in the 5-level taxonomy is tagged with one of three tiers.
+- `k` = `reputation.dampening_k` — compression strength past `S`. Global (the *shape* of compression doesn't need to vary by domain; only the *threshold* does).
+
+**Tiered stand-ins for `S`:**
+
+| Tier | `S` | Use |
+|---|---|---|
+| `small` | 5 | niche / sparse domains; typical accumulation is low; saturation reached quickly |
+| `standard` | 10 | default for most domains |
+| `large` | 50 | hot / dense domains (medicine, AI, mature institutional ecosystems); lots of room before compression |
+
+`k = 5` globally.
+
+Concretely with the standard tier (`S = 10, k = 5`):
+
+| Raw R | Effective R | Note |
+|---|---|---|
+| 1 (baseline) | 1 | newcomer |
+| 10 (S) | 10 | established |
+| 20 | ~13.5 | doubling raw → +35% effective |
+| 100 | ~21.5 | 10× raw → +115% effective |
+| 1000 | ~33 | 100× raw → ~3× effective |
+
+The shape prevents unbounded accumulation while preserving meaningful rank-ordering at high R — Harvard's chemistry rep still beats a no-name university's, but the gap doesn't grow without bound and cred(top) can't dominate the math.
+
+Per-node tier assignment is governance (same pattern as obsolescence). v0 default: `standard`.
+
 ### Still open (first-cut math)
 
-- **Outcome magnitude scaling** — how big is M_O, what sets it? (Tied to original attestation magnitudes, or independent?)
-- **Saturation point** — where the logarithmic dampening on R kicks in.
-- **Cold-start ramp specifics** — the ramp factor and N (number of early attestations amplified).
+- **Cold-start ramp specifics** — the `ramp_factor` and `N` (number of early attestations amplified).
 
 ---
 
@@ -670,4 +737,9 @@ In rough order of difficulty:
 
 ---
 
-*Last updated: 2026-05-22 — deep research synthesized + 3 corrections (Storj not Filecoin proofs; phones validate not durably store; no-resale is a stack not pure crypto). Access anchor = TEE-attested compute-to-data. Arweave endowment borrowed with seed-size-cap + storage-cost-oracle caveats. Open: seed-size cap decision, storage-cost-oracle design, endowment per-seed-vs-pooled, ingestion/endowment split among storers, access_cut_to_storers, on/off ramps, uptime/durability bond design, outcome magnitude scaling, saturation point, cold-start ramp, governance evolution, dual-license boundary.*
+- **2026-06-24 — Outcome magnitude `M_O` resolved (loose-thread close-out, reputation math 1/3).** Formula: `M_O = min(M_cap, β · S(att, t_issuance) · √cred(reporter))`. Five clarifications: (A) use `S(att, t_issuance)` not current — preserves appreciation-compounding for old-bets-paying-out; (B) multiple reporters aggregate paper-shape, not sum (Sybil-resistant); (C) self-reports cred ≈ 0 (Akerlof); (D) outcomes are attestations of `dt.outcome.*` — same review window + cred recursion + aggregation + time horizons as any attestation, special only in triggering the `M_O` chain; (E) outcomes can themselves be refuted — counter-outcome reverses original `M_O` and applies 2× penalty to the wrong reporter (asymmetry recurses). Stand-ins: `β = 1.0`, `M_cap = 5 · S(att, t_issuance)`. Added `dt.outcome.{validated,refuted,partial}@1` to `data-types.md`. parameters.md → v0.6.0.
+- **2026-06-24 — Saturation point resolved (reputation math 2/3).** Two-piece linear + log dampening: `effective_R = R` if `R ≤ S`, `effective_R = S + k · log(1 + (R−S)/S)` if `R > S`. **Per-domain `S` from day zero** (mirrors `domain.obsolescence_multiplier`), three tiers: `small=5`, `standard=10`, `large=50`. Global `k = 5`. Each domain node in the 5-level taxonomy tagged with one tier; v0 default `standard`. Prevents unbounded R accumulation while preserving rank-ordering at high R. parameters.md → v0.7.0.
+
+---
+
+*Last updated: 2026-06-24 — reputation math 2/3 closed (M_O + saturation). Remaining in §Reputation Dynamics: cold-start ramp specifics. Open beyond: seed-size cap, storage-cost-oracle, endowment per-seed-vs-pooled, ingestion/endowment split among storers, access_cut_to_storers, on/off ramps, uptime/durability bond design, TEE-specifics, dual-license boundary, governance evolution, formal per-type JSON Schemas, receiver-key handoff API.*

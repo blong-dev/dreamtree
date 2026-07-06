@@ -41,9 +41,14 @@ reputation:
   review_window_threshold: 1.0   # threshold in τ(M)
   lambda_r_base: null            # TBD — base reputation decay rate, per year
   lambda_r_target: baseline_kyc  # R decays toward baseline, not zero (settled)
-  saturation_point: null         # TBD — where logarithmic dampening on R begins
-  outcome_magnitude: null        # TBD — M_O scaling for outcome events
-  s_max: null                    # TBD — normalizer in the V(w) aggregation
+  saturation_point:                   # per-domain S in effective_R = S + k·log(1 + (R−S)/S) when R > S
+    small: 5                          # niche / sparse domains
+    standard: 10                      # default
+    large: 50                         # hot / dense domains (medicine, AI, mature ecosystems)
+  dampening_k: 5                      # global k — compression strength past saturation
+  outcome_magnitude_beta: 1.0         # β in M_O = min(M_cap, β · S(att, t_issuance) · √cred(reporter))
+  outcome_magnitude_cap_multiplier: 5 # M_cap = (this) · S(att, t_issuance); single outcome ≤ N× original bet
+  s_max: null                         # TBD — normalizer in the V(w) aggregation
 
 decay:                           # attestation-strength decay rates, per year
   proof_origin: 0.0              # permanent
@@ -99,8 +104,12 @@ economics:                       # founder-set at v0, governance-evolved
 | `reputation.review_window_threshold` | 1.0 | magnitude | threshold of τ(M) | > 0 | governance |
 | `reputation.lambda_r_base` | null | 1/yr | reputation atrophy speed | ≥ 0 | governance |
 | `reputation.lambda_r_target` | baseline_kyc | R | reputation as stock vs. flow | — | **settled** (baseline) |
-| `reputation.saturation_point` | null | R | where log dampening on R begins | > 0 | governance |
-| `reputation.outcome_magnitude` | null | magnitude | downstream reputation from one outcome | ≥ 0 | governance |
+| `reputation.saturation_point.small` | 5 | R | log-dampening threshold for niche / sparse domains | > 0 | per-domain governance |
+| `reputation.saturation_point.standard` | 10 | R | log-dampening threshold; default | > 0 | per-domain governance |
+| `reputation.saturation_point.large` | 50 | R | log-dampening threshold for hot / dense domains | > 0 | per-domain governance |
+| `reputation.dampening_k` | 5 | scalar | compression strength past saturation in `S + k·log(1 + (R−S)/S)` | > 0 | governance |
+| `reputation.outcome_magnitude_beta` | 1.0 | scalar | β in `M_O = min(M_cap, β · S(att, t_issuance) · √cred(reporter))` | ≥ 0 | governance |
+| `reputation.outcome_magnitude_cap_multiplier` | 5 | scalar | `M_cap = (this) · S(att, t_issuance)` — single-outcome ceiling as a multiplier of the original bet | ≥ 1 | governance |
 | `reputation.s_max` | null | S | normalizer in V(w) aggregation | > 0 | governance |
 | `decay.proof_origin` | 0.0 | 1/yr | Proof-of-Origin aging | = 0 | **settled** (permanent) |
 | `decay.proof_replication` | 0.015 | 1/yr | Proof-of-Replication aging (~45 yr ½) | ≥ 0 | governance |
@@ -150,3 +159,5 @@ Some values that look like levers are deliberately **not** in this registry:
 - **2026-05-22 — v0.3.0.** Per-type market pricing adopted (data value is marginal; market sets price per type). Invariant **changed** from `seed_access_per_photon = 1` to `creator_equality_within_type` (`p(c1,s,a)=p(c2,s,a)=p(c3,s,a)`) — global uniform price gone; creator-equality-within-type survives. Added per-type data prices (`N_a`) to "not parameters" (market outcome). Producer compensation restated as volume × `N_a`.
 - **2026-05-22 — v0.4.0.** Monetary policy resolved: **`photons = seeds`** invariant (supply pegged 1:1 to corpus). Two minting streams — S to creators (participation), P to storer-validators (storage + validation). `economics.photon_issuance` removed as a free parameter (determined by the peg). Added `economics.storage_replication_factor` and `economics.block_cadence_seconds`. Data lives in wallets (wallet-indexed fabric); unified validator-storer participation spectrum.
 - **2026-05-22 — v0.5.0.** `marketplace_toll` reconciled to **5%**. `access_duration_days` set to **1**. Storage rewards resolved: one-time ingestion mint (peg-preserving) + ongoing rent from circulating photons (access cuts + treasury subsidy), never new emission — added `economics.access_cut_to_storers`. Open: ingestion-photon split among storers, access-cut value.
+- **2026-06-24 — v0.6.0.** Outcome magnitude `M_O` resolved (formula + 5 clarifications, see `protocol-spec.md` §Reputation Dynamics). Replaced `reputation.outcome_magnitude: null` with `reputation.outcome_magnitude_beta: 1.0` and `reputation.outcome_magnitude_cap_multiplier: 5`. Uses `S(att, t_issuance)` (not current); multiple reporters aggregate paper-shape; self-reports cred ≈ 0; outcomes are attestations of `dt.outcome.*`; outcome refutation reverses + 2× penalty.
+- **2026-06-24 — v0.7.0.** Saturation point resolved (two-piece linear + log dampening). Replaced `reputation.saturation_point: null` with per-domain tiered structure: `small=5`, `standard=10`, `large=50` (each domain node tagged with a tier; v0 default `standard`). Added global `reputation.dampening_k: 5`. Per-domain from day zero (mirrors `domain.obsolescence_multiplier`), not deferred to v1+.
