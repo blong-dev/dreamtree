@@ -135,7 +135,9 @@ Note: `dt.skill.transferable`/`soft`/`knowledge` are distinct subcategories rath
 | key | payload sketch | PII | external | source |
 |---|---|---|---|---|
 | `dt.response.quiz@1` | `{ card_type: 'quiz_mc'|'quiz_tf', question, options?, chosen_index?, chosen_answer?, correct_index?, correct_answer?, correct }` | no | — | Telekora `quiz_response` |
-| `dt.response.text@1` | `{ prompt, body }` | **yes** (free-text response) | — | Telekora `text_response` |
+| `dt.response.text@1` | `{ prompt, body }` | **yes** (free-text response) | — | Telekora `text_response` (short_answer, answer-cards) |
+| `dt.response.poll@1` | `{ selected_index, option }` | no | — | Telekora `poll_response` (ungraded poll/survey choice) |
+| `dt.response.assessment@1` | `{ card_type: 'matching'|'ordering'|'cloze', correct, …result }` (result shape per card_type: matching `{matches:[{left,chosen}]}`, ordering `{order:[]}`, cloze `{filled:[]}`; the `learner_data.tool_type` column also carries the card_type) | no | — | Telekora `assessment_response` (matching/ordering/cloze) |
 
 ### `dt.credential.*` — issued credentials (W3C VC 2.0)
 
