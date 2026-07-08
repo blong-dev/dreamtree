@@ -7,6 +7,7 @@ Wants=dreamtreed.service
 Type=simple
 User=b
 Environment=ANCHORD_ADDR=:9110
+Environment=ANCHORD_BIN=/home/b/go/bin/dreamtreed
 Environment=ANCHORD_KEY=anchor
 Environment=ANCHORD_KEYRING=test
 Environment=ANCHORD_HOME=/var/lib/dreamtreed
