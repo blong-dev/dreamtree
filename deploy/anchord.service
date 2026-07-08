@@ -1,0 +1,23 @@
+[Unit]
+Description=dreamtree anchor seam (HTTP -> MsgCommitSeed)
+After=network-online.target dreamtreed.service
+Wants=dreamtreed.service
+
+[Service]
+Type=simple
+User=b
+Environment=ANCHORD_ADDR=:9110
+Environment=ANCHORD_KEY=anchor
+Environment=ANCHORD_KEYRING=test
+Environment=ANCHORD_HOME=/var/lib/dreamtreed
+Environment=ANCHORD_CHAIN_ID=dreamtree-devnet-1
+Environment=ANCHORD_NODE=tcp://localhost:26657
+Environment=ANCHORD_FEES=0photon
+# ANCHORD_TOKEN is supplied via an EnvironmentFile (from infra/.env), not committed:
+EnvironmentFile=/etc/dreamtree/anchord.env
+ExecStart=/home/b/go/bin/anchord
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

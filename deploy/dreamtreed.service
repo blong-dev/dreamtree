@@ -1,0 +1,16 @@
+[Unit]
+Description=dreamtree chain node (dreamtree-devnet-1)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=b
+Environment=DAEMON_HOME=/var/lib/dreamtreed
+ExecStart=/home/b/go/bin/dreamtreed start --home /var/lib/dreamtreed --minimum-gas-prices 0photon
+Restart=on-failure
+RestartSec=5
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target
