@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package dreamtree.seeds.module.v1;
+
+option go_package = "github.com/blong-dev/dreamtree/x/seeds";
+
+import "cosmos/app/v1alpha1/module.proto";
+
+// Module is the app config object of the seeds module.
+message Module {
+  option (cosmos.app.v1alpha1.module) = {
+    go_import : "github.com/blong-dev/dreamtree/x/seeds"
+  };
+
+  // authority defines the custom module authority.
+  // if not set, defaults to the governance module.
+  string authority = 1;
+}

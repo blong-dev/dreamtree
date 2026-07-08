@@ -1,0 +1,69 @@
+syntax = "proto3";
+package dreamtree.seeds.v1;
+
+option go_package = "github.com/blong-dev/dreamtree/x/seeds";
+
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "cosmos/query/v1/query.proto";
+import "google/api/annotations.proto";
+import "gogoproto/gogo.proto";
+import "amino/amino.proto";
+import "dreamtree/seeds/v1/types.proto";
+
+// Query defines the seeds gRPC query service.
+service Query {
+  // Seed returns a single anchored commitment by id.
+  rpc Seed(QuerySeedRequest) returns (QuerySeedResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/dreamtree/seeds/v1/seed/{id}";
+  }
+
+  // Seeds returns all anchored commitments, paginated.
+  rpc Seeds(QuerySeedsRequest) returns (QuerySeedsResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/dreamtree/seeds/v1/seeds";
+  }
+
+  // SeedsBySubject returns commitments for a given subject (e.g. a wallet DID).
+  rpc SeedsBySubject(QuerySeedsBySubjectRequest)
+      returns (QuerySeedsBySubjectResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get =
+        "/dreamtree/seeds/v1/seeds/subject/{subject}";
+  }
+
+  // Params returns the module parameters.
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/dreamtree/seeds/v1/params";
+  }
+}
+
+message QuerySeedRequest { uint64 id = 1; }
+message QuerySeedResponse {
+  Seed seed = 1 [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+}
+
+message QuerySeedsRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+message QuerySeedsResponse {
+  repeated Seed seeds = 1
+      [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+message QuerySeedsBySubjectRequest {
+  string subject = 1;
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+message QuerySeedsBySubjectResponse {
+  repeated Seed seeds = 1
+      [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+message QueryParamsRequest {}
+message QueryParamsResponse {
+  Params params = 1
+      [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+}

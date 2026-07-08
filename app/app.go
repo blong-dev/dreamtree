@@ -39,6 +39,8 @@ import (
 	_ "github.com/cosmos/cosmos-sdk/x/distribution"   // import for side-effects
 	_ "github.com/cosmos/cosmos-sdk/x/mint"           // import for side-effects
 	_ "github.com/cosmos/cosmos-sdk/x/staking"        // import for side-effects
+
+	_ "github.com/blong-dev/dreamtree/x/seeds/module" // import for side-effects
 )
 
 // DefaultNodeHome default home directories for the application daemon

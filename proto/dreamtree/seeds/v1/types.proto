@@ -1,0 +1,71 @@
+syntax = "proto3";
+package dreamtree.seeds.v1;
+
+option go_package = "github.com/blong-dev/dreamtree/x/seeds";
+
+import "gogoproto/gogo.proto";
+import "amino/amino.proto";
+import "cosmos_proto/cosmos.proto";
+
+// Params defines the parameters of the seeds module.
+message Params {
+  option (amino.name) = "dreamtree/x/seeds/Params";
+
+  // max_commitment_bytes bounds the size of a commitment digest (hex/base64
+  // string). A commitment is a hash or Merkle root, never a body, so this is
+  // small by design. 0 means use the module default.
+  uint32 max_commitment_bytes = 1;
+
+  // max_source_ref_bytes bounds the opaque origin reference length.
+  uint32 max_source_ref_bytes = 2;
+}
+
+// Seed is a commitment anchored on-chain: the hash (or Merkle root) of a
+// wallet record, an attestation, or any provenance-bearing body that lives in
+// the data fabric. The body never enters consensus; only this commitment does.
+message Seed {
+  option (amino.name) = "dreamtree/x/seeds/Seed";
+
+  // id is the global monotonic sequence assigned at commit time.
+  uint64 id = 1;
+
+  // committer is the address that anchored this commitment.
+  string committer = 2 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+
+  // subject identifies what the commitment is about — typically the owning
+  // wallet's DID (e.g. did:web:id.dreamtree.org:w:<uuid>). Free-form so the
+  // knowledge graph and other producers can namespace their own subjects.
+  string subject = 3;
+
+  // commitment is the hex-encoded digest (sha256 of a body, or a Merkle root
+  // of a batch). This is the anchor; the body stays in the fabric.
+  string commitment = 4;
+
+  // kind names what was committed: "record", "batch_root", "attestation",
+  // "kg_claim", etc. Producers own their kinds.
+  string kind = 5;
+
+  // source_ref is an opaque origin pointer (a roots record id, a batch label,
+  // a gnosis observation id) — enough to locate the body off-chain.
+  string source_ref = 6;
+
+  // height is the block height at which this seed was committed.
+  int64 height = 7;
+
+  // committed_at is the block time (unix seconds) of the commit.
+  int64 committed_at = 8;
+}
+
+// GenesisState is the seeds state provided at genesis.
+message GenesisState {
+  // params defines the module parameters.
+  Params params = 1
+      [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+
+  // seeds is the set of anchored commitments (for export/import).
+  repeated Seed seeds = 2
+      [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+
+  // next_id is the sequence value the next commit will take.
+  uint64 next_id = 3;
+}
