@@ -1,4 +1,4 @@
 # --- chain build artifacts ---
-dreamtreed
+/dreamtreed
 *.test
 /build/
