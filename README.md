@@ -23,6 +23,28 @@ observed. The log of observations is the **sole ground truth**; identity,
 things, edges, gravity, and value are all *derived, reprocessable projections*
 over that log. Legitimacy and referent-time are derived, never stored.
 
+## The chain — running
+
+This repo now holds the chain itself, not just its design. A Cosmos SDK + CometBFT
+app-chain (per the resolved decisions in [`protocol-spec.md`](protocol-spec.md)):
+photons as the native unit, `dream1…` addresses, instant finality.
+
+> **Honest status: v0 devnet.** One validator, run by us — internally we call this
+> "a really over-engineered database," and we will not claim decentralization we
+> have not earned. The validator-set schedule (solo → federated → permissioned-open
+> → open) is in the spec, published rather than promised. No ICO, no token sale,
+> ever; photons are work-accounting, not speculation.
+
+```
+# build & run a local devnet (Go 1.23+)
+make install
+bash scripts/init.sh
+dreamtreed start --minimum-gas-prices 0photon
+```
+
+The value layer (`x/seeds` commitments anchoring the wallet's records, attestations,
+reputation, licenses) lands module by module, in the open.
+
 ## The pieces
 
 - **[roots](https://github.com/blong-dev/roots)** — the wallet, live. Consent-gated reads,

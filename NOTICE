@@ -1,0 +1,9 @@
+dreamtree — the chain
+Copyright (C) 2026 Braedon Long
+
+Licensed under AGPL-3.0 (see LICENSE).
+
+Portions of the chain scaffold (app wiring, cmd, init scripts) are derived from
+cosmosregistry/chain-minimal ("Mini"), licensed under Apache License 2.0 — see
+LICENSE-chain-minimal. Modifications: renamed module/binary/denoms, dreamtree
+configuration, and the dreamtree value-layer modules built on top.
