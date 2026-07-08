@@ -1,0 +1,91 @@
+syntax = "proto3";
+package dreamtree.attest.v1;
+
+option go_package = "github.com/blong-dev/dreamtree/x/attest";
+
+import "gogoproto/gogo.proto";
+import "amino/amino.proto";
+import "cosmos_proto/cosmos.proto";
+
+// ProofType — the four canonical proof types (Great Library Protocol), plus
+// OUTCOME (outcomes ARE attestations, a subclass — protocol-spec §Reputation
+// Dynamics), which is what makes validation/refutation ride the same machinery.
+enum ProofType {
+  PROOF_TYPE_UNSPECIFIED = 0;
+  PROOF_TYPE_ORIGIN = 1;       // authorship
+  PROOF_TYPE_RIGOR = 2;        // peer/institutional review of quality
+  PROOF_TYPE_USE = 3;          // cites/depends-on prior work
+  PROOF_TYPE_REPLICATION = 4;  // independent reproduction
+  PROOF_TYPE_OUTCOME = 5;      // validates/refutes an earlier attestation
+}
+
+// OutcomeKind — set only when proof_type = OUTCOME.
+enum OutcomeKind {
+  OUTCOME_KIND_UNSPECIFIED = 0;
+  OUTCOME_KIND_VALIDATED = 1;
+  OUTCOME_KIND_REFUTED = 2;
+  OUTCOME_KIND_PARTIAL = 3;
+}
+
+// Attestation — an immutable signed claim. This is the ONLY thing stored; the
+// strength S(att,t), work value V(w,t), and refuted fraction are derived,
+// reprocessable projections computed at query time (data-model.md: the log is
+// ground truth; value is never stored).
+message Attestation {
+  option (amino.name) = "dreamtree/x/attest/Attestation";
+
+  uint64 id = 1;
+  // attestor — the signing entity (its reputation is what's at stake).
+  string attestor = 2 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // subject — the work being attested: a seed commitment, a wallet DID, or a
+  // knowledge-graph work URI. Free-form; producers namespace their own.
+  string subject = 3;
+  ProofType proof_type = 4;
+  // domain — a node in the 5-level taxonomy, path form
+  // (e.g. "sciences/life-sciences/medicine/cardiology/electrophysiology").
+  string domain = 5;
+  // specificity_bps — how narrow/specific the claim is, in basis points
+  // (10000 = fully specific). 0 is treated as 10000 (fully specific) at read.
+  uint32 specificity_bps = 6;
+  // outcome_kind — set iff proof_type = OUTCOME.
+  OutcomeKind outcome_kind = 7;
+  // target_id — the attestation this one validates/refutes (OUTCOME only; 0 = none).
+  uint64 target_id = 8;
+  int64 issued_at = 9;  // block time (unix seconds) — the t_issuance clock
+  int64 height = 10;
+}
+
+// Params — the levers from parameters.md. Weights in basis points; decay rates
+// and reputation stand-ins as decimal strings (parsed in the read-time
+// projection, never in consensus arithmetic).
+message Params {
+  option (amino.name) = "dreamtree/x/attest/Params";
+
+  // type_weight(att.type), basis points (10000 = 1.0)
+  uint32 weight_origin = 1;
+  uint32 weight_rigor = 2;
+  uint32 weight_use = 3;
+  uint32 weight_replication = 4;
+  uint32 weight_outcome = 5;
+
+  // proof-type base decay λ, per year (decimal string)
+  string lambda_origin = 6;       // "0.0"  — permanent
+  string lambda_replication = 7;  // "0.015" — ~45yr half-life
+  string lambda_rigor = 8;        // "0.04"  — ~17yr
+  string lambda_use = 9;          // "0.08"  — ~9yr
+
+  // domain obsolescence multiplier applied to λ (v0: one global default;
+  // per-domain tiers land with the taxonomy).
+  string obsolescence_default = 10; // "1.0"
+
+  // reputation stand-ins consumed by the projection until x/reputation lands.
+  string baseline_kyc = 11;  // "1.0" — flat R for every attestor, for now
+  string s_max = 12;         // "10.0" — normalization ceiling for V + refutation
+}
+
+// GenesisState.
+message GenesisState {
+  Params params = 1 [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+  repeated Attestation attestations = 2 [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+  uint64 next_id = 3;
+}

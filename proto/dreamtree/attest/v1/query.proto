@@ -1,0 +1,91 @@
+syntax = "proto3";
+package dreamtree.attest.v1;
+
+option go_package = "github.com/blong-dev/dreamtree/x/attest";
+
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "cosmos/query/v1/query.proto";
+import "google/api/annotations.proto";
+import "gogoproto/gogo.proto";
+import "amino/amino.proto";
+import "dreamtree/attest/v1/types.proto";
+
+// Query — reads + the derived projections (strength, work value). The
+// projections are readings computed at query time, not stored state.
+service Query {
+  rpc Attestation(QueryAttestationRequest) returns (QueryAttestationResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/dreamtree/attest/v1/attestation/{id}";
+  }
+  rpc AttestationsBySubject(QueryBySubjectRequest) returns (QueryBySubjectResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/dreamtree/attest/v1/subject/{subject}";
+  }
+  rpc AttestationsByAttestor(QueryByAttestorRequest) returns (QueryByAttestorResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/dreamtree/attest/v1/attestor/{attestor}";
+  }
+  // Strength returns S(att,t) for one attestation, with its components broken out.
+  rpc Strength(QueryStrengthRequest) returns (QueryStrengthResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/dreamtree/attest/v1/strength/{id}";
+  }
+  // WorkValue returns V(w,t) for a subject — the paper-shape aggregation of the
+  // strengths of all non-outcome attestations on it.
+  rpc WorkValue(QueryWorkValueRequest) returns (QueryWorkValueResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/dreamtree/attest/v1/work-value/{subject}";
+  }
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/dreamtree/attest/v1/params";
+  }
+}
+
+message QueryAttestationRequest { uint64 id = 1; }
+message QueryAttestationResponse {
+  Attestation attestation = 1 [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+}
+
+message QueryBySubjectRequest {
+  string subject = 1;
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+message QueryBySubjectResponse {
+  repeated Attestation attestations = 1 [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+message QueryByAttestorRequest {
+  string attestor = 1;
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+message QueryByAttestorResponse {
+  repeated Attestation attestations = 1 [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+message QueryStrengthRequest { uint64 id = 1; }
+message QueryStrengthResponse {
+  uint64 id = 1;
+  // All decimal readings are returned as strings — they are projections, not
+  // consensus values.
+  string strength = 2;         // S(att,t)
+  string reputation = 3;       // R(signer,domain,t) input (baseline stand-in for now)
+  string specificity = 4;      // specificity factor (0..1)
+  string type_weight = 5;      // type_weight(att.type) (0..1)
+  string decay = 6;            // decay(t - issued) (0..1)
+  string refuted_fraction = 7; // (0..1); S already includes (1 - this)
+  int64 age_seconds = 8;
+}
+
+message QueryWorkValueRequest { string subject = 1; }
+message QueryWorkValueResponse {
+  string subject = 1;
+  string value = 2;            // V(w,t)
+  uint32 attestation_count = 3; // non-outcome attestations counted
+}
+
+message QueryParamsRequest {}
+message QueryParamsResponse {
+  Params params = 1 [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+}
