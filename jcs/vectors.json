@@ -1,0 +1,260 @@
+{
+ "_comment": "Normative JCS (RFC 8785) golden vectors for the dreamtree quorum. Every canonicalizer (roots-TS, reflow-Go, reflow-Py, chain tooling) MUST byte-match `expected` (compared as UTF-8 bytes) for each `input`. Hand-authored against RFC 8785 §3.2.2/§3.2.3 and ECMA-262 §7.1.12.1 incl. Note 2. Never edit an existing vector; append new ones.",
+ "version": 1,
+ "vectors": [
+  {
+   "name": "keys-basic-sort",
+   "input": {
+    "b": 1,
+    "a": 2
+   },
+   "expected": "{\"a\":2,\"b\":1}"
+  },
+  {
+   "name": "keys-nested-sort",
+   "input": {
+    "z": {
+     "d": 4,
+     "c": 3
+    },
+    "y": [
+     {
+      "b": 2,
+      "a": 1
+     }
+    ]
+   },
+   "expected": "{\"y\":[{\"a\":1,\"b\":2}],\"z\":{\"c\":3,\"d\":4}}"
+  },
+  {
+   "name": "keys-utf16-vs-codepoint-DISCRIMINATOR",
+   "input": {
+    "￿": 2,
+    "😀": 1
+   },
+   "expected": "{\"😀\":1,\"￿\":2}",
+   "_why": "U+1F600 is UTF-16 D83D DE00; 0xD83D < 0xFFFF so the emoji key sorts FIRST under RFC 8785 (UTF-16 code units). Code-point sorters put it after — and fail."
+  },
+  {
+   "name": "keys-utf16-discriminator-with-prefix",
+   "input": {
+    "a￿": 2,
+    "a😀": 1,
+    "a": 0
+   },
+   "expected": "{\"a\":0,\"a😀\":1,\"a￿\":2}"
+  },
+  {
+   "name": "keys-rfc-style-ordering",
+   "input": {
+    "€": "Euro Sign",
+    "\r": "Carriage Return",
+    "1": "One",
+    "": "Control",
+    "ö": "Latin Small Letter O With Diaeresis"
+   },
+   "expected": "{\"\\r\":\"Carriage Return\",\"1\":\"One\",\"\":\"Control\",\"ö\":\"Latin Small Letter O With Diaeresis\",\"€\":\"Euro Sign\"}",
+   "_why": "UTF-16 unit order: 0x000D < 0x0031 < 0x0080 < 0x00F6 < 0x20AC"
+  },
+  {
+   "name": "keys-empty-string-key",
+   "input": {
+    "": 0,
+    "a": 1
+   },
+   "expected": "{\"\":0,\"a\":1}"
+  },
+  {
+   "name": "num-zero",
+   "input": [
+    0
+   ],
+   "expected": "[0]"
+  },
+  {
+   "name": "num-minus-zero",
+   "input": [
+    -0.0
+   ],
+   "expected": "[0]",
+   "_why": "-0 serializes as 0"
+  },
+  {
+   "name": "num-whole-float",
+   "input": [
+    100.0
+   ],
+   "expected": "[100]"
+  },
+  {
+   "name": "num-one",
+   "input": [
+    1.0
+   ],
+   "expected": "[1]"
+  },
+  {
+   "name": "num-tenth",
+   "input": [
+    0.1
+   ],
+   "expected": "[0.1]"
+  },
+  {
+   "name": "num-negative",
+   "input": [
+    -1.5
+   ],
+   "expected": "[-1.5]"
+  },
+  {
+   "name": "num-max-safe-int",
+   "input": [
+    9007199254740991
+   ],
+   "expected": "[9007199254740991]"
+  },
+  {
+   "name": "num-2pow53",
+   "input": [
+    9007199254740992
+   ],
+   "expected": "[9007199254740992]"
+  },
+  {
+   "name": "num-exp-threshold-below",
+   "input": [
+    1e+20
+   ],
+   "expected": "[100000000000000000000]",
+   "_why": "1e20 stays positional"
+  },
+  {
+   "name": "num-exp-threshold-at",
+   "input": [
+    1e+21
+   ],
+   "expected": "[1e+21]",
+   "_why": "≥1e21 → exponent, lowercase e, explicit +"
+  },
+  {
+   "name": "num-small-positional",
+   "input": [
+    1e-06
+   ],
+   "expected": "[0.000001]",
+   "_why": "RFC sample ieee 3eb0c6f7a0b5ed8d"
+  },
+  {
+   "name": "num-small-exponent",
+   "input": [
+    1e-07
+   ],
+   "expected": "[1e-7]",
+   "_why": "crosses ECMA n≤-7 → exponent, NO zero-padded exponent (Python repr says 1e-07: wrong)"
+  },
+  {
+   "name": "num-min-subnormal",
+   "input": [
+    5e-324
+   ],
+   "expected": "[5e-324]"
+  },
+  {
+   "name": "num-rfc-sample-thirds",
+   "input": [
+    333333333.3333333
+   ],
+   "expected": "[333333333.3333333]",
+   "_why": "RFC sample ieee 41b3de4355555555"
+  },
+  {
+   "name": "str-short-escapes",
+   "input": [
+    "\b\t\n\u000b\f\r"
+   ],
+   "expected": "[\"\\b\\t\\n\\u000b\\f\\r\"]",
+   "_why": "\\b \\t \\n \\f \\r short escapes; U+000B has none → lowercase \\u000b"
+  },
+  {
+   "name": "str-nul-and-c0",
+   "input": [
+    "\u0000\u001f"
+   ],
+   "expected": "[\"\\u0000\\u001f\"]"
+  },
+  {
+   "name": "str-quote-backslash-slash",
+   "input": [
+    "\"\\/"
+   ],
+   "expected": "[\"\\\"\\\\/\"]",
+   "_why": "forward slash is NOT escaped"
+  },
+  {
+   "name": "str-non-ascii-literal",
+   "input": [
+    "é 😀"
+   ],
+   "expected": "[\"é 😀\"]",
+   "_why": "é and 😀 literal UTF-8, never \\u-escaped"
+  },
+  {
+   "name": "str-del-not-escaped",
+   "input": [
+    ""
+   ],
+   "expected": "[\"\"]",
+   "_why": "only C0 controls escape; U+007F literal"
+  },
+  {
+   "name": "literals",
+   "input": [
+    true,
+    false,
+    null
+   ],
+   "expected": "[true,false,null]"
+  },
+  {
+   "name": "empty-containers",
+   "input": {
+    "a": {},
+    "b": []
+   },
+   "expected": "{\"a\":{},\"b\":[]}"
+  },
+  {
+   "name": "array-order-preserved",
+   "input": [
+    3,
+    1,
+    2,
+    "b",
+    "a"
+   ],
+   "expected": "[3,1,2,\"b\",\"a\"]"
+  },
+  {
+   "name": "no-whitespace",
+   "input": {
+    "a": [
+     1,
+     2
+    ],
+    "b": {
+     "c": 3
+    }
+   },
+   "expected": "{\"a\":[1,2],\"b\":{\"c\":3}}"
+  },
+  {
+   "name": "escaped-input-key-equals-literal",
+   "input": {
+    "é": 1
+   },
+   "expected": "{\"é\":1}",
+   "_why": "canonicalization operates on parsed values: \\u00e9 in input == literal é"
+  }
+ ]
+}
