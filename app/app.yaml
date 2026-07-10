@@ -10,7 +10,7 @@ modules:
       end_blockers: [staking, reputation]
       # NOTE: The genutils module must occur after staking so that pools are properly initialized with tokens from genesis accounts.
       # NOTE: The genutils module must also occur after auth so that it can access the params from auth.
-      init_genesis: [auth, bank, distribution, staking, genutil, seeds, attest, reputation]
+      init_genesis: [auth, bank, distribution, staking, genutil, photons, seeds, attest, reputation]
       override_store_keys:
         - module_name: auth
           kv_store_key: acc
@@ -25,6 +25,8 @@ modules:
           permissions: [burner, staking]
         - account: not_bonded_tokens_pool
           permissions: [burner, staking]
+        - account: photons
+          permissions: [minter]
   - name: bank
     config:
       "@type": cosmos.bank.module.v1.Module
@@ -36,6 +38,9 @@ modules:
   - name: distribution
     config:
       "@type": cosmos.distribution.module.v1.Module
+  - name: photons
+    config:
+      "@type": dreamtree.photons.module.v1.Module
   - name: seeds
     config:
       "@type": dreamtree.seeds.module.v1.Module

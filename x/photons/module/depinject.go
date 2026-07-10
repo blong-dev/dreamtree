@@ -10,21 +10,18 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
-	"github.com/blong-dev/dreamtree/x/seeds"
-	"github.com/blong-dev/dreamtree/x/seeds/keeper"
+	"github.com/blong-dev/dreamtree/x/photons"
+	"github.com/blong-dev/dreamtree/x/photons/keeper"
 )
 
 var _ appmodule.AppModule = AppModule{}
 
-// IsOnePerModuleType implements the depinject.OnePerModuleType interface.
 func (am AppModule) IsOnePerModuleType() {}
-
-// IsAppModule implements the appmodule.AppModule interface.
-func (am AppModule) IsAppModule() {}
+func (am AppModule) IsAppModule()        {}
 
 func init() {
 	appconfig.Register(
-		&seeds.Module{},
+		&photons.Module{},
 		appconfig.Provide(ProvideModule),
 	)
 }
@@ -36,9 +33,8 @@ type ModuleInputs struct {
 	StoreService store.KVStoreService
 	AddressCodec address.Codec
 
-	Config *seeds.Module
-	// Photons is the ingestion mint seam — optional so x/seeds runs alone.
-	Photons seeds.PhotonHooks `optional:"true"`
+	Config     *photons.Module
+	BankKeeper photons.BankKeeper
 }
 
 type ModuleOutputs struct {
@@ -49,17 +45,11 @@ type ModuleOutputs struct {
 }
 
 func ProvideModule(in ModuleInputs) ModuleOutputs {
-	// default to governance as authority if not provided
 	authority := authtypes.NewModuleAddress("gov")
 	if in.Config.Authority != "" {
 		authority = authtypes.NewModuleAddressOrBech32Address(in.Config.Authority)
 	}
-
-	k := keeper.NewKeeper(in.Cdc, in.AddressCodec, in.StoreService, authority.String())
-	if in.Photons != nil {
-		k.SetPhotonHooks(in.Photons)
-	}
+	k := keeper.NewKeeper(in.Cdc, in.AddressCodec, in.StoreService, authority.String(), in.BankKeeper)
 	m := NewAppModule(in.Cdc, k)
-
 	return ModuleOutputs{Module: m, Keeper: k}
 }

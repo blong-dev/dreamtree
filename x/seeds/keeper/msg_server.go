@@ -81,6 +81,13 @@ func (ms msgServer) CommitSeed(ctx context.Context, msg *seeds.MsgCommitSeed) (*
 		sdk.NewAttribute("commitment", msg.Commitment),
 	))
 
+	// Ingestion mint: one photon per data-seed (photons = seeds). No-op if
+	// x/photons is absent or the kind is not a data contribution.
+	if ms.k.Photons() != nil {
+		if err := ms.k.Photons().OnRecordSeed(ctx, msg.Kind); err != nil {
+			return nil, err
+		}
+	}
 	return &seeds.MsgCommitSeedResponse{Id: id, Height: sdkCtx.BlockHeight()}, nil
 }
 

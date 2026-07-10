@@ -27,7 +27,16 @@ type Keeper struct {
 	Seq collections.Sequence
 	// SubjectIndex is a (subject, id) key set for by-subject lookups.
 	SubjectIndex collections.KeySet[collections.Pair[string, uint64]]
+
+	// photons is the ingestion mint seam; nil when x/photons is absent.
+	photons seeds.PhotonHooks
 }
+
+// SetPhotonHooks wires the ingestion mint seam (once, at app assembly).
+func (k *Keeper) SetPhotonHooks(h seeds.PhotonHooks) { k.photons = h }
+
+// Photons returns the wired ingestion seam (nil when x/photons is absent).
+func (k Keeper) Photons() seeds.PhotonHooks { return k.photons }
 
 // NewKeeper creates a new seeds Keeper.
 func NewKeeper(cdc codec.BinaryCodec, addressCodec address.Codec, storeService storetypes.KVStoreService, authority string) Keeper {

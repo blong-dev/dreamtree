@@ -1,0 +1,33 @@
+syntax = "proto3";
+package dreamtree.photons.v1;
+
+option go_package = "github.com/blong-dev/dreamtree/x/photons";
+
+import "gogoproto/gogo.proto";
+import "amino/amino.proto";
+import "cosmos_proto/cosmos.proto";
+
+// Params — the photon monetary policy. photons = seeds is an INVARIANT, not a
+// param (supply is pegged to the corpus); the only lever here is where the
+// per-seed ingestion photon is routed.
+message Params {
+  option (amino.name) = "dreamtree/x/photons/Params";
+
+  // storer_reward_recipient — receives the one photon minted per data-seed at
+  // ingestion (the storer-validators' reward). v0: dreamtree (the sole
+  // storer-validator). When the storer market exists this becomes a pool split;
+  // empty ⇒ held in the module account.
+  string storer_reward_recipient = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+
+  // mintable_kinds — the x/seeds kinds that count as a data contribution and
+  // mint a photon (the atomic records, not batch roots). Default: record, kg_claim.
+  repeated string mintable_kinds = 2;
+}
+
+// GenesisState.
+message GenesisState {
+  Params params = 1 [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+  // minted — total photons minted by ingestion so far (= data-seed count). The
+  // peg's running tally.
+  uint64 minted = 2;
+}
