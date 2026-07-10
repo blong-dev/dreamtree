@@ -6,18 +6,17 @@ import (
 	"cosmossdk.io/math"
 )
 
-// ReputationKeeper is the seam x/attest reads R through and notifies of new
-// attestations. Defined here (the consumer) and implemented by x/reputation;
-// x/attest never imports x/reputation. If unwired (module absent), x/attest
-// falls back to baseline_kyc and OnAttestation is a no-op — so it runs alone.
-//
-// The math.LegacyDec import keeps this ready for later phases that pass
-// fixed-point magnitudes across the seam; P1 uses only the two methods below.
+// ReputationKeeper is the seam x/attest reads reputation through and notifies of
+// events. Defined here (the consumer); implemented by x/reputation. x/attest
+// never imports x/reputation. When unwired (module absent), x/attest falls back
+// to baseline everywhere and the hooks are no-ops — so it runs alone.
 type ReputationKeeper interface {
-	// ReputationOf returns R(signer,domain,t) — a read-time float projection.
+	// ReputationOf — R(signer,domain,t), the read-time float projection (S/V).
 	ReputationOf(ctx context.Context, signer, domain string) float64
-	// OnAttestation records the reputation effect of a newly stored attestation.
+	// StandingOf — the rational (fixed-point) reputation view, for S_issuance.
+	StandingOf(ctx context.Context, signer, domain string) math.LegacyDec
+	// OnAttestation — a new attestation's unvalidated bet.
 	OnAttestation(ctx context.Context, signer, domain string, proofType int32, specificityBps uint32, sourceAttID uint64) error
+	// OnOutcome — an OUTCOME attestation (validate/refute of targetAttID).
+	OnOutcome(ctx context.Context, reporter string, refutes bool, targetAttID uint64, targetAttestor, targetDomain string, targetSIssuance math.LegacyDec, targetIsOutcome bool, sourceAttID uint64) error
 }
-
-var _ = math.LegacyDec{}

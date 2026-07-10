@@ -25,6 +25,11 @@ service Query {
     option (cosmos.query.v1.module_query_safe) = true;
     option (google.api.http).get = "/dreamtree/reputation/v1/domain-config/{path}";
   }
+  // PendingEvents — reputation events currently in their review window.
+  rpc PendingEvents(QueryPendingEventsRequest) returns (QueryPendingEventsResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/dreamtree/reputation/v1/pending";
+  }
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
     option (google.api.http).get = "/dreamtree/reputation/v1/params";
   }
@@ -53,6 +58,14 @@ message QueryContributionsResponse {
 message QueryDomainConfigRequest { string path = 1; }
 message QueryDomainConfigResponse {
   DomainConfig config = 1 [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+}
+
+message QueryPendingEventsRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+message QueryPendingEventsResponse {
+  repeated PendingEvent pending = 1 [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
 
 message QueryParamsRequest {}

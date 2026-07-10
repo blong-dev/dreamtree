@@ -21,7 +21,13 @@ type Keeper struct {
 	Contributions collections.Map[uint64, reputation.Contribution]
 	Seq           collections.Sequence
 	SignerIndex   collections.KeySet[collections.Pair[string, uint64]]
+	SourceIndex   collections.KeySet[collections.Pair[uint64, uint64]]
 	DomainConfigs collections.Map[string, reputation.DomainConfig]
+
+	Pending         collections.Map[uint64, reputation.PendingEvent]
+	PendingSeq      collections.Sequence
+	CloseTimeIndex  collections.KeySet[collections.Pair[int64, uint64]]
+	PendingByTarget collections.Map[uint64, uint64]
 }
 
 func NewKeeper(cdc codec.BinaryCodec, addressCodec address.Codec, storeService storetypes.KVStoreService, authority string) Keeper {
@@ -37,7 +43,13 @@ func NewKeeper(cdc codec.BinaryCodec, addressCodec address.Codec, storeService s
 		Contributions: collections.NewMap(sb, reputation.ContributionsKey, "contributions", collections.Uint64Key, codec.CollValue[reputation.Contribution](cdc)),
 		Seq:           collections.NewSequence(sb, reputation.SeqKey, "seq"),
 		SignerIndex:   collections.NewKeySet(sb, reputation.SignerIndexKey, "signer_index", collections.PairKeyCodec(collections.StringKey, collections.Uint64Key)),
+		SourceIndex:   collections.NewKeySet(sb, reputation.SourceIndexKey, "source_index", collections.PairKeyCodec(collections.Uint64Key, collections.Uint64Key)),
 		DomainConfigs: collections.NewMap(sb, reputation.DomainConfigKey, "domain_configs", collections.StringKey, codec.CollValue[reputation.DomainConfig](cdc)),
+
+		Pending:         collections.NewMap(sb, reputation.PendingKey, "pending", collections.Uint64Key, codec.CollValue[reputation.PendingEvent](cdc)),
+		PendingSeq:      collections.NewSequence(sb, reputation.PendingSeqKey, "pending_seq"),
+		CloseTimeIndex:  collections.NewKeySet(sb, reputation.CloseTimeIndexKey, "close_time_index", collections.PairKeyCodec(collections.Int64Key, collections.Uint64Key)),
+		PendingByTarget: collections.NewMap(sb, reputation.PendingByTargetKey, "pending_by_target", collections.Uint64Key, collections.Uint64Value),
 	}
 	schema, err := sb.Build()
 	if err != nil {

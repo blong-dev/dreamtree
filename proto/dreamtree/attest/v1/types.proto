@@ -53,6 +53,14 @@ message Attestation {
   uint64 target_id = 8;
   int64 issued_at = 9;  // block time (unix seconds) — the t_issuance clock
   int64 height = 10;
+  // s_issuance — the RATIONAL strength at issuance (standing × spec × type_weight),
+  // frozen here so an outcome's M_O can read S(att, t_issuance) deterministically
+  // (never the float display-S). See docs/specs/x-reputation-p2-review-windows.md.
+  string s_issuance = 11 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
 }
 
 // Params — the levers from parameters.md. Weights in basis points; decay rates

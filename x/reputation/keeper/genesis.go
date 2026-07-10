@@ -25,11 +25,31 @@ func (k *Keeper) InitGenesis(ctx context.Context, data *reputation.GenesisState)
 			return err
 		}
 	}
+	for _, pe := range data.PendingEvents {
+		if err := k.Pending.Set(ctx, pe.Id, pe); err != nil {
+			return err
+		}
+		if err := k.CloseTimeIndex.Set(ctx, collections.Join(pe.CloseTime, pe.Id)); err != nil {
+			return err
+		}
+		if pe.Kind == reputation.PendingKind_PENDING_KIND_OUTCOME && pe.CounterTargetPending == 0 {
+			if err := k.PendingByTarget.Set(ctx, pe.TargetAttId, pe.Id); err != nil {
+				return err
+			}
+		}
+	}
 	next := data.NextId
 	if next == 0 {
 		next = 1
 	}
-	return k.Seq.Set(ctx, next)
+	if err := k.Seq.Set(ctx, next); err != nil {
+		return err
+	}
+	nextPending := data.NextPendingId
+	if nextPending == 0 {
+		nextPending = 1
+	}
+	return k.PendingSeq.Set(ctx, nextPending)
 }
 
 func (k *Keeper) ExportGenesis(ctx context.Context) (*reputation.GenesisState, error) {
@@ -55,5 +75,16 @@ func (k *Keeper) ExportGenesis(ctx context.Context) (*reputation.GenesisState, e
 	if err != nil {
 		return nil, err
 	}
-	return &reputation.GenesisState{Params: params, Contributions: contribs, DomainConfigs: cfgs, NextId: next}, nil
+	var pending []reputation.PendingEvent
+	if err := k.Pending.Walk(ctx, nil, func(_ uint64, v reputation.PendingEvent) (bool, error) {
+		pending = append(pending, v)
+		return false, nil
+	}); err != nil {
+		return nil, err
+	}
+	nextPending, err := k.PendingSeq.Peek(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return &reputation.GenesisState{Params: params, Contributions: contribs, DomainConfigs: cfgs, NextId: next, PendingEvents: pending, NextPendingId: nextPending}, nil
 }

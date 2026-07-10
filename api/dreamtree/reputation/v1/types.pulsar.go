@@ -1352,18 +1352,24 @@ func (x *fastReflection_DomainConfig) ProtoMethods() *protoiface.Methods {
 }
 
 var (
-	md_Params                       protoreflect.MessageDescriptor
-	fd_Params_baseline_kyc          protoreflect.FieldDescriptor
-	fd_Params_dampening_k           protoreflect.FieldDescriptor
-	fd_Params_saturation_standard   protoreflect.FieldDescriptor
-	fd_Params_obsolescence_standard protoreflect.FieldDescriptor
-	fd_Params_lambda_permanent      protoreflect.FieldDescriptor
-	fd_Params_lambda_durable        protoreflect.FieldDescriptor
-	fd_Params_lambda_rigor          protoreflect.FieldDescriptor
-	fd_Params_lambda_use            protoreflect.FieldDescriptor
-	fd_Params_lambda_replication    protoreflect.FieldDescriptor
-	fd_Params_lambda_endorsement    protoreflect.FieldDescriptor
-	fd_Params_attest_bet_scale      protoreflect.FieldDescriptor
+	md_Params                         protoreflect.MessageDescriptor
+	fd_Params_baseline_kyc            protoreflect.FieldDescriptor
+	fd_Params_dampening_k             protoreflect.FieldDescriptor
+	fd_Params_saturation_standard     protoreflect.FieldDescriptor
+	fd_Params_obsolescence_standard   protoreflect.FieldDescriptor
+	fd_Params_lambda_permanent        protoreflect.FieldDescriptor
+	fd_Params_lambda_durable          protoreflect.FieldDescriptor
+	fd_Params_lambda_rigor            protoreflect.FieldDescriptor
+	fd_Params_lambda_use              protoreflect.FieldDescriptor
+	fd_Params_lambda_replication      protoreflect.FieldDescriptor
+	fd_Params_lambda_endorsement      protoreflect.FieldDescriptor
+	fd_Params_attest_bet_scale        protoreflect.FieldDescriptor
+	fd_Params_neg_asymmetry           protoreflect.FieldDescriptor
+	fd_Params_outcome_beta            protoreflect.FieldDescriptor
+	fd_Params_outcome_cap_mult        protoreflect.FieldDescriptor
+	fd_Params_review_window_base      protoreflect.FieldDescriptor
+	fd_Params_review_window_threshold protoreflect.FieldDescriptor
+	fd_Params_coattestor_weight       protoreflect.FieldDescriptor
 )
 
 func init() {
@@ -1380,6 +1386,12 @@ func init() {
 	fd_Params_lambda_replication = md_Params.Fields().ByName("lambda_replication")
 	fd_Params_lambda_endorsement = md_Params.Fields().ByName("lambda_endorsement")
 	fd_Params_attest_bet_scale = md_Params.Fields().ByName("attest_bet_scale")
+	fd_Params_neg_asymmetry = md_Params.Fields().ByName("neg_asymmetry")
+	fd_Params_outcome_beta = md_Params.Fields().ByName("outcome_beta")
+	fd_Params_outcome_cap_mult = md_Params.Fields().ByName("outcome_cap_mult")
+	fd_Params_review_window_base = md_Params.Fields().ByName("review_window_base")
+	fd_Params_review_window_threshold = md_Params.Fields().ByName("review_window_threshold")
+	fd_Params_coattestor_weight = md_Params.Fields().ByName("coattestor_weight")
 }
 
 var _ protoreflect.Message = (*fastReflection_Params)(nil)
@@ -1513,6 +1525,42 @@ func (x *fastReflection_Params) Range(f func(protoreflect.FieldDescriptor, proto
 			return
 		}
 	}
+	if x.NegAsymmetry != "" {
+		value := protoreflect.ValueOfString(x.NegAsymmetry)
+		if !f(fd_Params_neg_asymmetry, value) {
+			return
+		}
+	}
+	if x.OutcomeBeta != "" {
+		value := protoreflect.ValueOfString(x.OutcomeBeta)
+		if !f(fd_Params_outcome_beta, value) {
+			return
+		}
+	}
+	if x.OutcomeCapMult != "" {
+		value := protoreflect.ValueOfString(x.OutcomeCapMult)
+		if !f(fd_Params_outcome_cap_mult, value) {
+			return
+		}
+	}
+	if x.ReviewWindowBase != "" {
+		value := protoreflect.ValueOfString(x.ReviewWindowBase)
+		if !f(fd_Params_review_window_base, value) {
+			return
+		}
+	}
+	if x.ReviewWindowThreshold != "" {
+		value := protoreflect.ValueOfString(x.ReviewWindowThreshold)
+		if !f(fd_Params_review_window_threshold, value) {
+			return
+		}
+	}
+	if x.CoattestorWeight != "" {
+		value := protoreflect.ValueOfString(x.CoattestorWeight)
+		if !f(fd_Params_coattestor_weight, value) {
+			return
+		}
+	}
 }
 
 // Has reports whether a field is populated.
@@ -1550,6 +1598,18 @@ func (x *fastReflection_Params) Has(fd protoreflect.FieldDescriptor) bool {
 		return x.LambdaEndorsement != ""
 	case "dreamtree.reputation.v1.Params.attest_bet_scale":
 		return x.AttestBetScale != ""
+	case "dreamtree.reputation.v1.Params.neg_asymmetry":
+		return x.NegAsymmetry != ""
+	case "dreamtree.reputation.v1.Params.outcome_beta":
+		return x.OutcomeBeta != ""
+	case "dreamtree.reputation.v1.Params.outcome_cap_mult":
+		return x.OutcomeCapMult != ""
+	case "dreamtree.reputation.v1.Params.review_window_base":
+		return x.ReviewWindowBase != ""
+	case "dreamtree.reputation.v1.Params.review_window_threshold":
+		return x.ReviewWindowThreshold != ""
+	case "dreamtree.reputation.v1.Params.coattestor_weight":
+		return x.CoattestorWeight != ""
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: dreamtree.reputation.v1.Params"))
@@ -1588,6 +1648,18 @@ func (x *fastReflection_Params) Clear(fd protoreflect.FieldDescriptor) {
 		x.LambdaEndorsement = ""
 	case "dreamtree.reputation.v1.Params.attest_bet_scale":
 		x.AttestBetScale = ""
+	case "dreamtree.reputation.v1.Params.neg_asymmetry":
+		x.NegAsymmetry = ""
+	case "dreamtree.reputation.v1.Params.outcome_beta":
+		x.OutcomeBeta = ""
+	case "dreamtree.reputation.v1.Params.outcome_cap_mult":
+		x.OutcomeCapMult = ""
+	case "dreamtree.reputation.v1.Params.review_window_base":
+		x.ReviewWindowBase = ""
+	case "dreamtree.reputation.v1.Params.review_window_threshold":
+		x.ReviewWindowThreshold = ""
+	case "dreamtree.reputation.v1.Params.coattestor_weight":
+		x.CoattestorWeight = ""
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: dreamtree.reputation.v1.Params"))
@@ -1637,6 +1709,24 @@ func (x *fastReflection_Params) Get(descriptor protoreflect.FieldDescriptor) pro
 	case "dreamtree.reputation.v1.Params.attest_bet_scale":
 		value := x.AttestBetScale
 		return protoreflect.ValueOfString(value)
+	case "dreamtree.reputation.v1.Params.neg_asymmetry":
+		value := x.NegAsymmetry
+		return protoreflect.ValueOfString(value)
+	case "dreamtree.reputation.v1.Params.outcome_beta":
+		value := x.OutcomeBeta
+		return protoreflect.ValueOfString(value)
+	case "dreamtree.reputation.v1.Params.outcome_cap_mult":
+		value := x.OutcomeCapMult
+		return protoreflect.ValueOfString(value)
+	case "dreamtree.reputation.v1.Params.review_window_base":
+		value := x.ReviewWindowBase
+		return protoreflect.ValueOfString(value)
+	case "dreamtree.reputation.v1.Params.review_window_threshold":
+		value := x.ReviewWindowThreshold
+		return protoreflect.ValueOfString(value)
+	case "dreamtree.reputation.v1.Params.coattestor_weight":
+		value := x.CoattestorWeight
+		return protoreflect.ValueOfString(value)
 	default:
 		if descriptor.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: dreamtree.reputation.v1.Params"))
@@ -1679,6 +1769,18 @@ func (x *fastReflection_Params) Set(fd protoreflect.FieldDescriptor, value proto
 		x.LambdaEndorsement = value.Interface().(string)
 	case "dreamtree.reputation.v1.Params.attest_bet_scale":
 		x.AttestBetScale = value.Interface().(string)
+	case "dreamtree.reputation.v1.Params.neg_asymmetry":
+		x.NegAsymmetry = value.Interface().(string)
+	case "dreamtree.reputation.v1.Params.outcome_beta":
+		x.OutcomeBeta = value.Interface().(string)
+	case "dreamtree.reputation.v1.Params.outcome_cap_mult":
+		x.OutcomeCapMult = value.Interface().(string)
+	case "dreamtree.reputation.v1.Params.review_window_base":
+		x.ReviewWindowBase = value.Interface().(string)
+	case "dreamtree.reputation.v1.Params.review_window_threshold":
+		x.ReviewWindowThreshold = value.Interface().(string)
+	case "dreamtree.reputation.v1.Params.coattestor_weight":
+		x.CoattestorWeight = value.Interface().(string)
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: dreamtree.reputation.v1.Params"))
@@ -1721,6 +1823,18 @@ func (x *fastReflection_Params) Mutable(fd protoreflect.FieldDescriptor) protore
 		panic(fmt.Errorf("field lambda_endorsement of message dreamtree.reputation.v1.Params is not mutable"))
 	case "dreamtree.reputation.v1.Params.attest_bet_scale":
 		panic(fmt.Errorf("field attest_bet_scale of message dreamtree.reputation.v1.Params is not mutable"))
+	case "dreamtree.reputation.v1.Params.neg_asymmetry":
+		panic(fmt.Errorf("field neg_asymmetry of message dreamtree.reputation.v1.Params is not mutable"))
+	case "dreamtree.reputation.v1.Params.outcome_beta":
+		panic(fmt.Errorf("field outcome_beta of message dreamtree.reputation.v1.Params is not mutable"))
+	case "dreamtree.reputation.v1.Params.outcome_cap_mult":
+		panic(fmt.Errorf("field outcome_cap_mult of message dreamtree.reputation.v1.Params is not mutable"))
+	case "dreamtree.reputation.v1.Params.review_window_base":
+		panic(fmt.Errorf("field review_window_base of message dreamtree.reputation.v1.Params is not mutable"))
+	case "dreamtree.reputation.v1.Params.review_window_threshold":
+		panic(fmt.Errorf("field review_window_threshold of message dreamtree.reputation.v1.Params is not mutable"))
+	case "dreamtree.reputation.v1.Params.coattestor_weight":
+		panic(fmt.Errorf("field coattestor_weight of message dreamtree.reputation.v1.Params is not mutable"))
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: dreamtree.reputation.v1.Params"))
@@ -1755,6 +1869,18 @@ func (x *fastReflection_Params) NewField(fd protoreflect.FieldDescriptor) protor
 	case "dreamtree.reputation.v1.Params.lambda_endorsement":
 		return protoreflect.ValueOfString("")
 	case "dreamtree.reputation.v1.Params.attest_bet_scale":
+		return protoreflect.ValueOfString("")
+	case "dreamtree.reputation.v1.Params.neg_asymmetry":
+		return protoreflect.ValueOfString("")
+	case "dreamtree.reputation.v1.Params.outcome_beta":
+		return protoreflect.ValueOfString("")
+	case "dreamtree.reputation.v1.Params.outcome_cap_mult":
+		return protoreflect.ValueOfString("")
+	case "dreamtree.reputation.v1.Params.review_window_base":
+		return protoreflect.ValueOfString("")
+	case "dreamtree.reputation.v1.Params.review_window_threshold":
+		return protoreflect.ValueOfString("")
+	case "dreamtree.reputation.v1.Params.coattestor_weight":
 		return protoreflect.ValueOfString("")
 	default:
 		if fd.IsExtension() {
@@ -1869,6 +1995,30 @@ func (x *fastReflection_Params) ProtoMethods() *protoiface.Methods {
 		if l > 0 {
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
+		l = len(x.NegAsymmetry)
+		if l > 0 {
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
+		l = len(x.OutcomeBeta)
+		if l > 0 {
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
+		l = len(x.OutcomeCapMult)
+		if l > 0 {
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
+		l = len(x.ReviewWindowBase)
+		if l > 0 {
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
+		l = len(x.ReviewWindowThreshold)
+		if l > 0 {
+			n += 2 + l + runtime.Sov(uint64(l))
+		}
+		l = len(x.CoattestorWeight)
+		if l > 0 {
+			n += 2 + l + runtime.Sov(uint64(l))
+		}
 		if x.unknownFields != nil {
 			n += len(x.unknownFields)
 		}
@@ -1897,6 +2047,52 @@ func (x *fastReflection_Params) ProtoMethods() *protoiface.Methods {
 		if x.unknownFields != nil {
 			i -= len(x.unknownFields)
 			copy(dAtA[i:], x.unknownFields)
+		}
+		if len(x.CoattestorWeight) > 0 {
+			i -= len(x.CoattestorWeight)
+			copy(dAtA[i:], x.CoattestorWeight)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.CoattestorWeight)))
+			i--
+			dAtA[i] = 0x1
+			i--
+			dAtA[i] = 0x8a
+		}
+		if len(x.ReviewWindowThreshold) > 0 {
+			i -= len(x.ReviewWindowThreshold)
+			copy(dAtA[i:], x.ReviewWindowThreshold)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.ReviewWindowThreshold)))
+			i--
+			dAtA[i] = 0x1
+			i--
+			dAtA[i] = 0x82
+		}
+		if len(x.ReviewWindowBase) > 0 {
+			i -= len(x.ReviewWindowBase)
+			copy(dAtA[i:], x.ReviewWindowBase)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.ReviewWindowBase)))
+			i--
+			dAtA[i] = 0x7a
+		}
+		if len(x.OutcomeCapMult) > 0 {
+			i -= len(x.OutcomeCapMult)
+			copy(dAtA[i:], x.OutcomeCapMult)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.OutcomeCapMult)))
+			i--
+			dAtA[i] = 0x72
+		}
+		if len(x.OutcomeBeta) > 0 {
+			i -= len(x.OutcomeBeta)
+			copy(dAtA[i:], x.OutcomeBeta)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.OutcomeBeta)))
+			i--
+			dAtA[i] = 0x6a
+		}
+		if len(x.NegAsymmetry) > 0 {
+			i -= len(x.NegAsymmetry)
+			copy(dAtA[i:], x.NegAsymmetry)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.NegAsymmetry)))
+			i--
+			dAtA[i] = 0x62
 		}
 		if len(x.AttestBetScale) > 0 {
 			i -= len(x.AttestBetScale)
@@ -2376,6 +2572,1508 @@ func (x *fastReflection_Params) ProtoMethods() *protoiface.Methods {
 				}
 				x.AttestBetScale = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
+			case 12:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field NegAsymmetry", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.NegAsymmetry = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			case 13:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field OutcomeBeta", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.OutcomeBeta = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			case 14:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field OutcomeCapMult", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.OutcomeCapMult = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			case 15:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field ReviewWindowBase", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.ReviewWindowBase = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			case 16:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field ReviewWindowThreshold", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.ReviewWindowThreshold = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			case 17:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field CoattestorWeight", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.CoattestorWeight = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			default:
+				iNdEx = preIndex
+				skippy, err := runtime.Skip(dAtA[iNdEx:])
+				if err != nil {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
+				}
+				if (skippy < 0) || (iNdEx+skippy) < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if (iNdEx + skippy) > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				if !options.DiscardUnknown {
+					x.unknownFields = append(x.unknownFields, dAtA[iNdEx:iNdEx+skippy]...)
+				}
+				iNdEx += skippy
+			}
+		}
+
+		if iNdEx > l {
+			return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+		}
+		return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, nil
+	}
+	return &protoiface.Methods{
+		NoUnkeyedLiterals: struct{}{},
+		Flags:             protoiface.SupportMarshalDeterministic | protoiface.SupportUnmarshalDiscardUnknown,
+		Size:              size,
+		Marshal:           marshal,
+		Unmarshal:         unmarshal,
+		Merge:             nil,
+		CheckInitialized:  nil,
+	}
+}
+
+var (
+	md_PendingEvent                        protoreflect.MessageDescriptor
+	fd_PendingEvent_id                     protoreflect.FieldDescriptor
+	fd_PendingEvent_kind                   protoreflect.FieldDescriptor
+	fd_PendingEvent_signer                 protoreflect.FieldDescriptor
+	fd_PendingEvent_domain                 protoreflect.FieldDescriptor
+	fd_PendingEvent_rate_bucket            protoreflect.FieldDescriptor
+	fd_PendingEvent_target_att_id          protoreflect.FieldDescriptor
+	fd_PendingEvent_target_attestor        protoreflect.FieldDescriptor
+	fd_PendingEvent_target_domain          protoreflect.FieldDescriptor
+	fd_PendingEvent_target_s_issuance      protoreflect.FieldDescriptor
+	fd_PendingEvent_outcome_refutes        protoreflect.FieldDescriptor
+	fd_PendingEvent_counter_target_pending protoreflect.FieldDescriptor
+	fd_PendingEvent_base_magnitude         protoreflect.FieldDescriptor
+	fd_PendingEvent_corroboration          protoreflect.FieldDescriptor
+	fd_PendingEvent_refutation             protoreflect.FieldDescriptor
+	fd_PendingEvent_opened_at              protoreflect.FieldDescriptor
+	fd_PendingEvent_close_time             protoreflect.FieldDescriptor
+	fd_PendingEvent_source_att_id          protoreflect.FieldDescriptor
+)
+
+func init() {
+	file_dreamtree_reputation_v1_types_proto_init()
+	md_PendingEvent = File_dreamtree_reputation_v1_types_proto.Messages().ByName("PendingEvent")
+	fd_PendingEvent_id = md_PendingEvent.Fields().ByName("id")
+	fd_PendingEvent_kind = md_PendingEvent.Fields().ByName("kind")
+	fd_PendingEvent_signer = md_PendingEvent.Fields().ByName("signer")
+	fd_PendingEvent_domain = md_PendingEvent.Fields().ByName("domain")
+	fd_PendingEvent_rate_bucket = md_PendingEvent.Fields().ByName("rate_bucket")
+	fd_PendingEvent_target_att_id = md_PendingEvent.Fields().ByName("target_att_id")
+	fd_PendingEvent_target_attestor = md_PendingEvent.Fields().ByName("target_attestor")
+	fd_PendingEvent_target_domain = md_PendingEvent.Fields().ByName("target_domain")
+	fd_PendingEvent_target_s_issuance = md_PendingEvent.Fields().ByName("target_s_issuance")
+	fd_PendingEvent_outcome_refutes = md_PendingEvent.Fields().ByName("outcome_refutes")
+	fd_PendingEvent_counter_target_pending = md_PendingEvent.Fields().ByName("counter_target_pending")
+	fd_PendingEvent_base_magnitude = md_PendingEvent.Fields().ByName("base_magnitude")
+	fd_PendingEvent_corroboration = md_PendingEvent.Fields().ByName("corroboration")
+	fd_PendingEvent_refutation = md_PendingEvent.Fields().ByName("refutation")
+	fd_PendingEvent_opened_at = md_PendingEvent.Fields().ByName("opened_at")
+	fd_PendingEvent_close_time = md_PendingEvent.Fields().ByName("close_time")
+	fd_PendingEvent_source_att_id = md_PendingEvent.Fields().ByName("source_att_id")
+}
+
+var _ protoreflect.Message = (*fastReflection_PendingEvent)(nil)
+
+type fastReflection_PendingEvent PendingEvent
+
+func (x *PendingEvent) ProtoReflect() protoreflect.Message {
+	return (*fastReflection_PendingEvent)(x)
+}
+
+func (x *PendingEvent) slowProtoReflect() protoreflect.Message {
+	mi := &file_dreamtree_reputation_v1_types_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+var _fastReflection_PendingEvent_messageType fastReflection_PendingEvent_messageType
+var _ protoreflect.MessageType = fastReflection_PendingEvent_messageType{}
+
+type fastReflection_PendingEvent_messageType struct{}
+
+func (x fastReflection_PendingEvent_messageType) Zero() protoreflect.Message {
+	return (*fastReflection_PendingEvent)(nil)
+}
+func (x fastReflection_PendingEvent_messageType) New() protoreflect.Message {
+	return new(fastReflection_PendingEvent)
+}
+func (x fastReflection_PendingEvent_messageType) Descriptor() protoreflect.MessageDescriptor {
+	return md_PendingEvent
+}
+
+// Descriptor returns message descriptor, which contains only the protobuf
+// type information for the message.
+func (x *fastReflection_PendingEvent) Descriptor() protoreflect.MessageDescriptor {
+	return md_PendingEvent
+}
+
+// Type returns the message type, which encapsulates both Go and protobuf
+// type information. If the Go type information is not needed,
+// it is recommended that the message descriptor be used instead.
+func (x *fastReflection_PendingEvent) Type() protoreflect.MessageType {
+	return _fastReflection_PendingEvent_messageType
+}
+
+// New returns a newly allocated and mutable empty message.
+func (x *fastReflection_PendingEvent) New() protoreflect.Message {
+	return new(fastReflection_PendingEvent)
+}
+
+// Interface unwraps the message reflection interface and
+// returns the underlying ProtoMessage interface.
+func (x *fastReflection_PendingEvent) Interface() protoreflect.ProtoMessage {
+	return (*PendingEvent)(x)
+}
+
+// Range iterates over every populated field in an undefined order,
+// calling f for each field descriptor and value encountered.
+// Range returns immediately if f returns false.
+// While iterating, mutating operations may only be performed
+// on the current field descriptor.
+func (x *fastReflection_PendingEvent) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
+	if x.Id != uint64(0) {
+		value := protoreflect.ValueOfUint64(x.Id)
+		if !f(fd_PendingEvent_id, value) {
+			return
+		}
+	}
+	if x.Kind != 0 {
+		value := protoreflect.ValueOfEnum((protoreflect.EnumNumber)(x.Kind))
+		if !f(fd_PendingEvent_kind, value) {
+			return
+		}
+	}
+	if x.Signer != "" {
+		value := protoreflect.ValueOfString(x.Signer)
+		if !f(fd_PendingEvent_signer, value) {
+			return
+		}
+	}
+	if x.Domain != "" {
+		value := protoreflect.ValueOfString(x.Domain)
+		if !f(fd_PendingEvent_domain, value) {
+			return
+		}
+	}
+	if x.RateBucket != 0 {
+		value := protoreflect.ValueOfEnum((protoreflect.EnumNumber)(x.RateBucket))
+		if !f(fd_PendingEvent_rate_bucket, value) {
+			return
+		}
+	}
+	if x.TargetAttId != uint64(0) {
+		value := protoreflect.ValueOfUint64(x.TargetAttId)
+		if !f(fd_PendingEvent_target_att_id, value) {
+			return
+		}
+	}
+	if x.TargetAttestor != "" {
+		value := protoreflect.ValueOfString(x.TargetAttestor)
+		if !f(fd_PendingEvent_target_attestor, value) {
+			return
+		}
+	}
+	if x.TargetDomain != "" {
+		value := protoreflect.ValueOfString(x.TargetDomain)
+		if !f(fd_PendingEvent_target_domain, value) {
+			return
+		}
+	}
+	if x.TargetSIssuance != "" {
+		value := protoreflect.ValueOfString(x.TargetSIssuance)
+		if !f(fd_PendingEvent_target_s_issuance, value) {
+			return
+		}
+	}
+	if x.OutcomeRefutes != false {
+		value := protoreflect.ValueOfBool(x.OutcomeRefutes)
+		if !f(fd_PendingEvent_outcome_refutes, value) {
+			return
+		}
+	}
+	if x.CounterTargetPending != uint64(0) {
+		value := protoreflect.ValueOfUint64(x.CounterTargetPending)
+		if !f(fd_PendingEvent_counter_target_pending, value) {
+			return
+		}
+	}
+	if x.BaseMagnitude != "" {
+		value := protoreflect.ValueOfString(x.BaseMagnitude)
+		if !f(fd_PendingEvent_base_magnitude, value) {
+			return
+		}
+	}
+	if x.Corroboration != "" {
+		value := protoreflect.ValueOfString(x.Corroboration)
+		if !f(fd_PendingEvent_corroboration, value) {
+			return
+		}
+	}
+	if x.Refutation != "" {
+		value := protoreflect.ValueOfString(x.Refutation)
+		if !f(fd_PendingEvent_refutation, value) {
+			return
+		}
+	}
+	if x.OpenedAt != int64(0) {
+		value := protoreflect.ValueOfInt64(x.OpenedAt)
+		if !f(fd_PendingEvent_opened_at, value) {
+			return
+		}
+	}
+	if x.CloseTime != int64(0) {
+		value := protoreflect.ValueOfInt64(x.CloseTime)
+		if !f(fd_PendingEvent_close_time, value) {
+			return
+		}
+	}
+	if x.SourceAttId != uint64(0) {
+		value := protoreflect.ValueOfUint64(x.SourceAttId)
+		if !f(fd_PendingEvent_source_att_id, value) {
+			return
+		}
+	}
+}
+
+// Has reports whether a field is populated.
+//
+// Some fields have the property of nullability where it is possible to
+// distinguish between the default value of a field and whether the field
+// was explicitly populated with the default value. Singular message fields,
+// member fields of a oneof, and proto2 scalar fields are nullable. Such
+// fields are populated only if explicitly set.
+//
+// In other cases (aside from the nullable cases above),
+// a proto3 scalar field is populated if it contains a non-zero value, and
+// a repeated field is populated if it is non-empty.
+func (x *fastReflection_PendingEvent) Has(fd protoreflect.FieldDescriptor) bool {
+	switch fd.FullName() {
+	case "dreamtree.reputation.v1.PendingEvent.id":
+		return x.Id != uint64(0)
+	case "dreamtree.reputation.v1.PendingEvent.kind":
+		return x.Kind != 0
+	case "dreamtree.reputation.v1.PendingEvent.signer":
+		return x.Signer != ""
+	case "dreamtree.reputation.v1.PendingEvent.domain":
+		return x.Domain != ""
+	case "dreamtree.reputation.v1.PendingEvent.rate_bucket":
+		return x.RateBucket != 0
+	case "dreamtree.reputation.v1.PendingEvent.target_att_id":
+		return x.TargetAttId != uint64(0)
+	case "dreamtree.reputation.v1.PendingEvent.target_attestor":
+		return x.TargetAttestor != ""
+	case "dreamtree.reputation.v1.PendingEvent.target_domain":
+		return x.TargetDomain != ""
+	case "dreamtree.reputation.v1.PendingEvent.target_s_issuance":
+		return x.TargetSIssuance != ""
+	case "dreamtree.reputation.v1.PendingEvent.outcome_refutes":
+		return x.OutcomeRefutes != false
+	case "dreamtree.reputation.v1.PendingEvent.counter_target_pending":
+		return x.CounterTargetPending != uint64(0)
+	case "dreamtree.reputation.v1.PendingEvent.base_magnitude":
+		return x.BaseMagnitude != ""
+	case "dreamtree.reputation.v1.PendingEvent.corroboration":
+		return x.Corroboration != ""
+	case "dreamtree.reputation.v1.PendingEvent.refutation":
+		return x.Refutation != ""
+	case "dreamtree.reputation.v1.PendingEvent.opened_at":
+		return x.OpenedAt != int64(0)
+	case "dreamtree.reputation.v1.PendingEvent.close_time":
+		return x.CloseTime != int64(0)
+	case "dreamtree.reputation.v1.PendingEvent.source_att_id":
+		return x.SourceAttId != uint64(0)
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: dreamtree.reputation.v1.PendingEvent"))
+		}
+		panic(fmt.Errorf("message dreamtree.reputation.v1.PendingEvent does not contain field %s", fd.FullName()))
+	}
+}
+
+// Clear clears the field such that a subsequent Has call reports false.
+//
+// Clearing an extension field clears both the extension type and value
+// associated with the given field number.
+//
+// Clear is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_PendingEvent) Clear(fd protoreflect.FieldDescriptor) {
+	switch fd.FullName() {
+	case "dreamtree.reputation.v1.PendingEvent.id":
+		x.Id = uint64(0)
+	case "dreamtree.reputation.v1.PendingEvent.kind":
+		x.Kind = 0
+	case "dreamtree.reputation.v1.PendingEvent.signer":
+		x.Signer = ""
+	case "dreamtree.reputation.v1.PendingEvent.domain":
+		x.Domain = ""
+	case "dreamtree.reputation.v1.PendingEvent.rate_bucket":
+		x.RateBucket = 0
+	case "dreamtree.reputation.v1.PendingEvent.target_att_id":
+		x.TargetAttId = uint64(0)
+	case "dreamtree.reputation.v1.PendingEvent.target_attestor":
+		x.TargetAttestor = ""
+	case "dreamtree.reputation.v1.PendingEvent.target_domain":
+		x.TargetDomain = ""
+	case "dreamtree.reputation.v1.PendingEvent.target_s_issuance":
+		x.TargetSIssuance = ""
+	case "dreamtree.reputation.v1.PendingEvent.outcome_refutes":
+		x.OutcomeRefutes = false
+	case "dreamtree.reputation.v1.PendingEvent.counter_target_pending":
+		x.CounterTargetPending = uint64(0)
+	case "dreamtree.reputation.v1.PendingEvent.base_magnitude":
+		x.BaseMagnitude = ""
+	case "dreamtree.reputation.v1.PendingEvent.corroboration":
+		x.Corroboration = ""
+	case "dreamtree.reputation.v1.PendingEvent.refutation":
+		x.Refutation = ""
+	case "dreamtree.reputation.v1.PendingEvent.opened_at":
+		x.OpenedAt = int64(0)
+	case "dreamtree.reputation.v1.PendingEvent.close_time":
+		x.CloseTime = int64(0)
+	case "dreamtree.reputation.v1.PendingEvent.source_att_id":
+		x.SourceAttId = uint64(0)
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: dreamtree.reputation.v1.PendingEvent"))
+		}
+		panic(fmt.Errorf("message dreamtree.reputation.v1.PendingEvent does not contain field %s", fd.FullName()))
+	}
+}
+
+// Get retrieves the value for a field.
+//
+// For unpopulated scalars, it returns the default value, where
+// the default value of a bytes scalar is guaranteed to be a copy.
+// For unpopulated composite types, it returns an empty, read-only view
+// of the value; to obtain a mutable reference, use Mutable.
+func (x *fastReflection_PendingEvent) Get(descriptor protoreflect.FieldDescriptor) protoreflect.Value {
+	switch descriptor.FullName() {
+	case "dreamtree.reputation.v1.PendingEvent.id":
+		value := x.Id
+		return protoreflect.ValueOfUint64(value)
+	case "dreamtree.reputation.v1.PendingEvent.kind":
+		value := x.Kind
+		return protoreflect.ValueOfEnum((protoreflect.EnumNumber)(value))
+	case "dreamtree.reputation.v1.PendingEvent.signer":
+		value := x.Signer
+		return protoreflect.ValueOfString(value)
+	case "dreamtree.reputation.v1.PendingEvent.domain":
+		value := x.Domain
+		return protoreflect.ValueOfString(value)
+	case "dreamtree.reputation.v1.PendingEvent.rate_bucket":
+		value := x.RateBucket
+		return protoreflect.ValueOfEnum((protoreflect.EnumNumber)(value))
+	case "dreamtree.reputation.v1.PendingEvent.target_att_id":
+		value := x.TargetAttId
+		return protoreflect.ValueOfUint64(value)
+	case "dreamtree.reputation.v1.PendingEvent.target_attestor":
+		value := x.TargetAttestor
+		return protoreflect.ValueOfString(value)
+	case "dreamtree.reputation.v1.PendingEvent.target_domain":
+		value := x.TargetDomain
+		return protoreflect.ValueOfString(value)
+	case "dreamtree.reputation.v1.PendingEvent.target_s_issuance":
+		value := x.TargetSIssuance
+		return protoreflect.ValueOfString(value)
+	case "dreamtree.reputation.v1.PendingEvent.outcome_refutes":
+		value := x.OutcomeRefutes
+		return protoreflect.ValueOfBool(value)
+	case "dreamtree.reputation.v1.PendingEvent.counter_target_pending":
+		value := x.CounterTargetPending
+		return protoreflect.ValueOfUint64(value)
+	case "dreamtree.reputation.v1.PendingEvent.base_magnitude":
+		value := x.BaseMagnitude
+		return protoreflect.ValueOfString(value)
+	case "dreamtree.reputation.v1.PendingEvent.corroboration":
+		value := x.Corroboration
+		return protoreflect.ValueOfString(value)
+	case "dreamtree.reputation.v1.PendingEvent.refutation":
+		value := x.Refutation
+		return protoreflect.ValueOfString(value)
+	case "dreamtree.reputation.v1.PendingEvent.opened_at":
+		value := x.OpenedAt
+		return protoreflect.ValueOfInt64(value)
+	case "dreamtree.reputation.v1.PendingEvent.close_time":
+		value := x.CloseTime
+		return protoreflect.ValueOfInt64(value)
+	case "dreamtree.reputation.v1.PendingEvent.source_att_id":
+		value := x.SourceAttId
+		return protoreflect.ValueOfUint64(value)
+	default:
+		if descriptor.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: dreamtree.reputation.v1.PendingEvent"))
+		}
+		panic(fmt.Errorf("message dreamtree.reputation.v1.PendingEvent does not contain field %s", descriptor.FullName()))
+	}
+}
+
+// Set stores the value for a field.
+//
+// For a field belonging to a oneof, it implicitly clears any other field
+// that may be currently set within the same oneof.
+// For extension fields, it implicitly stores the provided ExtensionType.
+// When setting a composite type, it is unspecified whether the stored value
+// aliases the source's memory in any way. If the composite value is an
+// empty, read-only value, then it panics.
+//
+// Set is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_PendingEvent) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
+	switch fd.FullName() {
+	case "dreamtree.reputation.v1.PendingEvent.id":
+		x.Id = value.Uint()
+	case "dreamtree.reputation.v1.PendingEvent.kind":
+		x.Kind = (PendingKind)(value.Enum())
+	case "dreamtree.reputation.v1.PendingEvent.signer":
+		x.Signer = value.Interface().(string)
+	case "dreamtree.reputation.v1.PendingEvent.domain":
+		x.Domain = value.Interface().(string)
+	case "dreamtree.reputation.v1.PendingEvent.rate_bucket":
+		x.RateBucket = (RateBucket)(value.Enum())
+	case "dreamtree.reputation.v1.PendingEvent.target_att_id":
+		x.TargetAttId = value.Uint()
+	case "dreamtree.reputation.v1.PendingEvent.target_attestor":
+		x.TargetAttestor = value.Interface().(string)
+	case "dreamtree.reputation.v1.PendingEvent.target_domain":
+		x.TargetDomain = value.Interface().(string)
+	case "dreamtree.reputation.v1.PendingEvent.target_s_issuance":
+		x.TargetSIssuance = value.Interface().(string)
+	case "dreamtree.reputation.v1.PendingEvent.outcome_refutes":
+		x.OutcomeRefutes = value.Bool()
+	case "dreamtree.reputation.v1.PendingEvent.counter_target_pending":
+		x.CounterTargetPending = value.Uint()
+	case "dreamtree.reputation.v1.PendingEvent.base_magnitude":
+		x.BaseMagnitude = value.Interface().(string)
+	case "dreamtree.reputation.v1.PendingEvent.corroboration":
+		x.Corroboration = value.Interface().(string)
+	case "dreamtree.reputation.v1.PendingEvent.refutation":
+		x.Refutation = value.Interface().(string)
+	case "dreamtree.reputation.v1.PendingEvent.opened_at":
+		x.OpenedAt = value.Int()
+	case "dreamtree.reputation.v1.PendingEvent.close_time":
+		x.CloseTime = value.Int()
+	case "dreamtree.reputation.v1.PendingEvent.source_att_id":
+		x.SourceAttId = value.Uint()
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: dreamtree.reputation.v1.PendingEvent"))
+		}
+		panic(fmt.Errorf("message dreamtree.reputation.v1.PendingEvent does not contain field %s", fd.FullName()))
+	}
+}
+
+// Mutable returns a mutable reference to a composite type.
+//
+// If the field is unpopulated, it may allocate a composite value.
+// For a field belonging to a oneof, it implicitly clears any other field
+// that may be currently set within the same oneof.
+// For extension fields, it implicitly stores the provided ExtensionType
+// if not already stored.
+// It panics if the field does not contain a composite type.
+//
+// Mutable is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_PendingEvent) Mutable(fd protoreflect.FieldDescriptor) protoreflect.Value {
+	switch fd.FullName() {
+	case "dreamtree.reputation.v1.PendingEvent.id":
+		panic(fmt.Errorf("field id of message dreamtree.reputation.v1.PendingEvent is not mutable"))
+	case "dreamtree.reputation.v1.PendingEvent.kind":
+		panic(fmt.Errorf("field kind of message dreamtree.reputation.v1.PendingEvent is not mutable"))
+	case "dreamtree.reputation.v1.PendingEvent.signer":
+		panic(fmt.Errorf("field signer of message dreamtree.reputation.v1.PendingEvent is not mutable"))
+	case "dreamtree.reputation.v1.PendingEvent.domain":
+		panic(fmt.Errorf("field domain of message dreamtree.reputation.v1.PendingEvent is not mutable"))
+	case "dreamtree.reputation.v1.PendingEvent.rate_bucket":
+		panic(fmt.Errorf("field rate_bucket of message dreamtree.reputation.v1.PendingEvent is not mutable"))
+	case "dreamtree.reputation.v1.PendingEvent.target_att_id":
+		panic(fmt.Errorf("field target_att_id of message dreamtree.reputation.v1.PendingEvent is not mutable"))
+	case "dreamtree.reputation.v1.PendingEvent.target_attestor":
+		panic(fmt.Errorf("field target_attestor of message dreamtree.reputation.v1.PendingEvent is not mutable"))
+	case "dreamtree.reputation.v1.PendingEvent.target_domain":
+		panic(fmt.Errorf("field target_domain of message dreamtree.reputation.v1.PendingEvent is not mutable"))
+	case "dreamtree.reputation.v1.PendingEvent.target_s_issuance":
+		panic(fmt.Errorf("field target_s_issuance of message dreamtree.reputation.v1.PendingEvent is not mutable"))
+	case "dreamtree.reputation.v1.PendingEvent.outcome_refutes":
+		panic(fmt.Errorf("field outcome_refutes of message dreamtree.reputation.v1.PendingEvent is not mutable"))
+	case "dreamtree.reputation.v1.PendingEvent.counter_target_pending":
+		panic(fmt.Errorf("field counter_target_pending of message dreamtree.reputation.v1.PendingEvent is not mutable"))
+	case "dreamtree.reputation.v1.PendingEvent.base_magnitude":
+		panic(fmt.Errorf("field base_magnitude of message dreamtree.reputation.v1.PendingEvent is not mutable"))
+	case "dreamtree.reputation.v1.PendingEvent.corroboration":
+		panic(fmt.Errorf("field corroboration of message dreamtree.reputation.v1.PendingEvent is not mutable"))
+	case "dreamtree.reputation.v1.PendingEvent.refutation":
+		panic(fmt.Errorf("field refutation of message dreamtree.reputation.v1.PendingEvent is not mutable"))
+	case "dreamtree.reputation.v1.PendingEvent.opened_at":
+		panic(fmt.Errorf("field opened_at of message dreamtree.reputation.v1.PendingEvent is not mutable"))
+	case "dreamtree.reputation.v1.PendingEvent.close_time":
+		panic(fmt.Errorf("field close_time of message dreamtree.reputation.v1.PendingEvent is not mutable"))
+	case "dreamtree.reputation.v1.PendingEvent.source_att_id":
+		panic(fmt.Errorf("field source_att_id of message dreamtree.reputation.v1.PendingEvent is not mutable"))
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: dreamtree.reputation.v1.PendingEvent"))
+		}
+		panic(fmt.Errorf("message dreamtree.reputation.v1.PendingEvent does not contain field %s", fd.FullName()))
+	}
+}
+
+// NewField returns a new value that is assignable to the field
+// for the given descriptor. For scalars, this returns the default value.
+// For lists, maps, and messages, this returns a new, empty, mutable value.
+func (x *fastReflection_PendingEvent) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
+	switch fd.FullName() {
+	case "dreamtree.reputation.v1.PendingEvent.id":
+		return protoreflect.ValueOfUint64(uint64(0))
+	case "dreamtree.reputation.v1.PendingEvent.kind":
+		return protoreflect.ValueOfEnum(0)
+	case "dreamtree.reputation.v1.PendingEvent.signer":
+		return protoreflect.ValueOfString("")
+	case "dreamtree.reputation.v1.PendingEvent.domain":
+		return protoreflect.ValueOfString("")
+	case "dreamtree.reputation.v1.PendingEvent.rate_bucket":
+		return protoreflect.ValueOfEnum(0)
+	case "dreamtree.reputation.v1.PendingEvent.target_att_id":
+		return protoreflect.ValueOfUint64(uint64(0))
+	case "dreamtree.reputation.v1.PendingEvent.target_attestor":
+		return protoreflect.ValueOfString("")
+	case "dreamtree.reputation.v1.PendingEvent.target_domain":
+		return protoreflect.ValueOfString("")
+	case "dreamtree.reputation.v1.PendingEvent.target_s_issuance":
+		return protoreflect.ValueOfString("")
+	case "dreamtree.reputation.v1.PendingEvent.outcome_refutes":
+		return protoreflect.ValueOfBool(false)
+	case "dreamtree.reputation.v1.PendingEvent.counter_target_pending":
+		return protoreflect.ValueOfUint64(uint64(0))
+	case "dreamtree.reputation.v1.PendingEvent.base_magnitude":
+		return protoreflect.ValueOfString("")
+	case "dreamtree.reputation.v1.PendingEvent.corroboration":
+		return protoreflect.ValueOfString("")
+	case "dreamtree.reputation.v1.PendingEvent.refutation":
+		return protoreflect.ValueOfString("")
+	case "dreamtree.reputation.v1.PendingEvent.opened_at":
+		return protoreflect.ValueOfInt64(int64(0))
+	case "dreamtree.reputation.v1.PendingEvent.close_time":
+		return protoreflect.ValueOfInt64(int64(0))
+	case "dreamtree.reputation.v1.PendingEvent.source_att_id":
+		return protoreflect.ValueOfUint64(uint64(0))
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: dreamtree.reputation.v1.PendingEvent"))
+		}
+		panic(fmt.Errorf("message dreamtree.reputation.v1.PendingEvent does not contain field %s", fd.FullName()))
+	}
+}
+
+// WhichOneof reports which field within the oneof is populated,
+// returning nil if none are populated.
+// It panics if the oneof descriptor does not belong to this message.
+func (x *fastReflection_PendingEvent) WhichOneof(d protoreflect.OneofDescriptor) protoreflect.FieldDescriptor {
+	switch d.FullName() {
+	default:
+		panic(fmt.Errorf("%s is not a oneof field in dreamtree.reputation.v1.PendingEvent", d.FullName()))
+	}
+	panic("unreachable")
+}
+
+// GetUnknown retrieves the entire list of unknown fields.
+// The caller may only mutate the contents of the RawFields
+// if the mutated bytes are stored back into the message with SetUnknown.
+func (x *fastReflection_PendingEvent) GetUnknown() protoreflect.RawFields {
+	return x.unknownFields
+}
+
+// SetUnknown stores an entire list of unknown fields.
+// The raw fields must be syntactically valid according to the wire format.
+// An implementation may panic if this is not the case.
+// Once stored, the caller must not mutate the content of the RawFields.
+// An empty RawFields may be passed to clear the fields.
+//
+// SetUnknown is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_PendingEvent) SetUnknown(fields protoreflect.RawFields) {
+	x.unknownFields = fields
+}
+
+// IsValid reports whether the message is valid.
+//
+// An invalid message is an empty, read-only value.
+//
+// An invalid message often corresponds to a nil pointer of the concrete
+// message type, but the details are implementation dependent.
+// Validity is not part of the protobuf data model, and may not
+// be preserved in marshaling or other operations.
+func (x *fastReflection_PendingEvent) IsValid() bool {
+	return x != nil
+}
+
+// ProtoMethods returns optional fastReflectionFeature-path implementations of various operations.
+// This method may return nil.
+//
+// The returned methods type is identical to
+// "google.golang.org/protobuf/runtime/protoiface".Methods.
+// Consult the protoiface package documentation for details.
+func (x *fastReflection_PendingEvent) ProtoMethods() *protoiface.Methods {
+	size := func(input protoiface.SizeInput) protoiface.SizeOutput {
+		x := input.Message.Interface().(*PendingEvent)
+		if x == nil {
+			return protoiface.SizeOutput{
+				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+				Size:              0,
+			}
+		}
+		options := runtime.SizeInputToOptions(input)
+		_ = options
+		var n int
+		var l int
+		_ = l
+		if x.Id != 0 {
+			n += 1 + runtime.Sov(uint64(x.Id))
+		}
+		if x.Kind != 0 {
+			n += 1 + runtime.Sov(uint64(x.Kind))
+		}
+		l = len(x.Signer)
+		if l > 0 {
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
+		l = len(x.Domain)
+		if l > 0 {
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
+		if x.RateBucket != 0 {
+			n += 1 + runtime.Sov(uint64(x.RateBucket))
+		}
+		if x.TargetAttId != 0 {
+			n += 1 + runtime.Sov(uint64(x.TargetAttId))
+		}
+		l = len(x.TargetAttestor)
+		if l > 0 {
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
+		l = len(x.TargetDomain)
+		if l > 0 {
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
+		l = len(x.TargetSIssuance)
+		if l > 0 {
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
+		if x.OutcomeRefutes {
+			n += 2
+		}
+		if x.CounterTargetPending != 0 {
+			n += 1 + runtime.Sov(uint64(x.CounterTargetPending))
+		}
+		l = len(x.BaseMagnitude)
+		if l > 0 {
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
+		l = len(x.Corroboration)
+		if l > 0 {
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
+		l = len(x.Refutation)
+		if l > 0 {
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
+		if x.OpenedAt != 0 {
+			n += 1 + runtime.Sov(uint64(x.OpenedAt))
+		}
+		if x.CloseTime != 0 {
+			n += 2 + runtime.Sov(uint64(x.CloseTime))
+		}
+		if x.SourceAttId != 0 {
+			n += 2 + runtime.Sov(uint64(x.SourceAttId))
+		}
+		if x.unknownFields != nil {
+			n += len(x.unknownFields)
+		}
+		return protoiface.SizeOutput{
+			NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+			Size:              n,
+		}
+	}
+
+	marshal := func(input protoiface.MarshalInput) (protoiface.MarshalOutput, error) {
+		x := input.Message.Interface().(*PendingEvent)
+		if x == nil {
+			return protoiface.MarshalOutput{
+				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+				Buf:               input.Buf,
+			}, nil
+		}
+		options := runtime.MarshalInputToOptions(input)
+		_ = options
+		size := options.Size(x)
+		dAtA := make([]byte, size)
+		i := len(dAtA)
+		_ = i
+		var l int
+		_ = l
+		if x.unknownFields != nil {
+			i -= len(x.unknownFields)
+			copy(dAtA[i:], x.unknownFields)
+		}
+		if x.SourceAttId != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.SourceAttId))
+			i--
+			dAtA[i] = 0x1
+			i--
+			dAtA[i] = 0x88
+		}
+		if x.CloseTime != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.CloseTime))
+			i--
+			dAtA[i] = 0x1
+			i--
+			dAtA[i] = 0x80
+		}
+		if x.OpenedAt != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.OpenedAt))
+			i--
+			dAtA[i] = 0x78
+		}
+		if len(x.Refutation) > 0 {
+			i -= len(x.Refutation)
+			copy(dAtA[i:], x.Refutation)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Refutation)))
+			i--
+			dAtA[i] = 0x72
+		}
+		if len(x.Corroboration) > 0 {
+			i -= len(x.Corroboration)
+			copy(dAtA[i:], x.Corroboration)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Corroboration)))
+			i--
+			dAtA[i] = 0x6a
+		}
+		if len(x.BaseMagnitude) > 0 {
+			i -= len(x.BaseMagnitude)
+			copy(dAtA[i:], x.BaseMagnitude)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.BaseMagnitude)))
+			i--
+			dAtA[i] = 0x62
+		}
+		if x.CounterTargetPending != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.CounterTargetPending))
+			i--
+			dAtA[i] = 0x58
+		}
+		if x.OutcomeRefutes {
+			i--
+			if x.OutcomeRefutes {
+				dAtA[i] = 1
+			} else {
+				dAtA[i] = 0
+			}
+			i--
+			dAtA[i] = 0x50
+		}
+		if len(x.TargetSIssuance) > 0 {
+			i -= len(x.TargetSIssuance)
+			copy(dAtA[i:], x.TargetSIssuance)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.TargetSIssuance)))
+			i--
+			dAtA[i] = 0x4a
+		}
+		if len(x.TargetDomain) > 0 {
+			i -= len(x.TargetDomain)
+			copy(dAtA[i:], x.TargetDomain)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.TargetDomain)))
+			i--
+			dAtA[i] = 0x42
+		}
+		if len(x.TargetAttestor) > 0 {
+			i -= len(x.TargetAttestor)
+			copy(dAtA[i:], x.TargetAttestor)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.TargetAttestor)))
+			i--
+			dAtA[i] = 0x3a
+		}
+		if x.TargetAttId != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.TargetAttId))
+			i--
+			dAtA[i] = 0x30
+		}
+		if x.RateBucket != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.RateBucket))
+			i--
+			dAtA[i] = 0x28
+		}
+		if len(x.Domain) > 0 {
+			i -= len(x.Domain)
+			copy(dAtA[i:], x.Domain)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Domain)))
+			i--
+			dAtA[i] = 0x22
+		}
+		if len(x.Signer) > 0 {
+			i -= len(x.Signer)
+			copy(dAtA[i:], x.Signer)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Signer)))
+			i--
+			dAtA[i] = 0x1a
+		}
+		if x.Kind != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.Kind))
+			i--
+			dAtA[i] = 0x10
+		}
+		if x.Id != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.Id))
+			i--
+			dAtA[i] = 0x8
+		}
+		if input.Buf != nil {
+			input.Buf = append(input.Buf, dAtA...)
+		} else {
+			input.Buf = dAtA
+		}
+		return protoiface.MarshalOutput{
+			NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+			Buf:               input.Buf,
+		}, nil
+	}
+	unmarshal := func(input protoiface.UnmarshalInput) (protoiface.UnmarshalOutput, error) {
+		x := input.Message.Interface().(*PendingEvent)
+		if x == nil {
+			return protoiface.UnmarshalOutput{
+				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+				Flags:             input.Flags,
+			}, nil
+		}
+		options := runtime.UnmarshalInputToOptions(input)
+		_ = options
+		dAtA := input.Buf
+		l := len(dAtA)
+		iNdEx := 0
+		for iNdEx < l {
+			preIndex := iNdEx
+			var wire uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				wire |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			fieldNum := int32(wire >> 3)
+			wireType := int(wire & 0x7)
+			if wireType == 4 {
+				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: PendingEvent: wiretype end group for non-group")
+			}
+			if fieldNum <= 0 {
+				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: PendingEvent: illegal tag %d (wire type %d)", fieldNum, wire)
+			}
+			switch fieldNum {
+			case 1:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
+				}
+				x.Id = 0
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					x.Id |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+			case 2:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Kind", wireType)
+				}
+				x.Kind = 0
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					x.Kind |= PendingKind(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+			case 3:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Signer", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.Signer = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			case 4:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Domain", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.Domain = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			case 5:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field RateBucket", wireType)
+				}
+				x.RateBucket = 0
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					x.RateBucket |= RateBucket(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+			case 6:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field TargetAttId", wireType)
+				}
+				x.TargetAttId = 0
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					x.TargetAttId |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+			case 7:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field TargetAttestor", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.TargetAttestor = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			case 8:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field TargetDomain", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.TargetDomain = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			case 9:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field TargetSIssuance", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.TargetSIssuance = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			case 10:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field OutcomeRefutes", wireType)
+				}
+				var v int
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					v |= int(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				x.OutcomeRefutes = bool(v != 0)
+			case 11:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field CounterTargetPending", wireType)
+				}
+				x.CounterTargetPending = 0
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					x.CounterTargetPending |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+			case 12:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field BaseMagnitude", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.BaseMagnitude = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			case 13:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Corroboration", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.Corroboration = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			case 14:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Refutation", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.Refutation = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			case 15:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field OpenedAt", wireType)
+				}
+				x.OpenedAt = 0
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					x.OpenedAt |= int64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+			case 16:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field CloseTime", wireType)
+				}
+				x.CloseTime = 0
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					x.CloseTime |= int64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+			case 17:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field SourceAttId", wireType)
+				}
+				x.SourceAttId = 0
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					x.SourceAttId |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
 			default:
 				iNdEx = preIndex
 				skippy, err := runtime.Skip(dAtA[iNdEx:])
@@ -2513,12 +4211,65 @@ func (x *_GenesisState_3_list) IsValid() bool {
 	return x.list != nil
 }
 
+var _ protoreflect.List = (*_GenesisState_5_list)(nil)
+
+type _GenesisState_5_list struct {
+	list *[]*PendingEvent
+}
+
+func (x *_GenesisState_5_list) Len() int {
+	if x.list == nil {
+		return 0
+	}
+	return len(*x.list)
+}
+
+func (x *_GenesisState_5_list) Get(i int) protoreflect.Value {
+	return protoreflect.ValueOfMessage((*x.list)[i].ProtoReflect())
+}
+
+func (x *_GenesisState_5_list) Set(i int, value protoreflect.Value) {
+	valueUnwrapped := value.Message()
+	concreteValue := valueUnwrapped.Interface().(*PendingEvent)
+	(*x.list)[i] = concreteValue
+}
+
+func (x *_GenesisState_5_list) Append(value protoreflect.Value) {
+	valueUnwrapped := value.Message()
+	concreteValue := valueUnwrapped.Interface().(*PendingEvent)
+	*x.list = append(*x.list, concreteValue)
+}
+
+func (x *_GenesisState_5_list) AppendMutable() protoreflect.Value {
+	v := new(PendingEvent)
+	*x.list = append(*x.list, v)
+	return protoreflect.ValueOfMessage(v.ProtoReflect())
+}
+
+func (x *_GenesisState_5_list) Truncate(n int) {
+	for i := n; i < len(*x.list); i++ {
+		(*x.list)[i] = nil
+	}
+	*x.list = (*x.list)[:n]
+}
+
+func (x *_GenesisState_5_list) NewElement() protoreflect.Value {
+	v := new(PendingEvent)
+	return protoreflect.ValueOfMessage(v.ProtoReflect())
+}
+
+func (x *_GenesisState_5_list) IsValid() bool {
+	return x.list != nil
+}
+
 var (
-	md_GenesisState                protoreflect.MessageDescriptor
-	fd_GenesisState_params         protoreflect.FieldDescriptor
-	fd_GenesisState_contributions  protoreflect.FieldDescriptor
-	fd_GenesisState_domain_configs protoreflect.FieldDescriptor
-	fd_GenesisState_next_id        protoreflect.FieldDescriptor
+	md_GenesisState                 protoreflect.MessageDescriptor
+	fd_GenesisState_params          protoreflect.FieldDescriptor
+	fd_GenesisState_contributions   protoreflect.FieldDescriptor
+	fd_GenesisState_domain_configs  protoreflect.FieldDescriptor
+	fd_GenesisState_next_id         protoreflect.FieldDescriptor
+	fd_GenesisState_pending_events  protoreflect.FieldDescriptor
+	fd_GenesisState_next_pending_id protoreflect.FieldDescriptor
 )
 
 func init() {
@@ -2528,6 +4279,8 @@ func init() {
 	fd_GenesisState_contributions = md_GenesisState.Fields().ByName("contributions")
 	fd_GenesisState_domain_configs = md_GenesisState.Fields().ByName("domain_configs")
 	fd_GenesisState_next_id = md_GenesisState.Fields().ByName("next_id")
+	fd_GenesisState_pending_events = md_GenesisState.Fields().ByName("pending_events")
+	fd_GenesisState_next_pending_id = md_GenesisState.Fields().ByName("next_pending_id")
 }
 
 var _ protoreflect.Message = (*fastReflection_GenesisState)(nil)
@@ -2539,7 +4292,7 @@ func (x *GenesisState) ProtoReflect() protoreflect.Message {
 }
 
 func (x *GenesisState) slowProtoReflect() protoreflect.Message {
-	mi := &file_dreamtree_reputation_v1_types_proto_msgTypes[3]
+	mi := &file_dreamtree_reputation_v1_types_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2619,6 +4372,18 @@ func (x *fastReflection_GenesisState) Range(f func(protoreflect.FieldDescriptor,
 			return
 		}
 	}
+	if len(x.PendingEvents) != 0 {
+		value := protoreflect.ValueOfList(&_GenesisState_5_list{list: &x.PendingEvents})
+		if !f(fd_GenesisState_pending_events, value) {
+			return
+		}
+	}
+	if x.NextPendingId != uint64(0) {
+		value := protoreflect.ValueOfUint64(x.NextPendingId)
+		if !f(fd_GenesisState_next_pending_id, value) {
+			return
+		}
+	}
 }
 
 // Has reports whether a field is populated.
@@ -2642,6 +4407,10 @@ func (x *fastReflection_GenesisState) Has(fd protoreflect.FieldDescriptor) bool 
 		return len(x.DomainConfigs) != 0
 	case "dreamtree.reputation.v1.GenesisState.next_id":
 		return x.NextId != uint64(0)
+	case "dreamtree.reputation.v1.GenesisState.pending_events":
+		return len(x.PendingEvents) != 0
+	case "dreamtree.reputation.v1.GenesisState.next_pending_id":
+		return x.NextPendingId != uint64(0)
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: dreamtree.reputation.v1.GenesisState"))
@@ -2666,6 +4435,10 @@ func (x *fastReflection_GenesisState) Clear(fd protoreflect.FieldDescriptor) {
 		x.DomainConfigs = nil
 	case "dreamtree.reputation.v1.GenesisState.next_id":
 		x.NextId = uint64(0)
+	case "dreamtree.reputation.v1.GenesisState.pending_events":
+		x.PendingEvents = nil
+	case "dreamtree.reputation.v1.GenesisState.next_pending_id":
+		x.NextPendingId = uint64(0)
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: dreamtree.reputation.v1.GenesisState"))
@@ -2700,6 +4473,15 @@ func (x *fastReflection_GenesisState) Get(descriptor protoreflect.FieldDescripto
 	case "dreamtree.reputation.v1.GenesisState.next_id":
 		value := x.NextId
 		return protoreflect.ValueOfUint64(value)
+	case "dreamtree.reputation.v1.GenesisState.pending_events":
+		if len(x.PendingEvents) == 0 {
+			return protoreflect.ValueOfList(&_GenesisState_5_list{})
+		}
+		listValue := &_GenesisState_5_list{list: &x.PendingEvents}
+		return protoreflect.ValueOfList(listValue)
+	case "dreamtree.reputation.v1.GenesisState.next_pending_id":
+		value := x.NextPendingId
+		return protoreflect.ValueOfUint64(value)
 	default:
 		if descriptor.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: dreamtree.reputation.v1.GenesisState"))
@@ -2732,6 +4514,12 @@ func (x *fastReflection_GenesisState) Set(fd protoreflect.FieldDescriptor, value
 		x.DomainConfigs = *clv.list
 	case "dreamtree.reputation.v1.GenesisState.next_id":
 		x.NextId = value.Uint()
+	case "dreamtree.reputation.v1.GenesisState.pending_events":
+		lv := value.List()
+		clv := lv.(*_GenesisState_5_list)
+		x.PendingEvents = *clv.list
+	case "dreamtree.reputation.v1.GenesisState.next_pending_id":
+		x.NextPendingId = value.Uint()
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: dreamtree.reputation.v1.GenesisState"))
@@ -2769,8 +4557,16 @@ func (x *fastReflection_GenesisState) Mutable(fd protoreflect.FieldDescriptor) p
 		}
 		value := &_GenesisState_3_list{list: &x.DomainConfigs}
 		return protoreflect.ValueOfList(value)
+	case "dreamtree.reputation.v1.GenesisState.pending_events":
+		if x.PendingEvents == nil {
+			x.PendingEvents = []*PendingEvent{}
+		}
+		value := &_GenesisState_5_list{list: &x.PendingEvents}
+		return protoreflect.ValueOfList(value)
 	case "dreamtree.reputation.v1.GenesisState.next_id":
 		panic(fmt.Errorf("field next_id of message dreamtree.reputation.v1.GenesisState is not mutable"))
+	case "dreamtree.reputation.v1.GenesisState.next_pending_id":
+		panic(fmt.Errorf("field next_pending_id of message dreamtree.reputation.v1.GenesisState is not mutable"))
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: dreamtree.reputation.v1.GenesisState"))
@@ -2794,6 +4590,11 @@ func (x *fastReflection_GenesisState) NewField(fd protoreflect.FieldDescriptor) 
 		list := []*DomainConfig{}
 		return protoreflect.ValueOfList(&_GenesisState_3_list{list: &list})
 	case "dreamtree.reputation.v1.GenesisState.next_id":
+		return protoreflect.ValueOfUint64(uint64(0))
+	case "dreamtree.reputation.v1.GenesisState.pending_events":
+		list := []*PendingEvent{}
+		return protoreflect.ValueOfList(&_GenesisState_5_list{list: &list})
+	case "dreamtree.reputation.v1.GenesisState.next_pending_id":
 		return protoreflect.ValueOfUint64(uint64(0))
 	default:
 		if fd.IsExtension() {
@@ -2883,6 +4684,15 @@ func (x *fastReflection_GenesisState) ProtoMethods() *protoiface.Methods {
 		if x.NextId != 0 {
 			n += 1 + runtime.Sov(uint64(x.NextId))
 		}
+		if len(x.PendingEvents) > 0 {
+			for _, e := range x.PendingEvents {
+				l = options.Size(e)
+				n += 1 + l + runtime.Sov(uint64(l))
+			}
+		}
+		if x.NextPendingId != 0 {
+			n += 1 + runtime.Sov(uint64(x.NextPendingId))
+		}
 		if x.unknownFields != nil {
 			n += len(x.unknownFields)
 		}
@@ -2911,6 +4721,27 @@ func (x *fastReflection_GenesisState) ProtoMethods() *protoiface.Methods {
 		if x.unknownFields != nil {
 			i -= len(x.unknownFields)
 			copy(dAtA[i:], x.unknownFields)
+		}
+		if x.NextPendingId != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.NextPendingId))
+			i--
+			dAtA[i] = 0x30
+		}
+		if len(x.PendingEvents) > 0 {
+			for iNdEx := len(x.PendingEvents) - 1; iNdEx >= 0; iNdEx-- {
+				encoded, err := options.Marshal(x.PendingEvents[iNdEx])
+				if err != nil {
+					return protoiface.MarshalOutput{
+						NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+						Buf:               input.Buf,
+					}, err
+				}
+				i -= len(encoded)
+				copy(dAtA[i:], encoded)
+				i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
+				i--
+				dAtA[i] = 0x2a
+			}
 		}
 		if x.NextId != 0 {
 			i = runtime.EncodeVarint(dAtA, i, uint64(x.NextId))
@@ -3135,6 +4966,59 @@ func (x *fastReflection_GenesisState) ProtoMethods() *protoiface.Methods {
 						break
 					}
 				}
+			case 5:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field PendingEvents", wireType)
+				}
+				var msglen int
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					msglen |= int(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				if msglen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + msglen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.PendingEvents = append(x.PendingEvents, &PendingEvent{})
+				if err := options.Unmarshal(dAtA[iNdEx:postIndex], x.PendingEvents[len(x.PendingEvents)-1]); err != nil {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
+				}
+				iNdEx = postIndex
+			case 6:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field NextPendingId", wireType)
+				}
+				x.NextPendingId = 0
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					x.NextPendingId |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
 			default:
 				iNdEx = preIndex
 				skippy, err := runtime.Skip(dAtA[iNdEx:])
@@ -3243,6 +5127,56 @@ func (x RateBucket) Number() protoreflect.EnumNumber {
 // Deprecated: Use RateBucket.Descriptor instead.
 func (RateBucket) EnumDescriptor() ([]byte, []int) {
 	return file_dreamtree_reputation_v1_types_proto_rawDescGZIP(), []int{0}
+}
+
+// PendingKind — what a pending event settles into.
+type PendingKind int32
+
+const (
+	PendingKind_PENDING_KIND_UNSPECIFIED PendingKind = 0
+	PendingKind_PENDING_KIND_BET         PendingKind = 1 // an unvalidated attestation bet (settles to a bet contribution)
+	PendingKind_PENDING_KIND_OUTCOME     PendingKind = 2 // an outcome on an attestation (settles to the M_O propagation)
+)
+
+// Enum value maps for PendingKind.
+var (
+	PendingKind_name = map[int32]string{
+		0: "PENDING_KIND_UNSPECIFIED",
+		1: "PENDING_KIND_BET",
+		2: "PENDING_KIND_OUTCOME",
+	}
+	PendingKind_value = map[string]int32{
+		"PENDING_KIND_UNSPECIFIED": 0,
+		"PENDING_KIND_BET":         1,
+		"PENDING_KIND_OUTCOME":     2,
+	}
+)
+
+func (x PendingKind) Enum() *PendingKind {
+	p := new(PendingKind)
+	*p = x
+	return p
+}
+
+func (x PendingKind) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (PendingKind) Descriptor() protoreflect.EnumDescriptor {
+	return file_dreamtree_reputation_v1_types_proto_enumTypes[1].Descriptor()
+}
+
+func (PendingKind) Type() protoreflect.EnumType {
+	return &file_dreamtree_reputation_v1_types_proto_enumTypes[1]
+}
+
+func (x PendingKind) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use PendingKind.Descriptor instead.
+func (PendingKind) EnumDescriptor() ([]byte, []int) {
+	return file_dreamtree_reputation_v1_types_proto_rawDescGZIP(), []int{1}
 }
 
 // Contribution — an immutable, settled increment to a signer's reputation in a
@@ -3421,6 +5355,14 @@ type Params struct {
 	LambdaEndorsement string `protobuf:"bytes,10,opt,name=lambda_endorsement,json=lambdaEndorsement,proto3" json:"lambda_endorsement,omitempty"` // "0.08"
 	// P1 unvalidated-bet magnitude: an attestation contributes this × (spec × type_weight).
 	AttestBetScale string `protobuf:"bytes,11,opt,name=attest_bet_scale,json=attestBetScale,proto3" json:"attest_bet_scale,omitempty"` // "0.1" — small; the big moves come from validated outcomes (P3)
+	// P2/P3 review-window + outcome levers (parameters.md).
+	NegAsymmetry          string `protobuf:"bytes,12,opt,name=neg_asymmetry,json=negAsymmetry,proto3" json:"neg_asymmetry,omitempty"`                              // "2.0" — refutation hits 2× harder than corroboration
+	OutcomeBeta           string `protobuf:"bytes,13,opt,name=outcome_beta,json=outcomeBeta,proto3" json:"outcome_beta,omitempty"`                                 // "1.0" — β in M_O = min(M_cap, β·S_issuance·√cred)
+	OutcomeCapMult        string `protobuf:"bytes,14,opt,name=outcome_cap_mult,json=outcomeCapMult,proto3" json:"outcome_cap_mult,omitempty"`                      // "5.0" — M_cap = this × S_issuance
+	ReviewWindowBase      string `protobuf:"bytes,15,opt,name=review_window_base,json=reviewWindowBase,proto3" json:"review_window_base,omitempty"`                // "1.0" days — base of τ = base·√(M/threshold)
+	ReviewWindowThreshold string `protobuf:"bytes,16,opt,name=review_window_threshold,json=reviewWindowThreshold,proto3" json:"review_window_threshold,omitempty"` // "1.0"
+	// co-attestor propagation: another attestor on the same work moves this × M_O.
+	CoattestorWeight string `protobuf:"bytes,17,opt,name=coattestor_weight,json=coattestorWeight,proto3" json:"coattestor_weight,omitempty"` // "0.25"
 }
 
 func (x *Params) Reset() {
@@ -3520,6 +5462,219 @@ func (x *Params) GetAttestBetScale() string {
 	return ""
 }
 
+func (x *Params) GetNegAsymmetry() string {
+	if x != nil {
+		return x.NegAsymmetry
+	}
+	return ""
+}
+
+func (x *Params) GetOutcomeBeta() string {
+	if x != nil {
+		return x.OutcomeBeta
+	}
+	return ""
+}
+
+func (x *Params) GetOutcomeCapMult() string {
+	if x != nil {
+		return x.OutcomeCapMult
+	}
+	return ""
+}
+
+func (x *Params) GetReviewWindowBase() string {
+	if x != nil {
+		return x.ReviewWindowBase
+	}
+	return ""
+}
+
+func (x *Params) GetReviewWindowThreshold() string {
+	if x != nil {
+		return x.ReviewWindowThreshold
+	}
+	return ""
+}
+
+func (x *Params) GetCoattestorWeight() string {
+	if x != nil {
+		return x.CoattestorWeight
+	}
+	return ""
+}
+
+// PendingEvent — a reputation-moving event inside its review window. At
+// close_time, EndBlock integrates its accumulators and settles it into
+// Contribution(s). Nothing here moves R until settled.
+type PendingEvent struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id   uint64      `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Kind PendingKind `protobuf:"varint,2,opt,name=kind,proto3,enum=dreamtree.reputation.v1.PendingKind" json:"kind,omitempty"`
+	// BET fields (kind = BET): whose R, and the bet magnitude/bucket.
+	Signer     string     `protobuf:"bytes,3,opt,name=signer,proto3" json:"signer,omitempty"`
+	Domain     string     `protobuf:"bytes,4,opt,name=domain,proto3" json:"domain,omitempty"`
+	RateBucket RateBucket `protobuf:"varint,5,opt,name=rate_bucket,json=rateBucket,proto3,enum=dreamtree.reputation.v1.RateBucket" json:"rate_bucket,omitempty"`
+	// OUTCOME fields (kind = OUTCOME): the contested claim on target_att.
+	TargetAttId          uint64 `protobuf:"varint,6,opt,name=target_att_id,json=targetAttId,proto3" json:"target_att_id,omitempty"`       // the attestation being validated/refuted
+	TargetAttestor       string `protobuf:"bytes,7,opt,name=target_attestor,json=targetAttestor,proto3" json:"target_attestor,omitempty"` // its author (the contributor whose R moves)
+	TargetDomain         string `protobuf:"bytes,8,opt,name=target_domain,json=targetDomain,proto3" json:"target_domain,omitempty"`
+	TargetSIssuance      string `protobuf:"bytes,9,opt,name=target_s_issuance,json=targetSIssuance,proto3" json:"target_s_issuance,omitempty"`
+	OutcomeRefutes       bool   `protobuf:"varint,10,opt,name=outcome_refutes,json=outcomeRefutes,proto3" json:"outcome_refutes,omitempty"`                     // true = refuted (−, 2×), false = validated (+)
+	CounterTargetPending uint64 `protobuf:"varint,11,opt,name=counter_target_pending,json=counterTargetPending,proto3" json:"counter_target_pending,omitempty"` // reversal: the settled outcome this counter-outcome overturns (0 = none)
+	// base_magnitude — the event's own magnitude before window integration
+	// (the bet, or the reporter's initial M_O contribution).
+	BaseMagnitude string `protobuf:"bytes,12,opt,name=base_magnitude,json=baseMagnitude,proto3" json:"base_magnitude,omitempty"`
+	// accumulators — corroboration/refutation gathered during the window (paper-shape).
+	Corroboration string `protobuf:"bytes,13,opt,name=corroboration,proto3" json:"corroboration,omitempty"`
+	Refutation    string `protobuf:"bytes,14,opt,name=refutation,proto3" json:"refutation,omitempty"`
+	OpenedAt      int64  `protobuf:"varint,15,opt,name=opened_at,json=openedAt,proto3" json:"opened_at,omitempty"`    // block time enqueued
+	CloseTime     int64  `protobuf:"varint,16,opt,name=close_time,json=closeTime,proto3" json:"close_time,omitempty"` // opened_at + τ(base_magnitude) seconds
+	SourceAttId   uint64 `protobuf:"varint,17,opt,name=source_att_id,json=sourceAttId,proto3" json:"source_att_id,omitempty"`
+}
+
+func (x *PendingEvent) Reset() {
+	*x = PendingEvent{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_dreamtree_reputation_v1_types_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *PendingEvent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PendingEvent) ProtoMessage() {}
+
+// Deprecated: Use PendingEvent.ProtoReflect.Descriptor instead.
+func (*PendingEvent) Descriptor() ([]byte, []int) {
+	return file_dreamtree_reputation_v1_types_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *PendingEvent) GetId() uint64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *PendingEvent) GetKind() PendingKind {
+	if x != nil {
+		return x.Kind
+	}
+	return PendingKind_PENDING_KIND_UNSPECIFIED
+}
+
+func (x *PendingEvent) GetSigner() string {
+	if x != nil {
+		return x.Signer
+	}
+	return ""
+}
+
+func (x *PendingEvent) GetDomain() string {
+	if x != nil {
+		return x.Domain
+	}
+	return ""
+}
+
+func (x *PendingEvent) GetRateBucket() RateBucket {
+	if x != nil {
+		return x.RateBucket
+	}
+	return RateBucket_RATE_BUCKET_UNSPECIFIED
+}
+
+func (x *PendingEvent) GetTargetAttId() uint64 {
+	if x != nil {
+		return x.TargetAttId
+	}
+	return 0
+}
+
+func (x *PendingEvent) GetTargetAttestor() string {
+	if x != nil {
+		return x.TargetAttestor
+	}
+	return ""
+}
+
+func (x *PendingEvent) GetTargetDomain() string {
+	if x != nil {
+		return x.TargetDomain
+	}
+	return ""
+}
+
+func (x *PendingEvent) GetTargetSIssuance() string {
+	if x != nil {
+		return x.TargetSIssuance
+	}
+	return ""
+}
+
+func (x *PendingEvent) GetOutcomeRefutes() bool {
+	if x != nil {
+		return x.OutcomeRefutes
+	}
+	return false
+}
+
+func (x *PendingEvent) GetCounterTargetPending() uint64 {
+	if x != nil {
+		return x.CounterTargetPending
+	}
+	return 0
+}
+
+func (x *PendingEvent) GetBaseMagnitude() string {
+	if x != nil {
+		return x.BaseMagnitude
+	}
+	return ""
+}
+
+func (x *PendingEvent) GetCorroboration() string {
+	if x != nil {
+		return x.Corroboration
+	}
+	return ""
+}
+
+func (x *PendingEvent) GetRefutation() string {
+	if x != nil {
+		return x.Refutation
+	}
+	return ""
+}
+
+func (x *PendingEvent) GetOpenedAt() int64 {
+	if x != nil {
+		return x.OpenedAt
+	}
+	return 0
+}
+
+func (x *PendingEvent) GetCloseTime() int64 {
+	if x != nil {
+		return x.CloseTime
+	}
+	return 0
+}
+
+func (x *PendingEvent) GetSourceAttId() uint64 {
+	if x != nil {
+		return x.SourceAttId
+	}
+	return 0
+}
+
 type GenesisState struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -3529,12 +5684,14 @@ type GenesisState struct {
 	Contributions []*Contribution `protobuf:"bytes,2,rep,name=contributions,proto3" json:"contributions,omitempty"`
 	DomainConfigs []*DomainConfig `protobuf:"bytes,3,rep,name=domain_configs,json=domainConfigs,proto3" json:"domain_configs,omitempty"`
 	NextId        uint64          `protobuf:"varint,4,opt,name=next_id,json=nextId,proto3" json:"next_id,omitempty"`
+	PendingEvents []*PendingEvent `protobuf:"bytes,5,rep,name=pending_events,json=pendingEvents,proto3" json:"pending_events,omitempty"`
+	NextPendingId uint64          `protobuf:"varint,6,opt,name=next_pending_id,json=nextPendingId,proto3" json:"next_pending_id,omitempty"`
 }
 
 func (x *GenesisState) Reset() {
 	*x = GenesisState{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_dreamtree_reputation_v1_types_proto_msgTypes[3]
+		mi := &file_dreamtree_reputation_v1_types_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3548,7 +5705,7 @@ func (*GenesisState) ProtoMessage() {}
 
 // Deprecated: Use GenesisState.ProtoReflect.Descriptor instead.
 func (*GenesisState) Descriptor() ([]byte, []int) {
-	return file_dreamtree_reputation_v1_types_proto_rawDescGZIP(), []int{3}
+	return file_dreamtree_reputation_v1_types_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *GenesisState) GetParams() *Params {
@@ -3575,6 +5732,20 @@ func (x *GenesisState) GetDomainConfigs() []*DomainConfig {
 func (x *GenesisState) GetNextId() uint64 {
 	if x != nil {
 		return x.NextId
+	}
+	return 0
+}
+
+func (x *GenesisState) GetPendingEvents() []*PendingEvent {
+	if x != nil {
+		return x.PendingEvents
+	}
+	return nil
+}
+
+func (x *GenesisState) GetNextPendingId() uint64 {
+	if x != nil {
+		return x.NextPendingId
 	}
 	return 0
 }
@@ -3629,7 +5800,7 @@ var file_dreamtree_reputation_v1_types_proto_rawDesc = []byte{
 	0x2e, 0x69, 0x6f, 0x2f, 0x6d, 0x61, 0x74, 0x68, 0x2e, 0x4c, 0x65, 0x67, 0x61, 0x63, 0x79, 0x44,
 	0x65, 0x63, 0xd2, 0xb4, 0x2d, 0x0a, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x44, 0x65, 0x63,
 	0x52, 0x16, 0x6f, 0x62, 0x73, 0x6f, 0x6c, 0x65, 0x73, 0x63, 0x65, 0x6e, 0x63, 0x65, 0x4d, 0x75,
-	0x6c, 0x74, 0x69, 0x70, 0x6c, 0x69, 0x65, 0x72, 0x22, 0xce, 0x03, 0x0a, 0x06, 0x50, 0x61, 0x72,
+	0x6c, 0x74, 0x69, 0x70, 0x6c, 0x69, 0x65, 0x72, 0x22, 0xd3, 0x05, 0x0a, 0x06, 0x50, 0x61, 0x72,
 	0x61, 0x6d, 0x73, 0x12, 0x21, 0x0a, 0x0c, 0x62, 0x61, 0x73, 0x65, 0x6c, 0x69, 0x6e, 0x65, 0x5f,
 	0x6b, 0x79, 0x63, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x62, 0x61, 0x73, 0x65, 0x6c,
 	0x69, 0x6e, 0x65, 0x4b, 0x79, 0x63, 0x12, 0x1f, 0x0a, 0x0b, 0x64, 0x61, 0x6d, 0x70, 0x65, 0x6e,
@@ -3658,7 +5829,82 @@ var file_dreamtree_reputation_v1_types_proto_rawDesc = []byte{
 	0x6d, 0x62, 0x64, 0x61, 0x45, 0x6e, 0x64, 0x6f, 0x72, 0x73, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x12,
 	0x28, 0x0a, 0x10, 0x61, 0x74, 0x74, 0x65, 0x73, 0x74, 0x5f, 0x62, 0x65, 0x74, 0x5f, 0x73, 0x63,
 	0x61, 0x6c, 0x65, 0x18, 0x0b, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0e, 0x61, 0x74, 0x74, 0x65, 0x73,
-	0x74, 0x42, 0x65, 0x74, 0x53, 0x63, 0x61, 0x6c, 0x65, 0x22, 0x9c, 0x02, 0x0a, 0x0c, 0x47, 0x65,
+	0x74, 0x42, 0x65, 0x74, 0x53, 0x63, 0x61, 0x6c, 0x65, 0x12, 0x23, 0x0a, 0x0d, 0x6e, 0x65, 0x67,
+	0x5f, 0x61, 0x73, 0x79, 0x6d, 0x6d, 0x65, 0x74, 0x72, 0x79, 0x18, 0x0c, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x0c, 0x6e, 0x65, 0x67, 0x41, 0x73, 0x79, 0x6d, 0x6d, 0x65, 0x74, 0x72, 0x79, 0x12, 0x21,
+	0x0a, 0x0c, 0x6f, 0x75, 0x74, 0x63, 0x6f, 0x6d, 0x65, 0x5f, 0x62, 0x65, 0x74, 0x61, 0x18, 0x0d,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x6f, 0x75, 0x74, 0x63, 0x6f, 0x6d, 0x65, 0x42, 0x65, 0x74,
+	0x61, 0x12, 0x28, 0x0a, 0x10, 0x6f, 0x75, 0x74, 0x63, 0x6f, 0x6d, 0x65, 0x5f, 0x63, 0x61, 0x70,
+	0x5f, 0x6d, 0x75, 0x6c, 0x74, 0x18, 0x0e, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0e, 0x6f, 0x75, 0x74,
+	0x63, 0x6f, 0x6d, 0x65, 0x43, 0x61, 0x70, 0x4d, 0x75, 0x6c, 0x74, 0x12, 0x2c, 0x0a, 0x12, 0x72,
+	0x65, 0x76, 0x69, 0x65, 0x77, 0x5f, 0x77, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x5f, 0x62, 0x61, 0x73,
+	0x65, 0x18, 0x0f, 0x20, 0x01, 0x28, 0x09, 0x52, 0x10, 0x72, 0x65, 0x76, 0x69, 0x65, 0x77, 0x57,
+	0x69, 0x6e, 0x64, 0x6f, 0x77, 0x42, 0x61, 0x73, 0x65, 0x12, 0x36, 0x0a, 0x17, 0x72, 0x65, 0x76,
+	0x69, 0x65, 0x77, 0x5f, 0x77, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x5f, 0x74, 0x68, 0x72, 0x65, 0x73,
+	0x68, 0x6f, 0x6c, 0x64, 0x18, 0x10, 0x20, 0x01, 0x28, 0x09, 0x52, 0x15, 0x72, 0x65, 0x76, 0x69,
+	0x65, 0x77, 0x57, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x54, 0x68, 0x72, 0x65, 0x73, 0x68, 0x6f, 0x6c,
+	0x64, 0x12, 0x2b, 0x0a, 0x11, 0x63, 0x6f, 0x61, 0x74, 0x74, 0x65, 0x73, 0x74, 0x6f, 0x72, 0x5f,
+	0x77, 0x65, 0x69, 0x67, 0x68, 0x74, 0x18, 0x11, 0x20, 0x01, 0x28, 0x09, 0x52, 0x10, 0x63, 0x6f,
+	0x61, 0x74, 0x74, 0x65, 0x73, 0x74, 0x6f, 0x72, 0x57, 0x65, 0x69, 0x67, 0x68, 0x74, 0x22, 0xa8,
+	0x07, 0x0a, 0x0c, 0x50, 0x65, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x45, 0x76, 0x65, 0x6e, 0x74, 0x12,
+	0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x02, 0x69, 0x64, 0x12,
+	0x38, 0x0a, 0x04, 0x6b, 0x69, 0x6e, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x24, 0x2e,
+	0x64, 0x72, 0x65, 0x61, 0x6d, 0x74, 0x72, 0x65, 0x65, 0x2e, 0x72, 0x65, 0x70, 0x75, 0x74, 0x61,
+	0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x50, 0x65, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x4b,
+	0x69, 0x6e, 0x64, 0x52, 0x04, 0x6b, 0x69, 0x6e, 0x64, 0x12, 0x30, 0x0a, 0x06, 0x73, 0x69, 0x67,
+	0x6e, 0x65, 0x72, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63,
+	0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72,
+	0x69, 0x6e, 0x67, 0x52, 0x06, 0x73, 0x69, 0x67, 0x6e, 0x65, 0x72, 0x12, 0x16, 0x0a, 0x06, 0x64,
+	0x6f, 0x6d, 0x61, 0x69, 0x6e, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x64, 0x6f, 0x6d,
+	0x61, 0x69, 0x6e, 0x12, 0x44, 0x0a, 0x0b, 0x72, 0x61, 0x74, 0x65, 0x5f, 0x62, 0x75, 0x63, 0x6b,
+	0x65, 0x74, 0x18, 0x05, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x23, 0x2e, 0x64, 0x72, 0x65, 0x61, 0x6d,
+	0x74, 0x72, 0x65, 0x65, 0x2e, 0x72, 0x65, 0x70, 0x75, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2e,
+	0x76, 0x31, 0x2e, 0x52, 0x61, 0x74, 0x65, 0x42, 0x75, 0x63, 0x6b, 0x65, 0x74, 0x52, 0x0a, 0x72,
+	0x61, 0x74, 0x65, 0x42, 0x75, 0x63, 0x6b, 0x65, 0x74, 0x12, 0x22, 0x0a, 0x0d, 0x74, 0x61, 0x72,
+	0x67, 0x65, 0x74, 0x5f, 0x61, 0x74, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x06, 0x20, 0x01, 0x28, 0x04,
+	0x52, 0x0b, 0x74, 0x61, 0x72, 0x67, 0x65, 0x74, 0x41, 0x74, 0x74, 0x49, 0x64, 0x12, 0x27, 0x0a,
+	0x0f, 0x74, 0x61, 0x72, 0x67, 0x65, 0x74, 0x5f, 0x61, 0x74, 0x74, 0x65, 0x73, 0x74, 0x6f, 0x72,
+	0x18, 0x07, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0e, 0x74, 0x61, 0x72, 0x67, 0x65, 0x74, 0x41, 0x74,
+	0x74, 0x65, 0x73, 0x74, 0x6f, 0x72, 0x12, 0x23, 0x0a, 0x0d, 0x74, 0x61, 0x72, 0x67, 0x65, 0x74,
+	0x5f, 0x64, 0x6f, 0x6d, 0x61, 0x69, 0x6e, 0x18, 0x08, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x74,
+	0x61, 0x72, 0x67, 0x65, 0x74, 0x44, 0x6f, 0x6d, 0x61, 0x69, 0x6e, 0x12, 0x5d, 0x0a, 0x11, 0x74,
+	0x61, 0x72, 0x67, 0x65, 0x74, 0x5f, 0x73, 0x5f, 0x69, 0x73, 0x73, 0x75, 0x61, 0x6e, 0x63, 0x65,
+	0x18, 0x09, 0x20, 0x01, 0x28, 0x09, 0x42, 0x31, 0xc8, 0xde, 0x1f, 0x00, 0xda, 0xde, 0x1f, 0x1b,
+	0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x73, 0x64, 0x6b, 0x2e, 0x69, 0x6f, 0x2f, 0x6d, 0x61, 0x74,
+	0x68, 0x2e, 0x4c, 0x65, 0x67, 0x61, 0x63, 0x79, 0x44, 0x65, 0x63, 0xd2, 0xb4, 0x2d, 0x0a, 0x63,
+	0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x44, 0x65, 0x63, 0x52, 0x0f, 0x74, 0x61, 0x72, 0x67, 0x65,
+	0x74, 0x53, 0x49, 0x73, 0x73, 0x75, 0x61, 0x6e, 0x63, 0x65, 0x12, 0x27, 0x0a, 0x0f, 0x6f, 0x75,
+	0x74, 0x63, 0x6f, 0x6d, 0x65, 0x5f, 0x72, 0x65, 0x66, 0x75, 0x74, 0x65, 0x73, 0x18, 0x0a, 0x20,
+	0x01, 0x28, 0x08, 0x52, 0x0e, 0x6f, 0x75, 0x74, 0x63, 0x6f, 0x6d, 0x65, 0x52, 0x65, 0x66, 0x75,
+	0x74, 0x65, 0x73, 0x12, 0x34, 0x0a, 0x16, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x65, 0x72, 0x5f, 0x74,
+	0x61, 0x72, 0x67, 0x65, 0x74, 0x5f, 0x70, 0x65, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x18, 0x0b, 0x20,
+	0x01, 0x28, 0x04, 0x52, 0x14, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x65, 0x72, 0x54, 0x61, 0x72, 0x67,
+	0x65, 0x74, 0x50, 0x65, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x12, 0x58, 0x0a, 0x0e, 0x62, 0x61, 0x73,
+	0x65, 0x5f, 0x6d, 0x61, 0x67, 0x6e, 0x69, 0x74, 0x75, 0x64, 0x65, 0x18, 0x0c, 0x20, 0x01, 0x28,
+	0x09, 0x42, 0x31, 0xc8, 0xde, 0x1f, 0x00, 0xda, 0xde, 0x1f, 0x1b, 0x63, 0x6f, 0x73, 0x6d, 0x6f,
+	0x73, 0x73, 0x64, 0x6b, 0x2e, 0x69, 0x6f, 0x2f, 0x6d, 0x61, 0x74, 0x68, 0x2e, 0x4c, 0x65, 0x67,
+	0x61, 0x63, 0x79, 0x44, 0x65, 0x63, 0xd2, 0xb4, 0x2d, 0x0a, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73,
+	0x2e, 0x44, 0x65, 0x63, 0x52, 0x0d, 0x62, 0x61, 0x73, 0x65, 0x4d, 0x61, 0x67, 0x6e, 0x69, 0x74,
+	0x75, 0x64, 0x65, 0x12, 0x57, 0x0a, 0x0d, 0x63, 0x6f, 0x72, 0x72, 0x6f, 0x62, 0x6f, 0x72, 0x61,
+	0x74, 0x69, 0x6f, 0x6e, 0x18, 0x0d, 0x20, 0x01, 0x28, 0x09, 0x42, 0x31, 0xc8, 0xde, 0x1f, 0x00,
+	0xda, 0xde, 0x1f, 0x1b, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x73, 0x64, 0x6b, 0x2e, 0x69, 0x6f,
+	0x2f, 0x6d, 0x61, 0x74, 0x68, 0x2e, 0x4c, 0x65, 0x67, 0x61, 0x63, 0x79, 0x44, 0x65, 0x63, 0xd2,
+	0xb4, 0x2d, 0x0a, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x44, 0x65, 0x63, 0x52, 0x0d, 0x63,
+	0x6f, 0x72, 0x72, 0x6f, 0x62, 0x6f, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x51, 0x0a, 0x0a,
+	0x72, 0x65, 0x66, 0x75, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x0e, 0x20, 0x01, 0x28, 0x09,
+	0x42, 0x31, 0xc8, 0xde, 0x1f, 0x00, 0xda, 0xde, 0x1f, 0x1b, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73,
+	0x73, 0x64, 0x6b, 0x2e, 0x69, 0x6f, 0x2f, 0x6d, 0x61, 0x74, 0x68, 0x2e, 0x4c, 0x65, 0x67, 0x61,
+	0x63, 0x79, 0x44, 0x65, 0x63, 0xd2, 0xb4, 0x2d, 0x0a, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e,
+	0x44, 0x65, 0x63, 0x52, 0x0a, 0x72, 0x65, 0x66, 0x75, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12,
+	0x1b, 0x0a, 0x09, 0x6f, 0x70, 0x65, 0x6e, 0x65, 0x64, 0x5f, 0x61, 0x74, 0x18, 0x0f, 0x20, 0x01,
+	0x28, 0x03, 0x52, 0x08, 0x6f, 0x70, 0x65, 0x6e, 0x65, 0x64, 0x41, 0x74, 0x12, 0x1d, 0x0a, 0x0a,
+	0x63, 0x6c, 0x6f, 0x73, 0x65, 0x5f, 0x74, 0x69, 0x6d, 0x65, 0x18, 0x10, 0x20, 0x01, 0x28, 0x03,
+	0x52, 0x09, 0x63, 0x6c, 0x6f, 0x73, 0x65, 0x54, 0x69, 0x6d, 0x65, 0x12, 0x22, 0x0a, 0x0d, 0x73,
+	0x6f, 0x75, 0x72, 0x63, 0x65, 0x5f, 0x61, 0x74, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x11, 0x20, 0x01,
+	0x28, 0x04, 0x52, 0x0b, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x41, 0x74, 0x74, 0x49, 0x64, 0x3a,
+	0x28, 0x8a, 0xe7, 0xb0, 0x2a, 0x23, 0x64, 0x72, 0x65, 0x61, 0x6d, 0x74, 0x72, 0x65, 0x65, 0x2f,
+	0x78, 0x2f, 0x72, 0x65, 0x70, 0x75, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2f, 0x50, 0x65, 0x6e,
+	0x64, 0x69, 0x6e, 0x67, 0x45, 0x76, 0x65, 0x6e, 0x74, 0x22, 0x9d, 0x03, 0x0a, 0x0c, 0x47, 0x65,
 	0x6e, 0x65, 0x73, 0x69, 0x73, 0x53, 0x74, 0x61, 0x74, 0x65, 0x12, 0x42, 0x0a, 0x06, 0x70, 0x61,
 	0x72, 0x61, 0x6d, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1f, 0x2e, 0x64, 0x72, 0x65,
 	0x61, 0x6d, 0x74, 0x72, 0x65, 0x65, 0x2e, 0x72, 0x65, 0x70, 0x75, 0x74, 0x61, 0x74, 0x69, 0x6f,
@@ -3676,35 +5922,49 @@ var file_dreamtree_reputation_v1_types_proto_rawDesc = []byte{
 	0x6f, 0x6e, 0x66, 0x69, 0x67, 0x42, 0x09, 0xc8, 0xde, 0x1f, 0x00, 0xa8, 0xe7, 0xb0, 0x2a, 0x01,
 	0x52, 0x0d, 0x64, 0x6f, 0x6d, 0x61, 0x69, 0x6e, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x73, 0x12,
 	0x17, 0x0a, 0x07, 0x6e, 0x65, 0x78, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x04, 0x20, 0x01, 0x28, 0x04,
-	0x52, 0x06, 0x6e, 0x65, 0x78, 0x74, 0x49, 0x64, 0x2a, 0xc7, 0x01, 0x0a, 0x0a, 0x52, 0x61, 0x74,
-	0x65, 0x42, 0x75, 0x63, 0x6b, 0x65, 0x74, 0x12, 0x1b, 0x0a, 0x17, 0x52, 0x41, 0x54, 0x45, 0x5f,
-	0x42, 0x55, 0x43, 0x4b, 0x45, 0x54, 0x5f, 0x55, 0x4e, 0x53, 0x50, 0x45, 0x43, 0x49, 0x46, 0x49,
-	0x45, 0x44, 0x10, 0x00, 0x12, 0x19, 0x0a, 0x15, 0x52, 0x41, 0x54, 0x45, 0x5f, 0x42, 0x55, 0x43,
-	0x4b, 0x45, 0x54, 0x5f, 0x50, 0x45, 0x52, 0x4d, 0x41, 0x4e, 0x45, 0x4e, 0x54, 0x10, 0x01, 0x12,
-	0x1b, 0x0a, 0x17, 0x52, 0x41, 0x54, 0x45, 0x5f, 0x42, 0x55, 0x43, 0x4b, 0x45, 0x54, 0x5f, 0x44,
-	0x55, 0x52, 0x41, 0x42, 0x4c, 0x45, 0x5f, 0x32, 0x35, 0x59, 0x10, 0x02, 0x12, 0x15, 0x0a, 0x11,
-	0x52, 0x41, 0x54, 0x45, 0x5f, 0x42, 0x55, 0x43, 0x4b, 0x45, 0x54, 0x5f, 0x52, 0x49, 0x47, 0x4f,
-	0x52, 0x10, 0x03, 0x12, 0x13, 0x0a, 0x0f, 0x52, 0x41, 0x54, 0x45, 0x5f, 0x42, 0x55, 0x43, 0x4b,
-	0x45, 0x54, 0x5f, 0x55, 0x53, 0x45, 0x10, 0x04, 0x12, 0x1b, 0x0a, 0x17, 0x52, 0x41, 0x54, 0x45,
-	0x5f, 0x42, 0x55, 0x43, 0x4b, 0x45, 0x54, 0x5f, 0x52, 0x45, 0x50, 0x4c, 0x49, 0x43, 0x41, 0x54,
-	0x49, 0x4f, 0x4e, 0x10, 0x05, 0x12, 0x1b, 0x0a, 0x17, 0x52, 0x41, 0x54, 0x45, 0x5f, 0x42, 0x55,
-	0x43, 0x4b, 0x45, 0x54, 0x5f, 0x45, 0x4e, 0x44, 0x4f, 0x52, 0x53, 0x45, 0x4d, 0x45, 0x4e, 0x54,
-	0x10, 0x06, 0x42, 0xf0, 0x01, 0x0a, 0x1b, 0x63, 0x6f, 0x6d, 0x2e, 0x64, 0x72, 0x65, 0x61, 0x6d,
-	0x74, 0x72, 0x65, 0x65, 0x2e, 0x72, 0x65, 0x70, 0x75, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2e,
-	0x76, 0x31, 0x42, 0x0a, 0x54, 0x79, 0x70, 0x65, 0x73, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x50, 0x01,
-	0x5a, 0x47, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x62, 0x6c, 0x6f,
-	0x6e, 0x67, 0x2d, 0x64, 0x65, 0x76, 0x2f, 0x64, 0x72, 0x65, 0x61, 0x6d, 0x74, 0x72, 0x65, 0x65,
-	0x2f, 0x61, 0x70, 0x69, 0x2f, 0x64, 0x72, 0x65, 0x61, 0x6d, 0x74, 0x72, 0x65, 0x65, 0x2f, 0x72,
-	0x65, 0x70, 0x75, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2f, 0x76, 0x31, 0x3b, 0x72, 0x65, 0x70,
-	0x75, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x76, 0x31, 0xa2, 0x02, 0x03, 0x44, 0x52, 0x58, 0xaa,
-	0x02, 0x17, 0x44, 0x72, 0x65, 0x61, 0x6d, 0x74, 0x72, 0x65, 0x65, 0x2e, 0x52, 0x65, 0x70, 0x75,
-	0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x56, 0x31, 0xca, 0x02, 0x17, 0x44, 0x72, 0x65, 0x61,
-	0x6d, 0x74, 0x72, 0x65, 0x65, 0x5c, 0x52, 0x65, 0x70, 0x75, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e,
-	0x5c, 0x56, 0x31, 0xe2, 0x02, 0x23, 0x44, 0x72, 0x65, 0x61, 0x6d, 0x74, 0x72, 0x65, 0x65, 0x5c,
-	0x52, 0x65, 0x70, 0x75, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5c, 0x56, 0x31, 0x5c, 0x47, 0x50,
-	0x42, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0xea, 0x02, 0x19, 0x44, 0x72, 0x65, 0x61,
-	0x6d, 0x74, 0x72, 0x65, 0x65, 0x3a, 0x3a, 0x52, 0x65, 0x70, 0x75, 0x74, 0x61, 0x74, 0x69, 0x6f,
-	0x6e, 0x3a, 0x3a, 0x56, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x52, 0x06, 0x6e, 0x65, 0x78, 0x74, 0x49, 0x64, 0x12, 0x57, 0x0a, 0x0e, 0x70, 0x65, 0x6e, 0x64,
+	0x69, 0x6e, 0x67, 0x5f, 0x65, 0x76, 0x65, 0x6e, 0x74, 0x73, 0x18, 0x05, 0x20, 0x03, 0x28, 0x0b,
+	0x32, 0x25, 0x2e, 0x64, 0x72, 0x65, 0x61, 0x6d, 0x74, 0x72, 0x65, 0x65, 0x2e, 0x72, 0x65, 0x70,
+	0x75, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x50, 0x65, 0x6e, 0x64, 0x69,
+	0x6e, 0x67, 0x45, 0x76, 0x65, 0x6e, 0x74, 0x42, 0x09, 0xc8, 0xde, 0x1f, 0x00, 0xa8, 0xe7, 0xb0,
+	0x2a, 0x01, 0x52, 0x0d, 0x70, 0x65, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x45, 0x76, 0x65, 0x6e, 0x74,
+	0x73, 0x12, 0x26, 0x0a, 0x0f, 0x6e, 0x65, 0x78, 0x74, 0x5f, 0x70, 0x65, 0x6e, 0x64, 0x69, 0x6e,
+	0x67, 0x5f, 0x69, 0x64, 0x18, 0x06, 0x20, 0x01, 0x28, 0x04, 0x52, 0x0d, 0x6e, 0x65, 0x78, 0x74,
+	0x50, 0x65, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x49, 0x64, 0x2a, 0xc7, 0x01, 0x0a, 0x0a, 0x52, 0x61,
+	0x74, 0x65, 0x42, 0x75, 0x63, 0x6b, 0x65, 0x74, 0x12, 0x1b, 0x0a, 0x17, 0x52, 0x41, 0x54, 0x45,
+	0x5f, 0x42, 0x55, 0x43, 0x4b, 0x45, 0x54, 0x5f, 0x55, 0x4e, 0x53, 0x50, 0x45, 0x43, 0x49, 0x46,
+	0x49, 0x45, 0x44, 0x10, 0x00, 0x12, 0x19, 0x0a, 0x15, 0x52, 0x41, 0x54, 0x45, 0x5f, 0x42, 0x55,
+	0x43, 0x4b, 0x45, 0x54, 0x5f, 0x50, 0x45, 0x52, 0x4d, 0x41, 0x4e, 0x45, 0x4e, 0x54, 0x10, 0x01,
+	0x12, 0x1b, 0x0a, 0x17, 0x52, 0x41, 0x54, 0x45, 0x5f, 0x42, 0x55, 0x43, 0x4b, 0x45, 0x54, 0x5f,
+	0x44, 0x55, 0x52, 0x41, 0x42, 0x4c, 0x45, 0x5f, 0x32, 0x35, 0x59, 0x10, 0x02, 0x12, 0x15, 0x0a,
+	0x11, 0x52, 0x41, 0x54, 0x45, 0x5f, 0x42, 0x55, 0x43, 0x4b, 0x45, 0x54, 0x5f, 0x52, 0x49, 0x47,
+	0x4f, 0x52, 0x10, 0x03, 0x12, 0x13, 0x0a, 0x0f, 0x52, 0x41, 0x54, 0x45, 0x5f, 0x42, 0x55, 0x43,
+	0x4b, 0x45, 0x54, 0x5f, 0x55, 0x53, 0x45, 0x10, 0x04, 0x12, 0x1b, 0x0a, 0x17, 0x52, 0x41, 0x54,
+	0x45, 0x5f, 0x42, 0x55, 0x43, 0x4b, 0x45, 0x54, 0x5f, 0x52, 0x45, 0x50, 0x4c, 0x49, 0x43, 0x41,
+	0x54, 0x49, 0x4f, 0x4e, 0x10, 0x05, 0x12, 0x1b, 0x0a, 0x17, 0x52, 0x41, 0x54, 0x45, 0x5f, 0x42,
+	0x55, 0x43, 0x4b, 0x45, 0x54, 0x5f, 0x45, 0x4e, 0x44, 0x4f, 0x52, 0x53, 0x45, 0x4d, 0x45, 0x4e,
+	0x54, 0x10, 0x06, 0x2a, 0x5b, 0x0a, 0x0b, 0x50, 0x65, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x4b, 0x69,
+	0x6e, 0x64, 0x12, 0x1c, 0x0a, 0x18, 0x50, 0x45, 0x4e, 0x44, 0x49, 0x4e, 0x47, 0x5f, 0x4b, 0x49,
+	0x4e, 0x44, 0x5f, 0x55, 0x4e, 0x53, 0x50, 0x45, 0x43, 0x49, 0x46, 0x49, 0x45, 0x44, 0x10, 0x00,
+	0x12, 0x14, 0x0a, 0x10, 0x50, 0x45, 0x4e, 0x44, 0x49, 0x4e, 0x47, 0x5f, 0x4b, 0x49, 0x4e, 0x44,
+	0x5f, 0x42, 0x45, 0x54, 0x10, 0x01, 0x12, 0x18, 0x0a, 0x14, 0x50, 0x45, 0x4e, 0x44, 0x49, 0x4e,
+	0x47, 0x5f, 0x4b, 0x49, 0x4e, 0x44, 0x5f, 0x4f, 0x55, 0x54, 0x43, 0x4f, 0x4d, 0x45, 0x10, 0x02,
+	0x42, 0xf0, 0x01, 0x0a, 0x1b, 0x63, 0x6f, 0x6d, 0x2e, 0x64, 0x72, 0x65, 0x61, 0x6d, 0x74, 0x72,
+	0x65, 0x65, 0x2e, 0x72, 0x65, 0x70, 0x75, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x76, 0x31,
+	0x42, 0x0a, 0x54, 0x79, 0x70, 0x65, 0x73, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x50, 0x01, 0x5a, 0x47,
+	0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x62, 0x6c, 0x6f, 0x6e, 0x67,
+	0x2d, 0x64, 0x65, 0x76, 0x2f, 0x64, 0x72, 0x65, 0x61, 0x6d, 0x74, 0x72, 0x65, 0x65, 0x2f, 0x61,
+	0x70, 0x69, 0x2f, 0x64, 0x72, 0x65, 0x61, 0x6d, 0x74, 0x72, 0x65, 0x65, 0x2f, 0x72, 0x65, 0x70,
+	0x75, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2f, 0x76, 0x31, 0x3b, 0x72, 0x65, 0x70, 0x75, 0x74,
+	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x76, 0x31, 0xa2, 0x02, 0x03, 0x44, 0x52, 0x58, 0xaa, 0x02, 0x17,
+	0x44, 0x72, 0x65, 0x61, 0x6d, 0x74, 0x72, 0x65, 0x65, 0x2e, 0x52, 0x65, 0x70, 0x75, 0x74, 0x61,
+	0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x56, 0x31, 0xca, 0x02, 0x17, 0x44, 0x72, 0x65, 0x61, 0x6d, 0x74,
+	0x72, 0x65, 0x65, 0x5c, 0x52, 0x65, 0x70, 0x75, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5c, 0x56,
+	0x31, 0xe2, 0x02, 0x23, 0x44, 0x72, 0x65, 0x61, 0x6d, 0x74, 0x72, 0x65, 0x65, 0x5c, 0x52, 0x65,
+	0x70, 0x75, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5c, 0x56, 0x31, 0x5c, 0x47, 0x50, 0x42, 0x4d,
+	0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0xea, 0x02, 0x19, 0x44, 0x72, 0x65, 0x61, 0x6d, 0x74,
+	0x72, 0x65, 0x65, 0x3a, 0x3a, 0x52, 0x65, 0x70, 0x75, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x3a,
+	0x3a, 0x56, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -3719,25 +5979,30 @@ func file_dreamtree_reputation_v1_types_proto_rawDescGZIP() []byte {
 	return file_dreamtree_reputation_v1_types_proto_rawDescData
 }
 
-var file_dreamtree_reputation_v1_types_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_dreamtree_reputation_v1_types_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_dreamtree_reputation_v1_types_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_dreamtree_reputation_v1_types_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_dreamtree_reputation_v1_types_proto_goTypes = []interface{}{
 	(RateBucket)(0),      // 0: dreamtree.reputation.v1.RateBucket
-	(*Contribution)(nil), // 1: dreamtree.reputation.v1.Contribution
-	(*DomainConfig)(nil), // 2: dreamtree.reputation.v1.DomainConfig
-	(*Params)(nil),       // 3: dreamtree.reputation.v1.Params
-	(*GenesisState)(nil), // 4: dreamtree.reputation.v1.GenesisState
+	(PendingKind)(0),     // 1: dreamtree.reputation.v1.PendingKind
+	(*Contribution)(nil), // 2: dreamtree.reputation.v1.Contribution
+	(*DomainConfig)(nil), // 3: dreamtree.reputation.v1.DomainConfig
+	(*Params)(nil),       // 4: dreamtree.reputation.v1.Params
+	(*PendingEvent)(nil), // 5: dreamtree.reputation.v1.PendingEvent
+	(*GenesisState)(nil), // 6: dreamtree.reputation.v1.GenesisState
 }
 var file_dreamtree_reputation_v1_types_proto_depIdxs = []int32{
 	0, // 0: dreamtree.reputation.v1.Contribution.rate_bucket:type_name -> dreamtree.reputation.v1.RateBucket
-	3, // 1: dreamtree.reputation.v1.GenesisState.params:type_name -> dreamtree.reputation.v1.Params
-	1, // 2: dreamtree.reputation.v1.GenesisState.contributions:type_name -> dreamtree.reputation.v1.Contribution
-	2, // 3: dreamtree.reputation.v1.GenesisState.domain_configs:type_name -> dreamtree.reputation.v1.DomainConfig
-	4, // [4:4] is the sub-list for method output_type
-	4, // [4:4] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	1, // 1: dreamtree.reputation.v1.PendingEvent.kind:type_name -> dreamtree.reputation.v1.PendingKind
+	0, // 2: dreamtree.reputation.v1.PendingEvent.rate_bucket:type_name -> dreamtree.reputation.v1.RateBucket
+	4, // 3: dreamtree.reputation.v1.GenesisState.params:type_name -> dreamtree.reputation.v1.Params
+	2, // 4: dreamtree.reputation.v1.GenesisState.contributions:type_name -> dreamtree.reputation.v1.Contribution
+	3, // 5: dreamtree.reputation.v1.GenesisState.domain_configs:type_name -> dreamtree.reputation.v1.DomainConfig
+	5, // 6: dreamtree.reputation.v1.GenesisState.pending_events:type_name -> dreamtree.reputation.v1.PendingEvent
+	7, // [7:7] is the sub-list for method output_type
+	7, // [7:7] is the sub-list for method input_type
+	7, // [7:7] is the sub-list for extension type_name
+	7, // [7:7] is the sub-list for extension extendee
+	0, // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_dreamtree_reputation_v1_types_proto_init() }
@@ -3783,6 +6048,18 @@ func file_dreamtree_reputation_v1_types_proto_init() {
 			}
 		}
 		file_dreamtree_reputation_v1_types_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*PendingEvent); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_dreamtree_reputation_v1_types_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GenesisState); i {
 			case 0:
 				return &v.state
@@ -3800,8 +6077,8 @@ func file_dreamtree_reputation_v1_types_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_dreamtree_reputation_v1_types_proto_rawDesc,
-			NumEnums:      1,
-			NumMessages:   4,
+			NumEnums:      2,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -22,6 +22,7 @@ const (
 	Query_Reputation_FullMethodName    = "/dreamtree.reputation.v1.Query/Reputation"
 	Query_Contributions_FullMethodName = "/dreamtree.reputation.v1.Query/Contributions"
 	Query_DomainConfig_FullMethodName  = "/dreamtree.reputation.v1.Query/DomainConfig"
+	Query_PendingEvents_FullMethodName = "/dreamtree.reputation.v1.Query/PendingEvents"
 	Query_Params_FullMethodName        = "/dreamtree.reputation.v1.Query/Params"
 )
 
@@ -34,6 +35,8 @@ type QueryClient interface {
 	// Contributions of a signer (optionally a domain), paginated.
 	Contributions(ctx context.Context, in *QueryContributionsRequest, opts ...grpc.CallOption) (*QueryContributionsResponse, error)
 	DomainConfig(ctx context.Context, in *QueryDomainConfigRequest, opts ...grpc.CallOption) (*QueryDomainConfigResponse, error)
+	// PendingEvents — reputation events currently in their review window.
+	PendingEvents(ctx context.Context, in *QueryPendingEventsRequest, opts ...grpc.CallOption) (*QueryPendingEventsResponse, error)
 	Params(ctx context.Context, in *QueryParamsRequest, opts ...grpc.CallOption) (*QueryParamsResponse, error)
 }
 
@@ -75,6 +78,16 @@ func (c *queryClient) DomainConfig(ctx context.Context, in *QueryDomainConfigReq
 	return out, nil
 }
 
+func (c *queryClient) PendingEvents(ctx context.Context, in *QueryPendingEventsRequest, opts ...grpc.CallOption) (*QueryPendingEventsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(QueryPendingEventsResponse)
+	err := c.cc.Invoke(ctx, Query_PendingEvents_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *queryClient) Params(ctx context.Context, in *QueryParamsRequest, opts ...grpc.CallOption) (*QueryParamsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(QueryParamsResponse)
@@ -94,6 +107,8 @@ type QueryServer interface {
 	// Contributions of a signer (optionally a domain), paginated.
 	Contributions(context.Context, *QueryContributionsRequest) (*QueryContributionsResponse, error)
 	DomainConfig(context.Context, *QueryDomainConfigRequest) (*QueryDomainConfigResponse, error)
+	// PendingEvents — reputation events currently in their review window.
+	PendingEvents(context.Context, *QueryPendingEventsRequest) (*QueryPendingEventsResponse, error)
 	Params(context.Context, *QueryParamsRequest) (*QueryParamsResponse, error)
 	mustEmbedUnimplementedQueryServer()
 }
@@ -113,6 +128,9 @@ func (UnimplementedQueryServer) Contributions(context.Context, *QueryContributio
 }
 func (UnimplementedQueryServer) DomainConfig(context.Context, *QueryDomainConfigRequest) (*QueryDomainConfigResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DomainConfig not implemented")
+}
+func (UnimplementedQueryServer) PendingEvents(context.Context, *QueryPendingEventsRequest) (*QueryPendingEventsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method PendingEvents not implemented")
 }
 func (UnimplementedQueryServer) Params(context.Context, *QueryParamsRequest) (*QueryParamsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Params not implemented")
@@ -192,6 +210,24 @@ func _Query_DomainConfig_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_PendingEvents_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryPendingEventsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).PendingEvents(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Query_PendingEvents_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).PendingEvents(ctx, req.(*QueryPendingEventsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Query_Params_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(QueryParamsRequest)
 	if err := dec(in); err != nil {
@@ -228,6 +264,10 @@ var Query_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DomainConfig",
 			Handler:    _Query_DomainConfig_Handler,
+		},
+		{
+			MethodName: "PendingEvents",
+			Handler:    _Query_PendingEvents_Handler,
 		},
 		{
 			MethodName: "Params",

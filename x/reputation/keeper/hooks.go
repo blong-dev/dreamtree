@@ -11,12 +11,12 @@ import (
 	"github.com/blong-dev/dreamtree/x/reputation"
 )
 
-// proofTypeToBucket maps an x/attest ProofType enum value to the decay bucket an
-// unvalidated "bet" contribution decays at. (Enum values mirror x/attest;
-// documented coupling — see docs/specs/x-reputation-design.md §6.)
+// The x/attest → reputation hooks. Events don't move R directly — they enqueue
+// PendingEvents that settle at their review-window close (see window.go).
+
 func proofTypeToBucket(proofType int32) (reputation.RateBucket, bool) {
 	switch proofType {
-	case 1: // ORIGIN — authorship never becomes false
+	case 1: // ORIGIN
 		return reputation.RateBucket_RATE_BUCKET_PERMANENT, true
 	case 2: // RIGOR
 		return reputation.RateBucket_RATE_BUCKET_RIGOR, true
@@ -24,16 +24,14 @@ func proofTypeToBucket(proofType int32) (reputation.RateBucket, bool) {
 		return reputation.RateBucket_RATE_BUCKET_USE, true
 	case 4: // REPLICATION
 		return reputation.RateBucket_RATE_BUCKET_REPLICATION, true
-	default: // OUTCOME (5) / unspecified — no direct bet contribution in P1
+	default: // OUTCOME / unspecified — no direct bet
 		return reputation.RateBucket_RATE_BUCKET_UNSPECIFIED, false
 	}
 }
 
-// OnAttestation is the hook x/attest calls when an attestation is recorded. P1:
-// making an attestation is an unvalidated bet — a small contribution to the
-// attestor's R in that domain, at the proof-type decay bucket. Magnitude is
-// attest_bet_scale × specificity, all fixed-point (consensus-safe). The big,
-// durable moves come from validated outcomes (P3).
+// OnAttestation enqueues an unvalidated "bet" for a newly recorded attestation:
+// attest_bet_scale × specificity, at the proof-type bucket, through a review
+// window (trivial magnitude → τ≈0 → settles next block).
 func (k Keeper) OnAttestation(ctx context.Context, signer, domain string, proofType int32, specificityBps uint32, sourceAttID uint64) error {
 	bucket, ok := proofTypeToBucket(proofType)
 	if !ok {
@@ -43,19 +41,100 @@ func (k Keeper) OnAttestation(ctx context.Context, signer, domain string, proofT
 	if err != nil {
 		return err
 	}
-	scale, err := math.LegacyNewDecFromStr(p.AttestBetScale)
+	magnitude := d(p.AttestBetScale).Mul(specDec(specificityBps))
+	_, err = k.enqueue(ctx, reputation.PendingEvent{
+		Kind:          reputation.PendingKind_PENDING_KIND_BET,
+		Signer:        signer,
+		Domain:        domain,
+		RateBucket:    bucket,
+		BaseMagnitude: magnitude,
+		Corroboration: math.LegacyZeroDec(),
+		Refutation:    math.LegacyZeroDec(),
+		SourceAttId:   sourceAttID,
+	})
+	return err
+}
+
+// OnOutcome handles an OUTCOME attestation. Non-reversal outcomes open (or
+// corroborate/refute) a review window on the target attestation; at settlement
+// the integrated M_O propagates to the contributor. A reversal (target is
+// itself an outcome) negates the overturned outcome + penalizes its reporter.
+func (k Keeper) OnOutcome(ctx context.Context, reporter string, refutes bool, targetAttID uint64, targetAttestor, targetDomain string, targetSIssuance math.LegacyDec, targetIsOutcome bool, sourceAttID uint64) error {
+	p, err := k.Params.Get(ctx)
 	if err != nil {
 		return err
 	}
-	bps := specificityBps
-	if bps == 0 {
-		bps = 10000 // unset = fully specific
+	// M_O = min(M_cap, β · S_issuance · √cred(reporter)).  M_cap = cap_mult · S_issuance.
+	cred := k.credOf(ctx, reporter, targetDomain)
+	sqrtCred, err := cred.ApproxSqrt()
+	if err != nil {
+		return err
 	}
-	spec := math.LegacyNewDec(int64(bps)).QuoInt64(10000)
-	magnitude := scale.Mul(spec)
-	return k.addContribution(ctx, signer, domain, magnitude, bucket, sourceAttID)
+	mO := d(p.OutcomeBeta).Mul(targetSIssuance).Mul(sqrtCred)
+	capM := d(p.OutcomeCapMult).Mul(targetSIssuance)
+	if mO.GT(capM) {
+		mO = capM
+	}
+	if !mO.IsPositive() {
+		return nil
+	}
+
+	if targetIsOutcome {
+		// Reversal: enqueue a counter-outcome that overturns targetAttID.
+		_, err = k.enqueue(ctx, reputation.PendingEvent{
+			Kind:                 reputation.PendingKind_PENDING_KIND_OUTCOME,
+			TargetAttId:          targetAttID,
+			TargetAttestor:       targetAttestor, // the overturned outcome's reporter
+			TargetDomain:         targetDomain,
+			TargetSIssuance:      targetSIssuance,
+			OutcomeRefutes:       refutes,
+			CounterTargetPending: targetAttID, // non-zero ⇒ reversal
+			BaseMagnitude:        mO,
+			Corroboration:        math.LegacyZeroDec(),
+			Refutation:           math.LegacyZeroDec(),
+			SourceAttId:          sourceAttID,
+		})
+		return err
+	}
+
+	// Is a window already open on this target? Then corroborate / refute it.
+	if openID, err := k.PendingByTarget.Get(ctx, targetAttID); err == nil {
+		pe, err := k.Pending.Get(ctx, openID)
+		if err == nil {
+			capPool := pe.BaseMagnitude.MulInt64(4)
+			if refutes == pe.OutcomeRefutes {
+				pe.Corroboration = paperShapeAdd(pe.Corroboration, mO, capPool)
+			} else {
+				pe.Refutation = paperShapeAdd(pe.Refutation, mO, capPool)
+			}
+			return k.Pending.Set(ctx, openID, pe)
+		}
+	}
+
+	// Otherwise open a fresh window.
+	_, err = k.enqueue(ctx, reputation.PendingEvent{
+		Kind:            reputation.PendingKind_PENDING_KIND_OUTCOME,
+		TargetAttId:     targetAttID,
+		TargetAttestor:  targetAttestor,
+		TargetDomain:    targetDomain,
+		TargetSIssuance: targetSIssuance,
+		OutcomeRefutes:  refutes,
+		BaseMagnitude:   mO,
+		Corroboration:   math.LegacyZeroDec(),
+		Refutation:      math.LegacyZeroDec(),
+		SourceAttId:     sourceAttID,
+	})
+	return err
 }
 
+func specDec(bps uint32) math.LegacyDec {
+	if bps == 0 {
+		bps = 10000
+	}
+	return math.LegacyNewDec(int64(bps)).QuoInt64(10000)
+}
+
+// addContribution writes a settled contribution + its indexes (signer, source).
 func (k Keeper) addContribution(ctx context.Context, signer, domain string, magnitude math.LegacyDec, bucket reputation.RateBucket, sourceAttID uint64) error {
 	id, err := k.Seq.Next(ctx)
 	if err != nil {
@@ -77,6 +156,11 @@ func (k Keeper) addContribution(ctx context.Context, signer, domain string, magn
 	}
 	if err := k.SignerIndex.Set(ctx, collections.Join(signer, id)); err != nil {
 		return err
+	}
+	if sourceAttID != 0 {
+		if err := k.SourceIndex.Set(ctx, collections.Join(sourceAttID, id)); err != nil {
+			return err
+		}
 	}
 	sdkCtx.EventManager().EmitEvent(sdk.NewEvent(
 		"reputation_contribution",

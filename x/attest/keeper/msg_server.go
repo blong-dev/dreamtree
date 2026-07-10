@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"cosmossdk.io/collections"
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/blong-dev/dreamtree/x/attest"
@@ -32,17 +33,16 @@ func (ms msgServer) Attest(ctx context.Context, msg *attest.MsgAttest) (*attest.
 	}
 
 	isOutcome := msg.ProofType == attest.ProofType_PROOF_TYPE_OUTCOME
+	var target attest.Attestation
 	if isOutcome {
 		if msg.OutcomeKind == attest.OutcomeKind_OUTCOME_KIND_UNSPECIFIED || msg.TargetId == 0 {
 			return nil, attest.ErrBadOutcome
 		}
-		has, err := ms.k.Attestations.Has(ctx, msg.TargetId)
-		if err != nil {
-			return nil, err
-		}
-		if !has {
+		t, gerr := ms.k.Attestations.Get(ctx, msg.TargetId)
+		if gerr != nil {
 			return nil, attest.ErrTargetNotFound.Wrapf("id %d", msg.TargetId)
 		}
+		target = t
 	} else if msg.OutcomeKind != attest.OutcomeKind_OUTCOME_KIND_UNSPECIFIED || msg.TargetId != 0 {
 		return nil, attest.ErrOutcomeFields
 	}
@@ -52,6 +52,19 @@ func (ms msgServer) Attest(ctx context.Context, msg *attest.MsgAttest) (*attest.
 	if err != nil {
 		return nil, err
 	}
+
+	// Snapshot the RATIONAL strength-at-issuance (standing × spec × type_weight),
+	// frozen so an outcome's M_O reads S(att, t_issuance) deterministically.
+	params, err := ms.k.Params.Get(ctx)
+	if err != nil {
+		return nil, err
+	}
+	standing := math.LegacyOneDec()
+	if ms.k.Rep() != nil {
+		standing = ms.k.Rep().StandingOf(ctx, msg.Attestor, msg.Domain)
+	}
+	sIssuance := params.SIssuance(standing, msg.ProofType, msg.SpecificityBps)
+
 	a := attest.Attestation{
 		Id:             id,
 		Attestor:       msg.Attestor,
@@ -63,6 +76,7 @@ func (ms msgServer) Attest(ctx context.Context, msg *attest.MsgAttest) (*attest.
 		TargetId:       msg.TargetId,
 		IssuedAt:       sdkCtx.BlockTime().Unix(),
 		Height:         sdkCtx.BlockHeight(),
+		SIssuance:      sIssuance,
 	}
 	if err := ms.k.Attestations.Set(ctx, id, a); err != nil {
 		return nil, err
@@ -90,7 +104,13 @@ func (ms msgServer) Attest(ctx context.Context, msg *attest.MsgAttest) (*attest.
 
 	// Notify the reputation seam (no-op if x/reputation is absent).
 	if ms.k.Rep() != nil {
-		if err := ms.k.Rep().OnAttestation(ctx, a.Attestor, a.Domain, int32(a.ProofType), a.SpecificityBps, id); err != nil {
+		if isOutcome {
+			targetIsOutcome := target.ProofType == attest.ProofType_PROOF_TYPE_OUTCOME
+			refutes := a.OutcomeKind == attest.OutcomeKind_OUTCOME_KIND_REFUTED
+			if err := ms.k.Rep().OnOutcome(ctx, a.Attestor, refutes, a.TargetId, target.Attestor, target.Domain, target.SIssuance, targetIsOutcome, id); err != nil {
+				return nil, err
+			}
+		} else if err := ms.k.Rep().OnAttestation(ctx, a.Attestor, a.Domain, int32(a.ProofType), a.SpecificityBps, id); err != nil {
 			return nil, err
 		}
 	}

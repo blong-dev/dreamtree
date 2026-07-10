@@ -1,7 +1,7 @@
 package reputation
 
 func NewGenesisState() *GenesisState {
-	return &GenesisState{Params: DefaultParams(), NextId: 1}
+	return &GenesisState{Params: DefaultParams(), NextId: 1, NextPendingId: 1}
 }
 
 func (gs *GenesisState) Validate() error {

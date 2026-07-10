@@ -81,6 +81,72 @@ message Params {
 
   // P1 unvalidated-bet magnitude: an attestation contributes this × (spec × type_weight).
   string attest_bet_scale = 11;         // "0.1" — small; the big moves come from validated outcomes (P3)
+
+  // P2/P3 review-window + outcome levers (parameters.md).
+  string neg_asymmetry = 12;            // "2.0" — refutation hits 2× harder than corroboration
+  string outcome_beta = 13;             // "1.0" — β in M_O = min(M_cap, β·S_issuance·√cred)
+  string outcome_cap_mult = 14;         // "5.0" — M_cap = this × S_issuance
+  string review_window_base = 15;       // "1.0" days — base of τ = base·√(M/threshold)
+  string review_window_threshold = 16;  // "1.0"
+  // co-attestor propagation: another attestor on the same work moves this × M_O.
+  string coattestor_weight = 17;        // "0.25"
+}
+
+// PendingKind — what a pending event settles into.
+enum PendingKind {
+  PENDING_KIND_UNSPECIFIED = 0;
+  PENDING_KIND_BET = 1;      // an unvalidated attestation bet (settles to a bet contribution)
+  PENDING_KIND_OUTCOME = 2;  // an outcome on an attestation (settles to the M_O propagation)
+}
+
+// PendingEvent — a reputation-moving event inside its review window. At
+// close_time, EndBlock integrates its accumulators and settles it into
+// Contribution(s). Nothing here moves R until settled.
+message PendingEvent {
+  option (amino.name) = "dreamtree/x/reputation/PendingEvent";
+
+  uint64 id = 1;
+  PendingKind kind = 2;
+
+  // BET fields (kind = BET): whose R, and the bet magnitude/bucket.
+  string signer = 3 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  string domain = 4;
+  RateBucket rate_bucket = 5;
+
+  // OUTCOME fields (kind = OUTCOME): the contested claim on target_att.
+  uint64 target_att_id = 6;         // the attestation being validated/refuted
+  string target_attestor = 7;       // its author (the contributor whose R moves)
+  string target_domain = 8;
+  string target_s_issuance = 9 [    // rational S(target, t_issuance) — the M_O input
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+  bool outcome_refutes = 10;        // true = refuted (−, 2×), false = validated (+)
+  uint64 counter_target_pending = 11; // reversal: the settled outcome this counter-outcome overturns (0 = none)
+
+  // base_magnitude — the event's own magnitude before window integration
+  // (the bet, or the reporter's initial M_O contribution).
+  string base_magnitude = 12 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+  // accumulators — corroboration/refutation gathered during the window (paper-shape).
+  string corroboration = 13 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+  string refutation = 14 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+
+  int64 opened_at = 15;   // block time enqueued
+  int64 close_time = 16;  // opened_at + τ(base_magnitude) seconds
+  uint64 source_att_id = 17;
 }
 
 message GenesisState {
@@ -88,4 +154,6 @@ message GenesisState {
   repeated Contribution contributions = 2 [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
   repeated DomainConfig domain_configs = 3 [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
   uint64 next_id = 4;
+  repeated PendingEvent pending_events = 5 [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+  uint64 next_pending_id = 6;
 }

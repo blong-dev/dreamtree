@@ -21,19 +21,24 @@ const secondsPerYear = 31557600.0 // 365.25 days
 
 func pf(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 
-// relevance attenuates a contribution earned in domain ki toward query domain k
-// by taxonomy distance — longest common prefix depth over the 5-level path.
-// Same node 1.0; then 0.70 / 0.40 / 0.15 / 0.03; cross-class 0. (spec table)
-func relevance(k, ki string) float64 {
+// relevanceDepth is the longest common prefix depth of two 5-level taxonomy
+// paths — the shared basis for both the float and fixed-point relevance.
+func relevanceDepth(k, ki string) int {
 	if k == ki {
-		return 1.0
+		return 5
 	}
 	a, b := strings.Split(k, "/"), strings.Split(ki, "/")
 	d := 0
 	for d < len(a) && d < len(b) && a[d] == b[d] && a[d] != "" {
 		d++
 	}
-	switch d {
+	return d
+}
+
+// relevance attenuates a contribution earned in domain ki toward query domain k.
+// Same node 1.0; then 0.70 / 0.40 / 0.15 / 0.03; cross-class 0. (spec table)
+func relevance(k, ki string) float64 {
+	switch relevanceDepth(k, ki) {
 	case 0:
 		return 0.0
 	case 1:
@@ -44,8 +49,8 @@ func relevance(k, ki string) float64 {
 		return 0.40
 	case 4:
 		return 0.70
-	default: // 5 shared but not equal string (shouldn't happen) → treat as near-full
-		return 0.85
+	default:
+		return 1.0
 	}
 }
 
@@ -82,8 +87,13 @@ func (k Keeper) domainShaping(ctx context.Context, p reputation.Params, domain s
 }
 
 // effectiveR applies the two-piece linear+log dampening past the saturation
-// point S: R for R<=S, else S + k·log(1+(R-S)/S).
+// point S: R for R<=S, else S + k·log(1+(R-S)/S). Floored at 0 — a domain R can
+// be destroyed to zero (spec: no negative reputation; start fresh in a new
+// domain). The underlying contribution debt persists, so recovery is real work.
 func effectiveR(raw, S, kDamp float64) float64 {
+	if raw <= 0 {
+		return 0
+	}
 	if raw <= S {
 		return raw
 	}

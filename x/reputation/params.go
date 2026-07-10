@@ -9,17 +9,23 @@ import (
 // (decay/saturation) inputs parsed in the projection.
 func DefaultParams() Params {
 	return Params{
-		BaselineKyc:          "1.0",
-		DampeningK:           "5.0",
-		SaturationStandard:   "10.0",
-		ObsolescenceStandard: "1.0",
-		LambdaPermanent:      "0.0",
-		LambdaDurable:        "0.0277", // ln2/25 ≈ 25yr half-life
-		LambdaRigor:          "0.04",
-		LambdaUse:            "0.08",
-		LambdaReplication:    "0.015",
-		LambdaEndorsement:    "0.08",
-		AttestBetScale:       "0.1", // an unvalidated attestation is a small bet
+		BaselineKyc:           "1.0",
+		DampeningK:            "5.0",
+		SaturationStandard:    "10.0",
+		ObsolescenceStandard:  "1.0",
+		LambdaPermanent:       "0.0",
+		LambdaDurable:         "0.0277", // ln2/25 ≈ 25yr half-life
+		LambdaRigor:           "0.04",
+		LambdaUse:             "0.08",
+		LambdaReplication:     "0.015",
+		LambdaEndorsement:     "0.08",
+		AttestBetScale:        "0.1", // an unvalidated attestation is a small bet
+		NegAsymmetry:          "2.0",
+		OutcomeBeta:           "1.0",
+		OutcomeCapMult:        "5.0",
+		ReviewWindowBase:      "1.0", // days
+		ReviewWindowThreshold: "1.0",
+		CoattestorWeight:      "0.25",
 	}
 }
 
@@ -41,7 +47,10 @@ func (p Params) Validate() error {
 		"lambda_permanent": p.LambdaPermanent, "lambda_durable": p.LambdaDurable,
 		"lambda_rigor": p.LambdaRigor, "lambda_use": p.LambdaUse,
 		"lambda_replication": p.LambdaReplication, "lambda_endorsement": p.LambdaEndorsement,
-		"attest_bet_scale": p.AttestBetScale,
+		"attest_bet_scale": p.AttestBetScale, "neg_asymmetry": p.NegAsymmetry,
+		"outcome_beta": p.OutcomeBeta, "outcome_cap_mult": p.OutcomeCapMult,
+		"review_window_base": p.ReviewWindowBase, "review_window_threshold": p.ReviewWindowThreshold,
+		"coattestor_weight": p.CoattestorWeight,
 	} {
 		if err := mustPos(name, v); err != nil {
 			return err

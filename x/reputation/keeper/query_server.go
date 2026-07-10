@@ -78,6 +78,17 @@ func (qs queryServer) DomainConfig(ctx context.Context, req *reputation.QueryDom
 	return &reputation.QueryDomainConfigResponse{Config: cfg}, nil
 }
 
+func (qs queryServer) PendingEvents(ctx context.Context, req *reputation.QueryPendingEventsRequest) (*reputation.QueryPendingEventsResponse, error) {
+	list, pageRes, err := query.CollectionPaginate(
+		ctx, qs.k.Pending, req.Pagination,
+		func(_ uint64, value reputation.PendingEvent) (reputation.PendingEvent, error) { return value, nil },
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &reputation.QueryPendingEventsResponse{Pending: list, Pagination: pageRes}, nil
+}
+
 func (qs queryServer) Params(ctx context.Context, _ *reputation.QueryParamsRequest) (*reputation.QueryParamsResponse, error) {
 	p, err := qs.k.Params.Get(ctx)
 	if err != nil {
