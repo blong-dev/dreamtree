@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"cosmossdk.io/math"
+
+	reputation "github.com/blong-dev/dreamtree/x/reputation"
 )
 
 // ReputationKeeper is the seam x/attest reads reputation through and notifies of
@@ -18,7 +20,7 @@ type ReputationKeeper interface {
 	// OnAttestation — a new attestation's unvalidated bet.
 	OnAttestation(ctx context.Context, signer, domain string, proofType int32, specificityBps uint32, sourceAttID uint64) error
 	// OnOutcome — an OUTCOME attestation (validate/refute of targetAttID).
-	OnOutcome(ctx context.Context, reporter string, refutes bool, targetAttID uint64, targetAttestor, targetDomain string, targetSIssuance math.LegacyDec, targetIsOutcome bool, sourceAttID uint64) error
+	OnOutcome(ctx context.Context, reporter string, refutes bool, targetAttID uint64, targetAttestor, targetDomain string, targetSIssuance math.LegacyDec, targetIsOutcome bool, propTargets []reputation.PropTarget, sourceAttID uint64) error
 	// OnEndorsement — A (endorser) vouches for B (endorsed) in a domain.
 	OnEndorsement(ctx context.Context, endorser, endorsed, domain string, sourceAttID uint64) error
 }

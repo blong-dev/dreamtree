@@ -144,13 +144,48 @@ func (k Keeper) settle(ctx context.Context, pe reputation.PendingEvent) error {
 			return nil // refuted into nothing
 		}
 		// Apply to the contributor (target's author), durable. Validated → +;
-		// refuted → −neg× (bad work hits harder).
+		// refuted → −neg× (bad work hits the author harder).
 		delta := strength
 		if pe.OutcomeRefutes {
 			delta = strength.Mul(d(p.NegAsymmetry)).Neg()
 		}
-		return k.addContribution(ctx, pe.TargetAttestor, pe.TargetDomain, delta,
-			reputation.RateBucket_RATE_BUCKET_DURABLE_25Y, pe.SourceAttId)
+		if err := k.addContribution(ctx, pe.TargetAttestor, pe.TargetDomain, delta,
+			reputation.RateBucket_RATE_BUCKET_DURABLE_25Y, pe.SourceAttId); err != nil {
+			return err
+		}
+		// Propagate to co-attestors and the contributor's endorsers (liability).
+		// Their move follows the outcome's sign (no extra 2× — that's the
+		// author's penalty), scaled by the kind's weight.
+		return k.propagate(ctx, p, pe, strength)
+	}
+	return nil
+}
+
+// propagate applies an outcome to the captured prop targets (co-attestors +
+// endorsers). Co-attestor weight = coattestor_weight × specificity; endorser
+// weight = endorse_inherit. Sign follows validated(+)/refuted(−).
+func (k Keeper) propagate(ctx context.Context, p reputation.Params, pe reputation.PendingEvent, strength math.LegacyDec) error {
+	for _, pt := range pe.PropTargets {
+		var weight math.LegacyDec
+		switch pt.Kind {
+		case reputation.PropKind_PROP_KIND_COATTESTOR:
+			weight = d(p.CoattestorWeight).Mul(pt.BaseFactor)
+		case reputation.PropKind_PROP_KIND_ENDORSER:
+			weight = d(p.EndorseInherit).Mul(pt.BaseFactor)
+		default:
+			continue
+		}
+		delta := strength.Mul(weight)
+		if pe.OutcomeRefutes {
+			delta = delta.Neg()
+		}
+		if delta.IsZero() {
+			continue
+		}
+		if err := k.addContribution(ctx, pt.Address, pt.Domain, delta,
+			reputation.RateBucket_RATE_BUCKET_DURABLE_25Y, pe.SourceAttId); err != nil {
+			return err
+		}
 	}
 	return nil
 }

@@ -103,6 +103,29 @@ enum PendingKind {
   PENDING_KIND_OUTCOME = 2;  // an outcome on an attestation (settles to the M_O propagation)
 }
 
+// PropKind — how a propagation target relates to the outcome (sets its weight).
+enum PropKind {
+  PROP_KIND_UNSPECIFIED = 0;
+  PROP_KIND_COATTESTOR = 1;  // another attestor on the same work (weight = coattestor_weight × base)
+  PROP_KIND_ENDORSER = 2;    // an endorser of the contributor (weight = endorse_inherit; = liability)
+}
+
+// PropTarget — a party (besides the contributor) whose R moves when an outcome
+// settles. Captured at outcome time from the attestation graph; the reputation
+// module applies the kind's weight at settlement.
+message PropTarget {
+  string address = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  string domain = 2;
+  PropKind kind = 3;
+  // base_factor — the kind-specific base (a co-attestor's specificity; 1 for an
+  // endorser). Final weight = param(kind) × base_factor.
+  string base_factor = 4 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+}
+
 // PendingEvent — a reputation-moving event inside its review window. At
 // close_time, EndBlock integrates its accumulators and settles it into
 // Contribution(s). Nothing here moves R until settled.
@@ -151,6 +174,10 @@ message PendingEvent {
   int64 opened_at = 15;   // block time enqueued
   int64 close_time = 16;  // opened_at + τ(base_magnitude) seconds
   uint64 source_att_id = 17;
+
+  // prop_targets — co-attestors + contributor endorsers who also move at
+  // settlement (outcome propagation lines 2-3). Captured at outcome time.
+  repeated PropTarget prop_targets = 18 [ (gogoproto.nullable) = false ];
 }
 
 message GenesisState {

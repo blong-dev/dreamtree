@@ -59,7 +59,7 @@ func (k Keeper) OnAttestation(ctx context.Context, signer, domain string, proofT
 // corroborate/refute) a review window on the target attestation; at settlement
 // the integrated M_O propagates to the contributor. A reversal (target is
 // itself an outcome) negates the overturned outcome + penalizes its reporter.
-func (k Keeper) OnOutcome(ctx context.Context, reporter string, refutes bool, targetAttID uint64, targetAttestor, targetDomain string, targetSIssuance math.LegacyDec, targetIsOutcome bool, sourceAttID uint64) error {
+func (k Keeper) OnOutcome(ctx context.Context, reporter string, refutes bool, targetAttID uint64, targetAttestor, targetDomain string, targetSIssuance math.LegacyDec, targetIsOutcome bool, propTargets []reputation.PropTarget, sourceAttID uint64) error {
 	p, err := k.Params.Get(ctx)
 	if err != nil {
 		return err
@@ -122,6 +122,7 @@ func (k Keeper) OnOutcome(ctx context.Context, reporter string, refutes bool, ta
 		BaseMagnitude:   mO,
 		Corroboration:   math.LegacyZeroDec(),
 		Refutation:      math.LegacyZeroDec(),
+		PropTargets:     propTargets,
 		SourceAttId:     sourceAttID,
 	})
 	return err

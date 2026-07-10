@@ -10,6 +10,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/blong-dev/dreamtree/x/attest"
+	reputation "github.com/blong-dev/dreamtree/x/reputation"
 )
 
 type msgServer struct{ k Keeper }
@@ -118,7 +119,11 @@ func (ms msgServer) Attest(ctx context.Context, msg *attest.MsgAttest) (*attest.
 		case isOutcome:
 			targetIsOutcome := target.ProofType == attest.ProofType_PROOF_TYPE_OUTCOME
 			refutes := a.OutcomeKind == attest.OutcomeKind_OUTCOME_KIND_REFUTED
-			if err := ms.k.Rep().OnOutcome(ctx, a.Attestor, refutes, a.TargetId, target.Attestor, target.Domain, target.SIssuance, targetIsOutcome, id); err != nil {
+			var propTargets []reputation.PropTarget
+			if !targetIsOutcome {
+				propTargets = ms.k.propTargetsFor(ctx, target)
+			}
+			if err := ms.k.Rep().OnOutcome(ctx, a.Attestor, refutes, a.TargetId, target.Attestor, target.Domain, target.SIssuance, targetIsOutcome, propTargets, id); err != nil {
 				return nil, err
 			}
 		case isEndorsement:
