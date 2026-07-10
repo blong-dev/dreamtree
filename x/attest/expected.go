@@ -19,4 +19,6 @@ type ReputationKeeper interface {
 	OnAttestation(ctx context.Context, signer, domain string, proofType int32, specificityBps uint32, sourceAttID uint64) error
 	// OnOutcome — an OUTCOME attestation (validate/refute of targetAttID).
 	OnOutcome(ctx context.Context, reporter string, refutes bool, targetAttID uint64, targetAttestor, targetDomain string, targetSIssuance math.LegacyDec, targetIsOutcome bool, sourceAttID uint64) error
+	// OnEndorsement — A (endorser) vouches for B (endorsed) in a domain.
+	OnEndorsement(ctx context.Context, endorser, endorsed, domain string, sourceAttID uint64) error
 }

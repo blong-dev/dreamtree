@@ -127,6 +127,35 @@ func (k Keeper) OnOutcome(ctx context.Context, reporter string, refutes bool, ta
 	return err
 }
 
+// OnEndorsement credits the endorsed B with endorse_inherit × the endorser's
+// rational standing, in the ENDORSEMENT bucket, through a review window. Because
+// StandingOf already sums endorsement contributions, geometric multi-hop
+// inheritance and the 2-hop cred recursion emerge automatically — and terminate
+// (contributions are snapshots, not runtime recursion). Self-endorsement is
+// rejected upstream, so a shell cannot bootstrap itself.
+func (k Keeper) OnEndorsement(ctx context.Context, endorser, endorsed, domain string, sourceAttID uint64) error {
+	p, err := k.Params.Get(ctx)
+	if err != nil {
+		return err
+	}
+	magnitude := d(p.EndorseInherit).Mul(k.StandingOf(ctx, endorser, domain))
+	if !magnitude.IsPositive() {
+		return nil
+	}
+	// Settles identically to a bet: credit `endorsed`, ENDORSEMENT bucket.
+	_, err = k.enqueue(ctx, reputation.PendingEvent{
+		Kind:          reputation.PendingKind_PENDING_KIND_BET,
+		Signer:        endorsed,
+		Domain:        domain,
+		RateBucket:    reputation.RateBucket_RATE_BUCKET_ENDORSEMENT,
+		BaseMagnitude: magnitude,
+		Corroboration: math.LegacyZeroDec(),
+		Refutation:    math.LegacyZeroDec(),
+		SourceAttId:   sourceAttID,
+	})
+	return err
+}
+
 func specDec(bps uint32) math.LegacyDec {
 	if bps == 0 {
 		bps = 10000

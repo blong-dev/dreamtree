@@ -16,6 +16,8 @@ func (p Params) typeWeightDec(pt ProofType) math.LegacyDec {
 		bps = p.WeightReplication
 	case ProofType_PROOF_TYPE_OUTCOME:
 		bps = p.WeightOutcome
+	case ProofType_PROOF_TYPE_ENDORSEMENT:
+		return math.LegacyOneDec() // endorsements carry full weight (no param)
 	}
 	return math.LegacyNewDec(int64(bps)).QuoInt64(10000)
 }

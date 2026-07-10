@@ -9,4 +9,6 @@ var (
 	ErrBadOutcome     = errors.Register(ModuleName, 5, "an OUTCOME attestation requires outcome_kind and an existing target_id")
 	ErrOutcomeFields  = errors.Register(ModuleName, 6, "outcome_kind/target_id may only be set on an OUTCOME attestation")
 	ErrTargetNotFound = errors.Register(ModuleName, 7, "target attestation not found")
+	ErrBadEndorsed    = errors.Register(ModuleName, 8, "an ENDORSEMENT subject must be a valid address")
+	ErrSelfEndorse    = errors.Register(ModuleName, 9, "cannot endorse yourself")
 )

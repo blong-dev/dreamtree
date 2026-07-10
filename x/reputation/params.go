@@ -26,6 +26,7 @@ func DefaultParams() Params {
 		ReviewWindowBase:      "1.0", // days
 		ReviewWindowThreshold: "1.0",
 		CoattestorWeight:      "0.25",
+		EndorseInherit:        "0.25",
 	}
 }
 
@@ -50,7 +51,7 @@ func (p Params) Validate() error {
 		"attest_bet_scale": p.AttestBetScale, "neg_asymmetry": p.NegAsymmetry,
 		"outcome_beta": p.OutcomeBeta, "outcome_cap_mult": p.OutcomeCapMult,
 		"review_window_base": p.ReviewWindowBase, "review_window_threshold": p.ReviewWindowThreshold,
-		"coattestor_weight": p.CoattestorWeight,
+		"coattestor_weight": p.CoattestorWeight, "endorse_inherit": p.EndorseInherit,
 	} {
 		if err := mustPos(name, v); err != nil {
 			return err

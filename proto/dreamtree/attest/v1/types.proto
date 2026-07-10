@@ -17,6 +17,7 @@ enum ProofType {
   PROOF_TYPE_USE = 3;          // cites/depends-on prior work
   PROOF_TYPE_REPLICATION = 4;  // independent reproduction
   PROOF_TYPE_OUTCOME = 5;      // validates/refutes an earlier attestation
+  PROOF_TYPE_ENDORSEMENT = 6;  // A vouches for B (subject = the endorsed entity)
 }
 
 // OutcomeKind — set only when proof_type = OUTCOME.

@@ -90,6 +90,10 @@ message Params {
   string review_window_threshold = 16;  // "1.0"
   // co-attestor propagation: another attestor on the same work moves this × M_O.
   string coattestor_weight = 17;        // "0.25"
+  // endorsement inheritance: B inherits this × endorser's standing (geometric
+  // multi-hop decay + 2-hop cred recursion fall out of standing including
+  // endorsement contributions).
+  string endorse_inherit = 18;          // "0.25"
 }
 
 // PendingKind — what a pending event settles into.

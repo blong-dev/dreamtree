@@ -47,6 +47,16 @@ func (ms msgServer) Attest(ctx context.Context, msg *attest.MsgAttest) (*attest.
 		return nil, attest.ErrOutcomeFields
 	}
 
+	isEndorsement := msg.ProofType == attest.ProofType_PROOF_TYPE_ENDORSEMENT
+	if isEndorsement {
+		if _, err := ms.k.addressCodec.StringToBytes(msg.Subject); err != nil {
+			return nil, attest.ErrBadEndorsed
+		}
+		if strings.EqualFold(msg.Subject, msg.Attestor) {
+			return nil, attest.ErrSelfEndorse
+		}
+	}
+
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	id, err := ms.k.Seq.Next(ctx)
 	if err != nil {
@@ -104,14 +114,21 @@ func (ms msgServer) Attest(ctx context.Context, msg *attest.MsgAttest) (*attest.
 
 	// Notify the reputation seam (no-op if x/reputation is absent).
 	if ms.k.Rep() != nil {
-		if isOutcome {
+		switch {
+		case isOutcome:
 			targetIsOutcome := target.ProofType == attest.ProofType_PROOF_TYPE_OUTCOME
 			refutes := a.OutcomeKind == attest.OutcomeKind_OUTCOME_KIND_REFUTED
 			if err := ms.k.Rep().OnOutcome(ctx, a.Attestor, refutes, a.TargetId, target.Attestor, target.Domain, target.SIssuance, targetIsOutcome, id); err != nil {
 				return nil, err
 			}
-		} else if err := ms.k.Rep().OnAttestation(ctx, a.Attestor, a.Domain, int32(a.ProofType), a.SpecificityBps, id); err != nil {
-			return nil, err
+		case isEndorsement:
+			if err := ms.k.Rep().OnEndorsement(ctx, a.Attestor, a.Subject, a.Domain, id); err != nil {
+				return nil, err
+			}
+		default:
+			if err := ms.k.Rep().OnAttestation(ctx, a.Attestor, a.Domain, int32(a.ProofType), a.SpecificityBps, id); err != nil {
+				return nil, err
+			}
 		}
 	}
 	return &attest.MsgAttestResponse{Id: id, Height: a.Height}, nil
