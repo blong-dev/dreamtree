@@ -49,10 +49,6 @@ func loadParamsF(p attest.Params) paramsF {
 	}
 }
 
-// reputation is the R(signer,domain,t) input. v0: flat baseline_kyc for every
-// signer. x/reputation replaces this with the accumulated+decayed state.
-func (pf paramsF) reputation(_ string, _ string) float64 { return pf.baselineKyc }
-
 func specificityFactor(bps uint32) float64 {
 	if bps == 0 {
 		return 1.0 // unset = fully specific
@@ -72,10 +68,19 @@ func (pf paramsF) decay(a attest.Attestation, now int64) float64 {
 	return math.Exp(-lam * years)
 }
 
-// rawStrength is S without the refutation term — used both directly and as the
-// weight a refuting outcome carries (breaks the refutation recursion).
-func (pf paramsF) rawStrength(a attest.Attestation, now int64) float64 {
-	return pf.reputation(a.Attestor, a.Domain) *
+// reputationOf resolves R(signer,domain) through the reputation seam, falling
+// back to baseline_kyc when x/reputation is not wired.
+func (k Keeper) reputationOf(ctx context.Context, pf paramsF, signer, domain string) float64 {
+	if k.rep != nil {
+		return k.rep.ReputationOf(ctx, signer, domain)
+	}
+	return pf.baselineKyc
+}
+
+// rawStrengthR is S without the refutation term, given a resolved R — used both
+// directly and as the weight a refuting outcome carries (breaks recursion).
+func (pf paramsF) rawStrengthR(a attest.Attestation, now int64, r float64) float64 {
+	return r *
 		specificityFactor(a.SpecificityBps) *
 		pf.weight[a.ProofType] *
 		pf.decay(a, now)
@@ -103,7 +108,8 @@ func (k Keeper) refutedFraction(ctx context.Context, id uint64, pf paramsF, now 
 		default:
 			return false, nil // VALIDATED does not reduce work strength
 		}
-		share := w * pf.rawStrength(out, now) / pf.sMax
+		rOut := k.reputationOf(ctx, pf, out.Attestor, out.Domain)
+		share := w * pf.rawStrengthR(out, now, rOut) / pf.sMax
 		if share > 1 {
 			share = 1
 		}
@@ -122,7 +128,8 @@ func (k Keeper) strength(ctx context.Context, a attest.Attestation, pf paramsF, 
 	if err != nil {
 		return 0, 0, err
 	}
-	return pf.rawStrength(a, now) * (1 - rf), rf, nil
+	r := k.reputationOf(ctx, pf, a.Attestor, a.Domain)
+	return pf.rawStrengthR(a, now, r) * (1 - rf), rf, nil
 }
 
 // workValue is the paper-shape aggregation over all non-outcome attestations on

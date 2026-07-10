@@ -82,7 +82,7 @@ func (qs queryServer) Strength(ctx context.Context, req *attest.QueryStrengthReq
 	return &attest.QueryStrengthResponse{
 		Id:              a.Id,
 		Strength:        dec(s),
-		Reputation:      dec(pf.reputation(a.Attestor, a.Domain)),
+		Reputation:      dec(qs.k.reputationOf(ctx, pf, a.Attestor, a.Domain)),
 		Specificity:     dec(specificityFactor(a.SpecificityBps)),
 		TypeWeight:      dec(pf.weight[a.ProofType]),
 		Decay:           dec(pf.decay(a, now)),

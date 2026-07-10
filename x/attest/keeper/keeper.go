@@ -23,7 +23,17 @@ type Keeper struct {
 	SubjectIndex  collections.KeySet[collections.Pair[string, uint64]]
 	AttestorIndex collections.KeySet[collections.Pair[string, uint64]]
 	TargetIndex   collections.KeySet[collections.Pair[uint64, uint64]]
+
+	// rep is the reputation seam; nil when x/reputation is absent (falls back
+	// to baseline_kyc for R, and a no-op OnAttestation).
+	rep attest.ReputationKeeper
 }
+
+// SetReputationKeeper wires the reputation seam (called once at app assembly).
+func (k *Keeper) SetReputationKeeper(rep attest.ReputationKeeper) { k.rep = rep }
+
+// Rep returns the wired reputation seam (nil when x/reputation is absent).
+func (k Keeper) Rep() attest.ReputationKeeper { return k.rep }
 
 func NewKeeper(cdc codec.BinaryCodec, addressCodec address.Codec, storeService storetypes.KVStoreService, authority string) Keeper {
 	if _, err := addressCodec.StringToBytes(authority); err != nil {

@@ -1,0 +1,91 @@
+syntax = "proto3";
+package dreamtree.reputation.v1;
+
+option go_package = "github.com/blong-dev/dreamtree/x/reputation";
+
+import "gogoproto/gogo.proto";
+import "amino/amino.proto";
+import "cosmos_proto/cosmos.proto";
+
+// RateBucket — the decay class a contribution decays at (read-time projection).
+enum RateBucket {
+  RATE_BUCKET_UNSPECIFIED = 0;
+  RATE_BUCKET_PERMANENT = 1;    // never decays (origin authorship)
+  RATE_BUCKET_DURABLE_25Y = 2;  // validated outcomes — ~25yr half-life (P3)
+  RATE_BUCKET_RIGOR = 3;        // ~17yr
+  RATE_BUCKET_USE = 4;          // ~9yr
+  RATE_BUCKET_REPLICATION = 5;  // ~45yr
+  RATE_BUCKET_ENDORSEMENT = 6;  // endorsement inheritance (P4)
+}
+
+// Contribution — an immutable, settled increment to a signer's reputation in a
+// domain. This is the ONLY reputation state stored. R(j,k,t) is a projection
+// over these (baseline + Σ magnitude·relevance·decay), computed at read time.
+// magnitude is fixed-point (LegacyDec) because settlement is consensus math;
+// the exponential decay applied to it is float, read-side only.
+message Contribution {
+  option (amino.name) = "dreamtree/x/reputation/Contribution";
+
+  uint64 id = 1;
+  // signer — whose reputation this moves (j).
+  string signer = 2 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // domain — the 5-level taxonomy path (k).
+  string domain = 3;
+  // magnitude — signed fixed-point increment (may be negative for reversals).
+  string magnitude = 4 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+  RateBucket rate_bucket = 5;
+  // settled_at — block time (unix) the contribution took effect; decay clock start.
+  int64 settled_at = 6;
+  // source_att_id — the attestation/outcome that produced it (provenance; 0 = none).
+  uint64 source_att_id = 7;
+  int64 height = 8;
+}
+
+// DomainConfig — per-domain governance tiers (saturation + obsolescence).
+// Absent domains use the standard defaults.
+message DomainConfig {
+  string path = 1;
+  // saturation_point S — log-dampening threshold (small 5 / standard 10 / large 50).
+  string saturation_point = 2 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+  // obsolescence_multiplier — scales decay (foundational .3 / standard 1 / frontier 3).
+  string obsolescence_multiplier = 3 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+}
+
+// Params — the reputation levers (parameters.md). Decimal strings are read-side
+// (decay/saturation) inputs; kept as strings, parsed in the projection.
+message Params {
+  string baseline_kyc = 1;              // "1.0"
+  string dampening_k = 2;               // "5.0" — global log-dampening strength
+  string saturation_standard = 3;       // "10.0" — default S tier
+  string obsolescence_standard = 4;     // "1.0" — default obsolescence
+
+  // per-bucket decay λ (per year); origin/permanent = 0
+  string lambda_permanent = 5;          // "0.0"
+  string lambda_durable = 6;            // "0.0277" — ln2/25 (~25yr half-life)
+  string lambda_rigor = 7;              // "0.04"
+  string lambda_use = 8;                // "0.08"
+  string lambda_replication = 9;        // "0.015"
+  string lambda_endorsement = 10;       // "0.08"
+
+  // P1 unvalidated-bet magnitude: an attestation contributes this × (spec × type_weight).
+  string attest_bet_scale = 11;         // "0.1" — small; the big moves come from validated outcomes (P3)
+}
+
+message GenesisState {
+  Params params = 1 [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+  repeated Contribution contributions = 2 [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+  repeated DomainConfig domain_configs = 3 [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+  uint64 next_id = 4;
+}

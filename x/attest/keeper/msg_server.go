@@ -87,6 +87,13 @@ func (ms msgServer) Attest(ctx context.Context, msg *attest.MsgAttest) (*attest.
 		sdk.NewAttribute("proof_type", a.ProofType.String()),
 		sdk.NewAttribute("domain", a.Domain),
 	))
+
+	// Notify the reputation seam (no-op if x/reputation is absent).
+	if ms.k.Rep() != nil {
+		if err := ms.k.Rep().OnAttestation(ctx, a.Attestor, a.Domain, int32(a.ProofType), a.SpecificityBps, id); err != nil {
+			return nil, err
+		}
+	}
 	return &attest.MsgAttestResponse{Id: id, Height: a.Height}, nil
 }
 

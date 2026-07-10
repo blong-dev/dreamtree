@@ -1,0 +1,61 @@
+syntax = "proto3";
+package dreamtree.reputation.v1;
+
+option go_package = "github.com/blong-dev/dreamtree/x/reputation";
+
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "cosmos/query/v1/query.proto";
+import "google/api/annotations.proto";
+import "gogoproto/gogo.proto";
+import "amino/amino.proto";
+import "dreamtree/reputation/v1/types.proto";
+
+service Query {
+  // Reputation returns R(signer,domain,t) — the read projection (float).
+  rpc Reputation(QueryReputationRequest) returns (QueryReputationResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/dreamtree/reputation/v1/reputation/{signer}/{domain}";
+  }
+  // Contributions of a signer (optionally a domain), paginated.
+  rpc Contributions(QueryContributionsRequest) returns (QueryContributionsResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/dreamtree/reputation/v1/contributions/{signer}";
+  }
+  rpc DomainConfig(QueryDomainConfigRequest) returns (QueryDomainConfigResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/dreamtree/reputation/v1/domain-config/{path}";
+  }
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/dreamtree/reputation/v1/params";
+  }
+}
+
+message QueryReputationRequest {
+  string signer = 1;
+  string domain = 2;
+}
+message QueryReputationResponse {
+  string reputation = 1;       // R(j,k,t) — effective (post-saturation)
+  string raw = 2;              // pre-saturation raw R
+  uint32 contribution_count = 3;
+}
+
+message QueryContributionsRequest {
+  string signer = 1;
+  string domain = 2; // optional filter; empty = all domains
+  cosmos.base.query.v1beta1.PageRequest pagination = 3;
+}
+message QueryContributionsResponse {
+  repeated Contribution contributions = 1 [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+message QueryDomainConfigRequest { string path = 1; }
+message QueryDomainConfigResponse {
+  DomainConfig config = 1 [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+}
+
+message QueryParamsRequest {}
+message QueryParamsResponse {
+  Params params = 1 [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+}

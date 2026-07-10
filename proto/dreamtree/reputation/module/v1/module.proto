@@ -1,0 +1,13 @@
+syntax = "proto3";
+package dreamtree.reputation.module.v1;
+
+option go_package = "github.com/blong-dev/dreamtree/x/reputation";
+
+import "cosmos/app/v1alpha1/module.proto";
+
+message Module {
+  option (cosmos.app.v1alpha1.module) = {
+    go_import : "github.com/blong-dev/dreamtree/x/reputation"
+  };
+  string authority = 1;
+}

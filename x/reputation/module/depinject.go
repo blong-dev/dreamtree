@@ -10,21 +10,18 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
-	"github.com/blong-dev/dreamtree/x/attest"
-	"github.com/blong-dev/dreamtree/x/attest/keeper"
+	"github.com/blong-dev/dreamtree/x/reputation"
+	"github.com/blong-dev/dreamtree/x/reputation/keeper"
 )
 
 var _ appmodule.AppModule = AppModule{}
 
-// IsOnePerModuleType implements the depinject.OnePerModuleType interface.
 func (am AppModule) IsOnePerModuleType() {}
-
-// IsAppModule implements the appmodule.AppModule interface.
-func (am AppModule) IsAppModule() {}
+func (am AppModule) IsAppModule()        {}
 
 func init() {
 	appconfig.Register(
-		&attest.Module{},
+		&reputation.Module{},
 		appconfig.Provide(ProvideModule),
 	)
 }
@@ -36,10 +33,7 @@ type ModuleInputs struct {
 	StoreService store.KVStoreService
 	AddressCodec address.Codec
 
-	Config *attest.Module
-	// Rep is the reputation seam — optional so x/attest builds without
-	// x/reputation (then R falls back to baseline_kyc).
-	Rep attest.ReputationKeeper `optional:"true"`
+	Config *reputation.Module
 }
 
 type ModuleOutputs struct {
@@ -50,17 +44,11 @@ type ModuleOutputs struct {
 }
 
 func ProvideModule(in ModuleInputs) ModuleOutputs {
-	// default to governance as authority if not provided
 	authority := authtypes.NewModuleAddress("gov")
 	if in.Config.Authority != "" {
 		authority = authtypes.NewModuleAddressOrBech32Address(in.Config.Authority)
 	}
-
 	k := keeper.NewKeeper(in.Cdc, in.AddressCodec, in.StoreService, authority.String())
-	if in.Rep != nil {
-		k.SetReputationKeeper(in.Rep)
-	}
 	m := NewAppModule(in.Cdc, k)
-
 	return ModuleOutputs{Module: m, Keeper: k}
 }
