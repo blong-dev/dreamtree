@@ -57,8 +57,9 @@ func (k Keeper) StandingOf(ctx context.Context, signer, domain string) math.Lega
 	return sum
 }
 
-// credOf is a basic continuous cred: 1 + standing, so √cred grows with a
-// reporter's track record. (2-hop recursion is P4.)
+// credOf is the reporter's rational standing: baseline(1) for a fresh KYC signer,
+// higher with track record. At baseline √cred=1 ⟹ M_O≈S (the spec's β=1
+// calibration). (2-hop recursion is P4.)
 func (k Keeper) credOf(ctx context.Context, reporter, domain string) math.LegacyDec {
-	return math.LegacyOneDec().Add(k.StandingOf(ctx, reporter, domain))
+	return k.StandingOf(ctx, reporter, domain)
 }

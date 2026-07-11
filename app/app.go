@@ -37,7 +37,6 @@ import (
 	_ "github.com/cosmos/cosmos-sdk/x/bank"           // import for side-effects
 	_ "github.com/cosmos/cosmos-sdk/x/consensus"      // import for side-effects
 	_ "github.com/cosmos/cosmos-sdk/x/distribution"   // import for side-effects
-	_ "github.com/cosmos/cosmos-sdk/x/mint"           // import for side-effects
 	_ "github.com/cosmos/cosmos-sdk/x/staking"        // import for side-effects
 
 	_ "github.com/blong-dev/dreamtree/x/photons/module" // import for side-effects

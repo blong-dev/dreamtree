@@ -64,6 +64,11 @@ func (k Keeper) OnOutcome(ctx context.Context, reporter string, refutes bool, ta
 	if err != nil {
 		return err
 	}
+	// Self-reports carry cred ≈ 0 (spec: Akerlof lemons) — a signer cannot
+	// validate/refute their own work (or counter their own outcome) for weight.
+	if reporter == targetAttestor {
+		return nil
+	}
 	// M_O = min(M_cap, β · S_issuance · √cred(reporter)).  M_cap = cap_mult · S_issuance.
 	cred := k.credOf(ctx, reporter, targetDomain)
 	sqrtCred, err := cred.ApproxSqrt()
@@ -101,7 +106,7 @@ func (k Keeper) OnOutcome(ctx context.Context, reporter string, refutes bool, ta
 	if openID, err := k.PendingByTarget.Get(ctx, targetAttID); err == nil {
 		pe, err := k.Pending.Get(ctx, openID)
 		if err == nil {
-			capPool := pe.BaseMagnitude.MulInt64(4)
+			capPool := d(p.OutcomeCapMult).Mul(pe.TargetSIssuance)
 			if refutes == pe.OutcomeRefutes {
 				pe.Corroboration = paperShapeAdd(pe.Corroboration, mO, capPool)
 			} else {

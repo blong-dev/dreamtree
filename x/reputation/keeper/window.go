@@ -114,7 +114,12 @@ func (k Keeper) EndBlock(ctx context.Context) error {
 
 // claimStrength integrates a window: paper-shape(base, corroboration) − neg×refutation, ≥ 0.
 func (k Keeper) claimStrength(p reputation.Params, pe reputation.PendingEvent) math.LegacyDec {
-	capM := pe.BaseMagnitude.MulInt64(4) // generous cap for the accumulator pool
+	// The paper-shape ceiling is M_cap = cap_mult × S_issuance (spec's hard 5×
+	// bound on total outcome magnitude — corroboration can't breach it).
+	capM := d(p.OutcomeCapMult).Mul(pe.TargetSIssuance)
+	if !capM.IsPositive() {
+		capM = pe.BaseMagnitude
+	}
 	support := paperShapeAdd(pe.BaseMagnitude, pe.Corroboration, capM)
 	net := support.Sub(d(p.NegAsymmetry).Mul(pe.Refutation))
 	if net.IsNegative() {
@@ -193,6 +198,14 @@ func (k Keeper) propagate(ctx context.Context, p reputation.Params, pe reputatio
 // reverse un-applies a settled outcome's contributions and penalizes its reporter.
 func (k Keeper) reverse(ctx context.Context, p reputation.Params, pe reputation.PendingEvent, strength math.LegacyDec) error {
 	overturned := pe.TargetAttId // the outcome attestation being countered
+	// Idempotent: an outcome can only be overturned once. Parallel counter-outcomes
+	// on the same outcome must not double-negate its contributions.
+	if has, _ := k.Reversed.Has(ctx, overturned); has {
+		return nil
+	}
+	if err := k.Reversed.Set(ctx, overturned); err != nil {
+		return err
+	}
 	rng := collections.NewPrefixedPairRange[uint64, uint64](overturned)
 	var toNegate []uint64
 	if err := k.SourceIndex.Walk(ctx, rng, func(key collections.Pair[uint64, uint64]) (bool, error) {

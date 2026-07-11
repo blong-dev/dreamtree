@@ -37,7 +37,12 @@ func (k Keeper) Purchase(ctx context.Context, buyer string, seedIDs []uint64) (*
 	}
 	var grants []grant
 
+	seen := make(map[uint64]struct{}, len(seedIDs))
 	for _, id := range seedIDs {
+		if _, dup := seen[id]; dup {
+			continue // dedup: a seed in the swath twice is bought (and paid) once
+		}
+		seen[id] = struct{}{}
 		dataType, producer, found := k.seeds.SeedInfo(ctx, id)
 		if !found || dataType == "" || producer == "" {
 			continue
@@ -55,7 +60,11 @@ func (k Keeper) Purchase(ctx context.Context, buyer string, seedIDs []uint64) (*
 		return nil, licenses.ErrNoPricedSeeds
 	}
 
-	toll := params.MarketplaceToll.MulInt64(int64(totalSale)).TruncateInt().Uint64()
+	// Toll only when a treasury is configured; uint64→Int (no int64 narrowing).
+	toll := uint64(0)
+	if params.TreasuryRecipient != "" {
+		toll = params.MarketplaceToll.MulInt(math.NewIntFromUint64(totalSale)).TruncateInt().Uint64()
+	}
 	total := totalSale + toll
 
 	// Fail early (deterministically) if the buyer can't cover the swath.

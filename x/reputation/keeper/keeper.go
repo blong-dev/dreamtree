@@ -28,6 +28,7 @@ type Keeper struct {
 	PendingSeq      collections.Sequence
 	CloseTimeIndex  collections.KeySet[collections.Pair[int64, uint64]]
 	PendingByTarget collections.Map[uint64, uint64]
+	Reversed        collections.KeySet[uint64] // overturned outcome att ids (idempotent reversal)
 }
 
 func NewKeeper(cdc codec.BinaryCodec, addressCodec address.Codec, storeService storetypes.KVStoreService, authority string) Keeper {
@@ -50,6 +51,7 @@ func NewKeeper(cdc codec.BinaryCodec, addressCodec address.Codec, storeService s
 		PendingSeq:      collections.NewSequence(sb, reputation.PendingSeqKey, "pending_seq"),
 		CloseTimeIndex:  collections.NewKeySet(sb, reputation.CloseTimeIndexKey, "close_time_index", collections.PairKeyCodec(collections.Int64Key, collections.Uint64Key)),
 		PendingByTarget: collections.NewMap(sb, reputation.PendingByTargetKey, "pending_by_target", collections.Uint64Key, collections.Uint64Value),
+		Reversed:        collections.NewKeySet(sb, reputation.ReversedKey, "reversed", collections.Uint64Key),
 	}
 	schema, err := sb.Build()
 	if err != nil {

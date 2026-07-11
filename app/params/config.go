@@ -10,9 +10,15 @@ import (
 )
 
 const (
+	// CoinUnit is the currency denom (photons = seeds; minted per data-seed).
 	CoinUnit = "photon"
+	// BondDenom is the SEPARATE, non-circulating validator-power denom. Photon is
+	// deliberately NOT the staking/gas token (no-ICO framing); validators bond
+	// dtvp. The live bond_denom is set in staking genesis (scripts/init.sh); this
+	// records the intended default.
+	BondDenom = "dtvp"
 
-	DefaultBondDenom = CoinUnit
+	DefaultBondDenom = BondDenom
 
 	// Bech32PrefixAccAddr defines the Bech32 prefix of an account's address.
 	Bech32PrefixAccAddr = "dream"
@@ -37,8 +43,12 @@ func init() {
 }
 
 func RegisterDenoms() {
-	err := sdk.RegisterDenom(CoinUnit, math.LegacyOneDec())
-	if err != nil {
+	// Register only the currency base unit. Do NOT register the bond denom here:
+	// two denoms at factor 1.0 make sdk's coin normalizer treat one as the base
+	// and rewrite the other (it silently converted "…dtvp" → photon, corrupting
+	// the gentx). dtvp is a valid denom without registration (registration is for
+	// display-unit conversion, which these integer base denoms don't need).
+	if err := sdk.RegisterDenom(CoinUnit, math.LegacyOneDec()); err != nil {
 		panic(err)
 	}
 }
