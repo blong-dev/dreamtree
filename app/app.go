@@ -39,11 +39,11 @@ import (
 	_ "github.com/cosmos/cosmos-sdk/x/distribution"   // import for side-effects
 	_ "github.com/cosmos/cosmos-sdk/x/staking"        // import for side-effects
 
-	_ "github.com/blong-dev/dreamtree/x/photons/module" // import for side-effects
-	_ "github.com/blong-dev/dreamtree/x/seeds/module" // import for side-effects
 	_ "github.com/blong-dev/dreamtree/x/attest/module"     // import for side-effects
 	_ "github.com/blong-dev/dreamtree/x/licenses/module"   // import for side-effects
+	_ "github.com/blong-dev/dreamtree/x/photons/module"    // import for side-effects
 	_ "github.com/blong-dev/dreamtree/x/reputation/module" // import for side-effects
+	_ "github.com/blong-dev/dreamtree/x/seeds/module"      // import for side-effects
 
 	// pulsar (protobuf-v2) descriptors — registered for client/v2 autocli
 	// (enum flags + typed query rendering).
