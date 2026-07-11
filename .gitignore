@@ -1,4 +1,5 @@
 # --- chain build artifacts ---
 /dreamtreed
+/anchord
 *.test
 /build/
