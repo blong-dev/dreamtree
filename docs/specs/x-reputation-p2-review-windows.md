@@ -159,6 +159,26 @@ The module becomes an `appmodule.HasEndBlocker`; `reputation` is added to
 
 ## 5. The integration formula (built now, inputs in P3)
 
+> **Superseded 2026-07-11 — see protocol-spec.md decision log (reputation math 3/3).**
+> The P2 draft below baked the 2× asymmetry *into* the window integration; that
+> was a latent double-2× (a defending report in a fraud-claim window would count
+> 4×). The shipped model integrates a **signed** verdict with the 2× moved out to
+> the contributor R-update only:
+>
+> ```
+> netVerdict(pe):                                  # x/reputation/keeper/window.go
+>     V_pool, R_pool = the two directions, each paper-shape(base+corrob), capped M_cap
+>     return V_pool − R_pool                        # SIGNED, 1× each — the verdict
+> settle(pe):
+>     contributor += net  (net≥0)  |  net·neg_asymmetry  (net<0)   # 2× lives here only
+>     co-attestors/endorsers += net · weight                        # 1×, signed
+>     every move floored at the recipient's current standing        # R∈[0,∞), no debt
+> ```
+>
+> A false accusation is thus neutralized by an *equal* defense (1:1), not 2:1.
+
+Original P2 draft (retained for history):
+
 ```
 integrate(base, corrob, refut):
     signal = base + corrob − neg_asymmetry × refut      # 2× asymmetry (parameters.md)
@@ -167,8 +187,7 @@ integrate(base, corrob, refut):
 
 Corroboration/refutation aggregate **paper-shape** as they arrive (P3):
 `agg' = cap·[1 − (1 − agg/cap)(1 − x/cap)]` — diminishing returns, Sybil-resistant,
-all `LegacyDec`. In P2 both accumulators are 0, so `final = base` — but the
-formula and the 2× asymmetry ship now, unit-tested, so P3 only has to *feed* it.
+all `LegacyDec`.
 
 ---
 

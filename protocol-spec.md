@@ -295,7 +295,7 @@ Diminishing returns; Sybil-resistant by construction.
 
 **Stand-ins** (levers, see [`parameters.md`](./parameters.md)):
 - `β = 1.0` — when the reporter is baseline-cred (KYC-verified but unaccumulated), `M_O ≈ S(att, t_issuance)`.
-- `M_cap = 5 · S(att, t_issuance)` — a single outcome can multiply the original bet by up to 5×, no more. Protects against single-event reputation kills; persistent bad behavior still tanks R because there's no floor.
+- `M_cap = 5 · S(att, t_issuance)` — a single outcome can multiply the original bet by up to 5×, no more. Protects against single-event reputation kills; persistent bad behavior still tanks R all the way to the zero floor (see [The floor is zero](#the-floor-is-zero-no-negative-debt)) — bounded, but bounded at nothing, not at a protected positive value.
 
 Both tunable, governance-evolved.
 
@@ -313,11 +313,13 @@ R_initial(j,k) = baseline_KYC                           // verified-human floor
 
 Newcomers inherit context (taught by signed humans, hired by entities with history). Early validated work is amplified to clear the dead zone. Established signers' far-higher saturation cap means this isn't unfair to them.
 
-### No reputation floor
+### The floor is zero (no negative debt)
 
-There is no math floor below which R cannot fall in a given domain. A domain-specific R can decay to zero — you become unable to attest *in that domain* with weight. This is correct: real reputations get destroyed when reality reveals enough.
+R in a domain lives on `[0, ∞)`. It can decay all the way to zero — you become unable to attest *in that domain* with weight — and reality revealing enough can drive it there. But **zero is the floor: R is never negative, and no negative "debt" is stored.** Zero talent is zero; there is nothing worse than nothing. Recovery is therefore genuinely *from zero* — one good act moves you back into positive standing, not against an accumulated hole you must first dig out of. (The 2× asymmetry still bites while you *have* standing to lose; it has nothing left to take at zero.)
 
-The structural protection is different: KYC verification means a verified human can always **start fresh in a new domain**. Refutation in one specialty doesn't bar you from any other. No global civil death; domain-specific loss of standing, plus the always-available ground of being a verified human entering a new domain.
+This is what actually stops character assassination. A refutation crowd is bounded twice over: **paper-shape** caps the whole outcome pool at `M_cap` (100 million "he's a bad golfer" claims aggregate to `M_cap`, not 100 million), and the **zero floor** means the bounded blow can at most take you to zero, never into an unrecoverable negative. Both bounds are load-bearing; either alone leaves a hole.
+
+The structural protection layers on top: KYC verification means a verified human can always **start fresh in a new domain**. Refutation in one specialty doesn't bar you from any other. No global civil death; domain-specific loss of standing, plus the always-available ground of being a verified human entering a new domain.
 
 ### Shell-institution resistance
 
@@ -739,7 +741,8 @@ In rough order of difficulty:
 
 - **2026-06-24 — Outcome magnitude `M_O` resolved (loose-thread close-out, reputation math 1/3).** Formula: `M_O = min(M_cap, β · S(att, t_issuance) · √cred(reporter))`. Five clarifications: (A) use `S(att, t_issuance)` not current — preserves appreciation-compounding for old-bets-paying-out; (B) multiple reporters aggregate paper-shape, not sum (Sybil-resistant); (C) self-reports cred ≈ 0 (Akerlof); (D) outcomes are attestations of `dt.outcome.*` — same review window + cred recursion + aggregation + time horizons as any attestation, special only in triggering the `M_O` chain; (E) outcomes can themselves be refuted — counter-outcome reverses original `M_O` and applies 2× penalty to the wrong reporter (asymmetry recurses). Stand-ins: `β = 1.0`, `M_cap = 5 · S(att, t_issuance)`. Added `dt.outcome.{validated,refuted,partial}@1` to `data-types.md`. parameters.md → v0.6.0.
 - **2026-06-24 — Saturation point resolved (reputation math 2/3).** Two-piece linear + log dampening: `effective_R = R` if `R ≤ S`, `effective_R = S + k · log(1 + (R−S)/S)` if `R > S`. **Per-domain `S` from day zero** (mirrors `domain.obsolescence_multiplier`), three tiers: `small=5`, `standard=10`, `large=50`. Global `k = 5`. Each domain node in the 5-level taxonomy tagged with one tier; v0 default `standard`. Prevents unbounded R accumulation while preserving rank-ordering at high R. parameters.md → v0.7.0.
+- **2026-07-11 — Refutation-window integration + zero floor resolved (reputation math 3/3).** A review window integrates a **signed** verdict `M_O_net = V_pool − R_pool`, where each pool is a 1× paper-shape aggregate of its direction's reports, each capped at `M_cap`. The **2× negative asymmetry lives only at the contributor R-update** (`+M_O_net` validated / `2·M_O_net` refuted), never inside the window integration — so a defending report counts 1×, and a **false accusation is neutralized by an equal defense (1:1), not 2:1**. Co-attestors, endorsers, and the reversal penalty move at 1× (signed by the verdict). Fixes a latent double-2× (defenses in a fraud-claim window would have counted 4×, inverting Akerlof). **Zero floor made explicit and debtless**: every R move is capped at the recipient's current standing, so R can reach 0 but never go negative and no debt is stored — recovery is from 0. Paper-shape's `M_cap` (bounds crowd pile-on) plus the zero floor are the two load-bearing anti-assassination bounds. Implemented in `x/reputation/keeper/window.go` (`netVerdict` + `applyFloored`), deterministic unit tests in `window_test.go`. §"The floor is zero" rewritten to match.
 
 ---
 
-*Last updated: 2026-06-24 — reputation math 2/3 closed (M_O + saturation). Remaining in §Reputation Dynamics: cold-start ramp specifics. Open beyond: seed-size cap, storage-cost-oracle, endowment per-seed-vs-pooled, ingestion/endowment split among storers, access_cut_to_storers, on/off ramps, uptime/durability bond design, TEE-specifics, dual-license boundary, governance evolution, formal per-type JSON Schemas, receiver-key handoff API.*
+*Last updated: 2026-07-11 — reputation math 3/3 closed (refutation-window integration + zero floor). §Reputation Dynamics is fully resolved. Open beyond: seed-size cap, storage-cost-oracle, endowment per-seed-vs-pooled, ingestion/endowment split among storers, access_cut_to_storers, on/off ramps, uptime/durability bond design, TEE-specifics, dual-license boundary, governance evolution, formal per-type JSON Schemas, receiver-key handoff API.*
