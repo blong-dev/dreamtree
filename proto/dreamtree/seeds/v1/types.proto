@@ -54,6 +54,10 @@ message Seed {
 
   // committed_at is the block time (unix seconds) of the commit.
   int64 committed_at = 8;
+
+  // data_type is the dt.*@v type of the underlying record — the priceable type
+  // for the marketplace (per-type N_a). Empty for non-priceable commits.
+  string data_type = 9;
 }
 
 // GenesisState is the seeds state provided at genesis.

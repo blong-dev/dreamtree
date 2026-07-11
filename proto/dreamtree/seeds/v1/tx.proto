@@ -39,6 +39,9 @@ message MsgCommitSeed {
 
   // source_ref — opaque off-chain locator for the committed body.
   string source_ref = 5;
+
+  // data_type — the dt.*@v type of the underlying record (for marketplace pricing).
+  string data_type = 6;
 }
 
 // MsgCommitSeedResponse is the response type for the Msg/CommitSeed RPC.

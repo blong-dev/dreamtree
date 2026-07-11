@@ -60,6 +60,7 @@ func (ms msgServer) CommitSeed(ctx context.Context, msg *seeds.MsgCommitSeed) (*
 		Commitment:  msg.Commitment,
 		Kind:        msg.Kind,
 		SourceRef:   msg.SourceRef,
+		DataType:    msg.DataType,
 		Height:      sdkCtx.BlockHeight(),
 		CommittedAt: sdkCtx.BlockTime().Unix(),
 	}

@@ -1,0 +1,47 @@
+syntax = "proto3";
+package dreamtree.licenses.v1;
+
+option go_package = "github.com/blong-dev/dreamtree/x/licenses";
+
+import "gogoproto/gogo.proto";
+import "amino/amino.proto";
+import "cosmos_proto/cosmos.proto";
+
+// Params — the marketplace levers (economics.* in parameters.md). Per-type
+// prices N_a are NOT here — they are market outcomes, not levers.
+message Params {
+  option (amino.name) = "dreamtree/x/licenses/Params";
+
+  // marketplace_toll — infrastructure cut on each sale (5%), added atop N_a.
+  string marketplace_toll = 1 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+  // access_duration_days — how long one purchase buys access (default 1).
+  uint64 access_duration_days = 2;
+  // treasury_recipient — where the toll goes (DreamTree infrastructure funding).
+  string treasury_recipient = 3 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+}
+
+// TypePrice — the current market rate N_a for a data type, in photons. Uniform
+// across every creator of the type (creator_equality_within_type). v0: set by
+// authority as a market stand-in; real price discovery is a later mechanism.
+message TypePrice {
+  string data_type = 1;
+  uint64 price = 2; // N_a, whole photons
+}
+
+// AccessGrant — a buyer's time-bound access to a seed, bought at a sale.
+message AccessGrant {
+  string buyer = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  uint64 seed_id = 2;
+  int64 expires_at = 3; // block time (unix) after which access lapses
+  uint64 price_paid = 4;
+}
+
+message GenesisState {
+  Params params = 1 [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+  repeated TypePrice type_prices = 2 [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+  repeated AccessGrant access_grants = 3 [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+}

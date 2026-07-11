@@ -43,11 +43,13 @@ import (
 	_ "github.com/blong-dev/dreamtree/x/photons/module" // import for side-effects
 	_ "github.com/blong-dev/dreamtree/x/seeds/module" // import for side-effects
 	_ "github.com/blong-dev/dreamtree/x/attest/module"     // import for side-effects
+	_ "github.com/blong-dev/dreamtree/x/licenses/module"   // import for side-effects
 	_ "github.com/blong-dev/dreamtree/x/reputation/module" // import for side-effects
 
 	// pulsar (protobuf-v2) descriptors — registered for client/v2 autocli
 	// (enum flags + typed query rendering).
 	_ "github.com/blong-dev/dreamtree/api/dreamtree/attest/v1"
+	_ "github.com/blong-dev/dreamtree/api/dreamtree/licenses/v1"
 	_ "github.com/blong-dev/dreamtree/api/dreamtree/photons/v1"
 	_ "github.com/blong-dev/dreamtree/api/dreamtree/reputation/v1"
 	_ "github.com/blong-dev/dreamtree/api/dreamtree/seeds/v1"

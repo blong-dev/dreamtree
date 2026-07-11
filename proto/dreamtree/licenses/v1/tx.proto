@@ -1,0 +1,50 @@
+syntax = "proto3";
+package dreamtree.licenses.v1;
+
+option go_package = "github.com/blong-dev/dreamtree/x/licenses";
+
+import "cosmos/msg/v1/msg.proto";
+import "gogoproto/gogo.proto";
+import "amino/amino.proto";
+import "cosmos_proto/cosmos.proto";
+import "dreamtree/licenses/v1/types.proto";
+
+service Msg {
+  option (cosmos.msg.v1.service) = true;
+  // Purchase buys time-bound access to a set of seeds at their type rates.
+  rpc Purchase(MsgPurchase) returns (MsgPurchaseResponse);
+  // SetTypePrice records the market rate for a type (v0 market stand-in).
+  rpc SetTypePrice(MsgSetTypePrice) returns (MsgSetTypePriceResponse);
+  rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
+}
+
+message MsgPurchase {
+  option (cosmos.msg.v1.signer) = "buyer";
+  option (amino.name) = "dreamtree/x/licenses/MsgPurchase";
+  string buyer = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  repeated uint64 seed_ids = 2; // the swath (resolved off-chain by metadata query)
+}
+message MsgPurchaseResponse {
+  uint64 producers_paid = 1;   // total photons routed to producers (Σ N_a)
+  uint64 toll = 2;             // photons to treasury
+  uint64 total_paid = 3;      // buyer outlay = producers_paid + toll
+  uint32 seeds_purchased = 4; // priced seeds actually bought
+  int64 access_expires_at = 5;
+}
+
+message MsgSetTypePrice {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "dreamtree/x/licenses/MsgSetTypePrice";
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  string data_type = 2;
+  uint64 price = 3;
+}
+message MsgSetTypePriceResponse {}
+
+message MsgUpdateParams {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "dreamtree/x/licenses/MsgUpdateParams";
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  Params params = 2 [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+}
+message MsgUpdateParamsResponse {}

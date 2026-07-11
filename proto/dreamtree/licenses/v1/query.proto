@@ -1,0 +1,42 @@
+syntax = "proto3";
+package dreamtree.licenses.v1;
+
+option go_package = "github.com/blong-dev/dreamtree/x/licenses";
+
+import "cosmos/query/v1/query.proto";
+import "google/api/annotations.proto";
+import "gogoproto/gogo.proto";
+import "amino/amino.proto";
+import "dreamtree/licenses/v1/types.proto";
+
+service Query {
+  rpc TypePrice(QueryTypePriceRequest) returns (QueryTypePriceResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/dreamtree/licenses/v1/price/{data_type}";
+  }
+  // Access reports whether a buyer currently holds access to a seed.
+  rpc Access(QueryAccessRequest) returns (QueryAccessResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/dreamtree/licenses/v1/access/{buyer}/{seed_id}";
+  }
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/dreamtree/licenses/v1/params";
+  }
+}
+
+message QueryTypePriceRequest { string data_type = 1; }
+message QueryTypePriceResponse { uint64 price = 1; bool priced = 2; }
+
+message QueryAccessRequest {
+  string buyer = 1;
+  uint64 seed_id = 2;
+}
+message QueryAccessResponse {
+  bool has_access = 1;
+  int64 expires_at = 2;
+}
+
+message QueryParamsRequest {}
+message QueryParamsResponse {
+  Params params = 1 [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+}

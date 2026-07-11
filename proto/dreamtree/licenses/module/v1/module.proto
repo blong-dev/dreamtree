@@ -1,0 +1,13 @@
+syntax = "proto3";
+package dreamtree.licenses.module.v1;
+
+option go_package = "github.com/blong-dev/dreamtree/x/licenses";
+
+import "cosmos/app/v1alpha1/module.proto";
+
+message Module {
+  option (cosmos.app.v1alpha1.module) = {
+    go_import : "github.com/blong-dev/dreamtree/x/licenses"
+  };
+  string authority = 1;
+}
