@@ -143,8 +143,8 @@ func (k Keeper) workValue(ctx context.Context, subject string, pf paramsF, now i
 		if err != nil {
 			return false, err
 		}
-		if a.ProofType == attest.ProofType_PROOF_TYPE_OUTCOME {
-			return false, nil // outcomes move reputation, not work value
+		if a.ProofType == attest.ProofType_PROOF_TYPE_OUTCOME || a.ProofType == attest.ProofType_PROOF_TYPE_ENDORSEMENT {
+			return false, nil // outcomes/endorsements move reputation, not work value
 		}
 		s, _, err := k.strength(ctx, a, pf, now)
 		if err != nil {

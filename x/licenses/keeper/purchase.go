@@ -60,12 +60,15 @@ func (k Keeper) Purchase(ctx context.Context, buyer string, seedIDs []uint64) (*
 		return nil, licenses.ErrNoPricedSeeds
 	}
 
-	// Toll only when a treasury is configured; uint64→Int (no int64 narrowing).
+	// Taxes apply only when a treasury is configured. marketplace_toll is
+	// buyer-side (added atop N_a); value_creation_tax is producer-side (deducted
+	// from each producer's earnings). uint64→Int (no int64 narrowing).
+	hasTreasury := params.TreasuryRecipient != ""
 	toll := uint64(0)
-	if params.TreasuryRecipient != "" {
+	if hasTreasury {
 		toll = params.MarketplaceToll.MulInt(math.NewIntFromUint64(totalSale)).TruncateInt().Uint64()
 	}
-	total := totalSale + toll
+	total := totalSale + toll // buyer outlay (the value-creation tax comes out of producers)
 
 	// Fail early (deterministically) if the buyer can't cover the swath.
 	bal := k.bank.GetBalance(ctx, buyerAddr, licenses.PhotonDenom)
@@ -73,27 +76,38 @@ func (k Keeper) Purchase(ctx context.Context, buyer string, seedIDs []uint64) (*
 		return nil, licenses.ErrInsufficient.Wrapf("need %d, have %s", total, bal.Amount)
 	}
 
-	// Route to producers (sorted for determinism), then the toll to treasury.
+	// Route to producers (sorted for determinism), net of the value-creation
+	// tax; accumulate that tax + the toll to the treasury.
 	producers := make([]string, 0, len(producerTotals))
 	for p := range producerTotals {
 		producers = append(producers, p)
 	}
 	sort.Strings(producers)
+	valueTaxTotal := uint64(0)
 	for _, p := range producers {
 		pAddr, err := k.addressCodec.StringToBytes(p)
 		if err != nil {
 			return nil, err
 		}
-		if err := k.bank.SendCoins(ctx, buyerAddr, pAddr, coins(producerTotals[p])); err != nil {
-			return nil, err
+		gross := producerTotals[p]
+		vct := uint64(0)
+		if hasTreasury {
+			vct = params.ValueCreationTax.MulInt(math.NewIntFromUint64(gross)).TruncateInt().Uint64()
+		}
+		valueTaxTotal += vct
+		if net := gross - vct; net > 0 {
+			if err := k.bank.SendCoins(ctx, buyerAddr, pAddr, coins(net)); err != nil {
+				return nil, err
+			}
 		}
 	}
-	if toll > 0 && params.TreasuryRecipient != "" {
+	treasuryTotal := toll + valueTaxTotal
+	if treasuryTotal > 0 && hasTreasury {
 		tAddr, err := k.addressCodec.StringToBytes(params.TreasuryRecipient)
 		if err != nil {
 			return nil, err
 		}
-		if err := k.bank.SendCoins(ctx, buyerAddr, tAddr, coins(toll)); err != nil {
+		if err := k.bank.SendCoins(ctx, buyerAddr, tAddr, coins(treasuryTotal)); err != nil {
 			return nil, err
 		}
 	}
@@ -107,16 +121,17 @@ func (k Keeper) Purchase(ctx context.Context, buyer string, seedIDs []uint64) (*
 		}
 	}
 
+	producersPaid := totalSale - valueTaxTotal
 	sdk.UnwrapSDKContext(ctx).EventManager().EmitEvent(sdk.NewEvent(
 		"seed_access_purchased",
 		sdk.NewAttribute("buyer", buyer),
 		sdk.NewAttribute("seeds", uintToStr(uint64(bought))),
-		sdk.NewAttribute("producers_paid", uintToStr(totalSale)),
-		sdk.NewAttribute("toll", uintToStr(toll)),
+		sdk.NewAttribute("producers_paid", uintToStr(producersPaid)),
+		sdk.NewAttribute("treasury", uintToStr(treasuryTotal)),
 	))
 	return &licenses.MsgPurchaseResponse{
-		ProducersPaid:   totalSale,
-		Toll:            toll,
+		ProducersPaid:   producersPaid,
+		Toll:            treasuryTotal,
 		TotalPaid:       total,
 		SeedsPurchased:  bought,
 		AccessExpiresAt: expires,

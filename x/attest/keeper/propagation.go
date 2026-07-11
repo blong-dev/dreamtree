@@ -2,9 +2,11 @@ package keeper
 
 import (
 	"context"
+	"fmt"
 
 	"cosmossdk.io/collections"
 	"cosmossdk.io/math"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/blong-dev/dreamtree/x/attest"
 	reputation "github.com/blong-dev/dreamtree/x/reputation"
@@ -53,6 +55,15 @@ func (k Keeper) propTargetsFor(ctx context.Context, target attest.Attestation) [
 		})
 		return len(out) >= maxCoAttestors, nil
 	})
+	if len(out) >= maxCoAttestors {
+		// No silent truncation — surface that a work's fan-out exceeded the cap
+		// so the under-propagation is observable.
+		sdk.UnwrapSDKContext(ctx).EventManager().EmitEvent(sdk.NewEvent(
+			"propagation_truncated",
+			sdk.NewAttribute("target_id", fmt.Sprintf("%d", target.Id)),
+			sdk.NewAttribute("cap", fmt.Sprintf("%d", maxCoAttestors)),
+		))
+	}
 
 	// Endorsers of the contributor (ENDORSEMENT attestations with subject = the
 	// contributor's address) — the liability mirror of P4 inheritance.

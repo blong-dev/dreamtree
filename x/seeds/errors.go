@@ -10,5 +10,6 @@ var (
 	// ErrSourceRefTooLong is returned when the source ref exceeds the param bound.
 	ErrSourceRefTooLong = errors.Register(ModuleName, 4, "source_ref exceeds max length")
 	// ErrEmptyKind is returned when a commit carries no kind label.
-	ErrEmptyKind = errors.Register(ModuleName, 5, "kind must not be empty")
+	ErrEmptyKind        = errors.Register(ModuleName, 5, "kind must not be empty")
+	ErrCommitmentNotHex = errors.Register(ModuleName, 6, "commitment must be hex (a digest or Merkle root, not a body)")
 )

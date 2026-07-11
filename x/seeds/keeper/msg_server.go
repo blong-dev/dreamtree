@@ -31,6 +31,9 @@ func (ms msgServer) CommitSeed(ctx context.Context, msg *seeds.MsgCommitSeed) (*
 	if msg.Commitment == "" {
 		return nil, seeds.ErrEmptyCommitment
 	}
+	if !isHex(msg.Commitment) {
+		return nil, seeds.ErrCommitmentNotHex
+	}
 	if msg.Kind == "" {
 		return nil, seeds.ErrEmptyKind
 	}
@@ -107,4 +110,15 @@ func (ms msgServer) UpdateParams(ctx context.Context, msg *seeds.MsgUpdateParams
 		return nil, err
 	}
 	return &seeds.MsgUpdateParamsResponse{}, nil
+}
+
+// isHex reports whether s is non-empty and all hex digits (a commitment is a
+// digest/Merkle root, never a body).
+func isHex(s string) bool {
+	for _, c := range s {
+		if !((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
+			return false
+		}
+	}
+	return len(s) > 0
 }

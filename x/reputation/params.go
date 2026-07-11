@@ -24,7 +24,7 @@ func DefaultParams() Params {
 		OutcomeBeta:           "1.0",
 		OutcomeCapMult:        "5.0",
 		ReviewWindowBase:      "1.0", // days
-		ReviewWindowThreshold: "1.0",
+		ReviewWindowThreshold: "4.0", // tuned up: √ has a fat tail near 0, so a higher threshold shortens trivial-event windows toward "instant" (bets ~hours). √ can't fully match log's trivial-instant/large-weeks spread — revisit the curve or route bets around the window if the spread matters.
 		CoattestorWeight:      "0.25",
 		EndorseInherit:        "0.25",
 	}

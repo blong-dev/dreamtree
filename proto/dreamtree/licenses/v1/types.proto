@@ -20,8 +20,16 @@ message Params {
   ];
   // access_duration_days — how long one purchase buys access (default 1).
   uint64 access_duration_days = 2;
-  // treasury_recipient — where the toll goes (DreamTree infrastructure funding).
+  // treasury_recipient — where the toll + tax go (DreamTree infrastructure funding).
   string treasury_recipient = 3 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // value_creation_tax — a cut on the producer's sale revenue (infrastructure
+  // funding from the value the work created), distinct from the buyer-side
+  // marketplace_toll. Only applied when a treasury is configured.
+  string value_creation_tax = 4 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
 }
 
 // TypePrice — the current market rate N_a for a data type, in photons. Uniform

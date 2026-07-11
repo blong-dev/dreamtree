@@ -8,15 +8,19 @@ import (
 
 func DefaultParams() Params {
 	return Params{
-		MarketplaceToll:    math.LegacyMustNewDecFromStr("0.05"), // 5%
+		MarketplaceToll:    math.LegacyMustNewDecFromStr("0.05"), // 5% buyer-side
 		AccessDurationDays: 1,
-		TreasuryRecipient:  "", // set to dreamtree at launch
+		TreasuryRecipient:  "",                                    // set to dreamtree at launch
+		ValueCreationTax:   math.LegacyMustNewDecFromStr("0.005"), // 0.5% producer-side
 	}
 }
 
 func (p Params) Validate() error {
 	if p.MarketplaceToll.IsNegative() || p.MarketplaceToll.GT(math.LegacyOneDec()) {
 		return fmt.Errorf("marketplace_toll must be in [0,1]")
+	}
+	if p.ValueCreationTax.IsNegative() || p.ValueCreationTax.GT(math.LegacyOneDec()) {
+		return fmt.Errorf("value_creation_tax must be in [0,1]")
 	}
 	if p.AccessDurationDays == 0 {
 		return fmt.Errorf("access_duration_days must be > 0")
