@@ -20,7 +20,7 @@
 #   DTVP_BOND         dtvp the validator bonds via gentx (700000000; keep some liquid for gov)
 set -euo pipefail
 
-BIN=$(command -v dreamtreed || echo "$(go env GOPATH)/bin/dreamtreed")
+BIN=${DREAMTREED_BIN:-$(command -v dreamtreed || echo "$(go env GOPATH)/bin/dreamtreed")}
 CHAIN_ID=${CHAIN_ID:-dreamtree-1}
 DT_VALIDATOR_KEY=${DT_VALIDATOR_KEY:-dt-validator}
 KEYRING=${KEYRING:-test}
