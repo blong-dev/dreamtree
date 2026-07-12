@@ -36,5 +36,10 @@ import json, sys
 g, alice = sys.argv[1], sys.argv[2]
 d = json.load(open(g))
 d['app_state']['photons']['params']['storer_reward_recipient'] = alice
+# gov deposits must be in dtvp — the default min_deposit denom is "stake",
+# which does not exist on this chain, so governance would be unusable.
+gp = d['app_state']['gov']['params']
+gp['min_deposit'] = [{"denom": "dtvp", "amount": "10000000"}]
+gp['expedited_min_deposit'] = [{"denom": "dtvp", "amount": "50000000"}]
 json.dump(d, open(g, 'w'), indent=1)
 PY

@@ -32,12 +32,16 @@ marketplace prices and sells access → producers earn, treasury takes toll + ta
   for a newcomer's first N validated attestations (clear the dead zone). Not
   coded. Newcomers currently start at `baseline_kyc` + inherited endorsements
   only. Not launch-blocking; affects newcomer bootstrap fairness.
-- **`gov` module.** Not wired. `UpdateParams`/`SetDomainConfig`/`SetTypePrice`
-  handlers exist and are authority-gated, but there is no on-chain proposal
-  path — params are set at genesis / by the authority address. Every "lever,
-  governance-evolved" in the spec is genesis-set until gov lands.
+- **`gov` module — DONE 2026-07-12.** Wired (`app/app.yaml` + `app/app.go`);
+  the gov module account is the same authority the custom modules already trust,
+  so `MsgUpdateParams`/`SetDomainConfig`/`SetTypePrice` now route through
+  proposals. Proven end-to-end by `scripts/gov-proof.sh`: a proposal changed
+  `x/licenses` `marketplace_toll` 5%→8% on-chain via propose→vote→execute.
+  `scripts/init.sh` sets gov `min_deposit` in `dtvp` (the default `stake` denom
+  does not exist here — gov would otherwise be undepositable).
 - **`x/upgrade`.** Not wired. Fine for a fresh genesis; needed before the first
-  in-place upgrade (otherwise upgrades = new-genesis migrations).
+  in-place upgrade (otherwise upgrades = new-genesis migrations). Requires a new
+  `cosmossdk.io/x/upgrade` dependency.
 - **`slashing`.** Absent. Validator misbehavior (downtime, double-sign) is not
   penalized. Acceptable for a permissioned `dtvp`-bond v0; revisit before
   opening the validator set.
