@@ -32,6 +32,7 @@ message MsgAttest {
   uint32 specificity_bps = 5;
   OutcomeKind outcome_kind = 6; // OUTCOME only
   uint64 target_id = 7;         // OUTCOME only — the attestation being validated/refuted
+  string used_by = 8;           // USE only — subject of the new work that builds on `subject`
 }
 
 message MsgAttestResponse {

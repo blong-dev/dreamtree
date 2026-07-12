@@ -62,6 +62,13 @@ message Attestation {
     (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable) = false
   ];
+  // used_by — for a PROOF_TYPE_USE attestation, the subject of the *new* work
+  // that builds on / cites this attestation's `subject` (the prior work). The
+  // edge is directed used_by → subject. It lets a source's value be inflated in
+  // proportion to the success of the works built on it (creation-credit-forward
+  // as a value SIGNAL, never a hardwired compensation split). Empty for all
+  // other proof types; empty/unknown ⇒ no uplift. See docs/specs/citation-value.md.
+  string used_by = 12;
 }
 
 // Params — the levers from parameters.md. Weights in basis points; decay rates

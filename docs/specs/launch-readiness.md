@@ -75,23 +75,19 @@ required for the core value loop to run.
 
 ## Open decisions (parked)
 
-- **Creation-credit-forward — PARKED 2026-07-12 (do not build now).** The
-  idea: a boon realized by a derivative work B flows a share to its sources
-  A1..A4. NOT hardwired, by design — the manifesto (`03-architecture.md`) names
-  transitive compensation the unsolved hard problem, and hardwiring a fixed
-  royalty split would violate "the protocol informs; the market prices; we don't
-  dictate compensation" (spec §8). Decision (owner, 2026-07-12): do **not**
-  define compensation at this time. Two layers to keep distinct if revisited:
-  (a) **compensation** (photons flowing to sources) — parked indefinitely;
-  (b) **value signal** (a source's reputation/`V` rising when used) — this
-  already exists but is weak: a `USE` citation inflates the source's `V(A)` in
-  proportion to the *citer's* standing `R` × `WeightUse` (0.5) at citation time,
-  and does **not** scale with how successful the citing work B later becomes.
-  The compensation-free lever, if wanted later, is to weight a citation's
-  contribution to `V(A)` by `V(B)` / B's validated outcomes (eigenvector/
-  PageRank flavor) — and it can live entirely in the read-projection
-  (`x/attest/keeper/projection.go`), off consensus, so it carries no determinism
-  risk. Not started.
+- **Creation-credit-forward — split into two layers 2026-07-12:**
+  - **Value-signal layer — DONE 2026-07-12** (`docs/specs/citation-value.md`).
+    A `USE` attestation now carries the derivation edge (`used_by` = the new
+    work B; `subject` = prior work A), and A's value is uplifted by
+    `(1 + λ·V_base(B))` in the read-projection — a source's value rises with the
+    value of the works built on it. Off-consensus, non-recursive (one hop),
+    signal-only. Proven by `scripts/citation-proof.sh`. `λ` is a constant today
+    (TODO: promote to a governable attest param).
+  - **Compensation layer — PARKED indefinitely.** Photons flowing to sources.
+    NOT hardwired, by design — the manifesto names transitive compensation the
+    unsolved hard problem, and a fixed royalty split would violate "the protocol
+    informs; the market prices; we don't dictate compensation" (spec §8). Owner
+    decision 2026-07-12: do not define compensation now.
 
 
 - **Refutation friction to reach 0 — DECIDED 2026-07-12: enough friction, no

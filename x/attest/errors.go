@@ -11,4 +11,6 @@ var (
 	ErrTargetNotFound = errors.Register(ModuleName, 7, "target attestation not found")
 	ErrBadEndorsed    = errors.Register(ModuleName, 8, "an ENDORSEMENT subject must be a valid address")
 	ErrSelfEndorse    = errors.Register(ModuleName, 9, "cannot endorse yourself")
+	ErrUsedByNonUse   = errors.Register(ModuleName, 10, "used_by may only be set on a USE attestation")
+	ErrSelfUse        = errors.Register(ModuleName, 11, "used_by must differ from subject (a work cannot build on itself)")
 )

@@ -58,6 +58,17 @@ func (ms msgServer) Attest(ctx context.Context, msg *attest.MsgAttest) (*attest.
 		}
 	}
 
+	// used_by carries the citation edge (new work → this subject); USE-only, and
+	// a work cannot build on itself.
+	if msg.UsedBy != "" {
+		if msg.ProofType != attest.ProofType_PROOF_TYPE_USE {
+			return nil, attest.ErrUsedByNonUse
+		}
+		if msg.UsedBy == msg.Subject {
+			return nil, attest.ErrSelfUse
+		}
+	}
+
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	id, err := ms.k.Seq.Next(ctx)
 	if err != nil {
@@ -88,6 +99,7 @@ func (ms msgServer) Attest(ctx context.Context, msg *attest.MsgAttest) (*attest.
 		IssuedAt:       sdkCtx.BlockTime().Unix(),
 		Height:         sdkCtx.BlockHeight(),
 		SIssuance:      sIssuance,
+		UsedBy:         msg.UsedBy,
 	}
 	if err := ms.k.Attestations.Set(ctx, id, a); err != nil {
 		return nil, err
