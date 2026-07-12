@@ -12,6 +12,7 @@ import (
 	storetypes "cosmossdk.io/store/types"
 
 	clienthelpers "cosmossdk.io/client/v2/helpers"
+	upgradekeeper "cosmossdk.io/x/upgrade/keeper"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -33,6 +34,7 @@ import (
 
 	appv1alpha1 "cosmossdk.io/api/cosmos/app/v1alpha1"
 	_ "cosmossdk.io/api/cosmos/tx/config/v1"          // import for side-effects
+	_ "cosmossdk.io/x/upgrade"                        // import for side-effects
 	_ "github.com/cosmos/cosmos-sdk/x/auth"           // import for side-effects
 	_ "github.com/cosmos/cosmos-sdk/x/auth/tx/config" // import for side-effects
 	_ "github.com/cosmos/cosmos-sdk/x/bank"           // import for side-effects
@@ -83,6 +85,7 @@ type DreamtreeApp struct {
 	StakingKeeper         *stakingkeeper.Keeper
 	DistrKeeper           distrkeeper.Keeper
 	GovKeeper             *govkeeper.Keeper
+	UpgradeKeeper         *upgradekeeper.Keeper
 	ConsensusParamsKeeper consensuskeeper.Keeper
 
 	// simulation manager
@@ -144,6 +147,7 @@ func NewDreamtreeApp(
 		&app.StakingKeeper,
 		&app.DistrKeeper,
 		&app.GovKeeper,
+		&app.UpgradeKeeper,
 		&app.ConsensusParamsKeeper,
 	); err != nil {
 		return nil, err

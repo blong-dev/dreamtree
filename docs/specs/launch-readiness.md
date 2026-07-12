@@ -39,9 +39,12 @@ marketplace prices and sells access → producers earn, treasury takes toll + ta
   `x/licenses` `marketplace_toll` 5%→8% on-chain via propose→vote→execute.
   `scripts/init.sh` sets gov `min_deposit` in `dtvp` (the default `stake` denom
   does not exist here — gov would otherwise be undepositable).
-- **`x/upgrade`.** Not wired. Fine for a fresh genesis; needed before the first
-  in-place upgrade (otherwise upgrades = new-genesis migrations). Requires a new
-  `cosmossdk.io/x/upgrade` dependency.
+- **`x/upgrade` — DONE 2026-07-12.** Wired (`cosmossdk.io/x/upgrade` v0.1.4;
+  app.yaml `pre_blockers: [upgrade]` + init_genesis + module config; app.go blank
+  import + `UpgradeKeeper` inject, whose `BaseAppOption` store-loader is applied
+  by the depinject builder). Proven by `scripts/upgrade-proof.sh`: a gov proposal
+  schedules a software-upgrade plan (`q upgrade plan` shows it). In-place upgrades
+  are now possible instead of new-genesis migrations.
 - **`slashing`.** Absent. Validator misbehavior (downtime, double-sign) is not
   penalized. Acceptable for a permissioned `dtvp`-bond v0; revisit before
   opening the validator set.

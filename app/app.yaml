@@ -6,12 +6,13 @@ modules:
       # During begin block slashing happens after distr.BeginBlocker so that
       # there is nothing left over in the validator fee pool, so as to keep the CanWithdrawInvariant invariant.
       # NOTE: staking module is required if HistoricalEntries param > 0
+      pre_blockers: [upgrade]
       begin_blockers: [distribution, staking]
       end_blockers: [gov, staking, reputation]
       # NOTE: The genutils module must occur after staking so that pools are properly initialized with tokens from genesis accounts.
       # NOTE: The genutils module must also occur after auth so that it can access the params from auth.
       # NOTE: gov after staking (needs bonded stake for voting power); before genutil.
-      init_genesis: [auth, bank, distribution, staking, gov, genutil, photons, seeds, attest, reputation, licenses]
+      init_genesis: [auth, bank, distribution, staking, gov, genutil, upgrade, photons, seeds, attest, reputation, licenses]
       override_store_keys:
         - module_name: auth
           kv_store_key: acc
@@ -61,6 +62,9 @@ modules:
   - name: reputation
     config:
       "@type": dreamtree.reputation.module.v1.Module
+  - name: upgrade
+    config:
+      "@type": cosmos.upgrade.module.v1.Module
   - name: consensus
     config:
       "@type": cosmos.consensus.module.v1.Module
