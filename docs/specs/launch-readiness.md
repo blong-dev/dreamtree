@@ -75,6 +75,25 @@ required for the core value loop to run.
 
 ## Open decisions (parked)
 
+- **Creation-credit-forward — PARKED 2026-07-12 (do not build now).** The
+  idea: a boon realized by a derivative work B flows a share to its sources
+  A1..A4. NOT hardwired, by design — the manifesto (`03-architecture.md`) names
+  transitive compensation the unsolved hard problem, and hardwiring a fixed
+  royalty split would violate "the protocol informs; the market prices; we don't
+  dictate compensation" (spec §8). Decision (owner, 2026-07-12): do **not**
+  define compensation at this time. Two layers to keep distinct if revisited:
+  (a) **compensation** (photons flowing to sources) — parked indefinitely;
+  (b) **value signal** (a source's reputation/`V` rising when used) — this
+  already exists but is weak: a `USE` citation inflates the source's `V(A)` in
+  proportion to the *citer's* standing `R` × `WeightUse` (0.5) at citation time,
+  and does **not** scale with how successful the citing work B later becomes.
+  The compensation-free lever, if wanted later, is to weight a citation's
+  contribution to `V(A)` by `V(B)` / B's validated outcomes (eigenvector/
+  PageRank flavor) — and it can live entirely in the read-projection
+  (`x/attest/keeper/projection.go`), off consensus, so it carries no determinism
+  risk. Not started.
+
+
 - **Refutation friction to reach 0 — DECIDED 2026-07-12: enough friction, no
   change.** `neg_asymmetry = 2.0`; reaching 0 requires only a paper-shape-
   bounded crowd (capped at `M_cap`) plus the review window, not an additional
