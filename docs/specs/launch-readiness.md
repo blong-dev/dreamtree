@@ -53,12 +53,18 @@ Storage/durability economics: seed-size cap, storage-cost oracle, endowment
 dual-license boundary, receiver-key handoff API. All spec-listed as open; none
 required for the core value loop to run.
 
-## Not yet exercised
+## Exercised end-to-end
 
-- **Full economic loop as one end-to-end devnet flow.** Components are each
-  devnet-proven individually (marketplace 20-seed purchase; reputation R moves;
-  photon mint). The whole chain seed→mint→attest→outcome→settle→sale→income has
-  not been run as a single scripted flow. Worth doing once before / at launch.
+- **Full economic loop — DONE 2026-07-12** (`scripts/e2e-loop.sh`). One scripted
+  throwaway devnet proves the whole chain as a single flow: commit seed → photon
+  mints to storer (peg holds, supply=3) → bob attests → alice validates the
+  outcome → review windows settle → bob's R moves to 1.55 (0.05 bet **+ 0.50
+  validated-outcome payout** in the DURABLE_25Y bucket) → marketplace sells
+  access (buyer −, producer +, supply unchanged). Exercises the refutation-
+  window settlement rewrite live (`settle → applyFloored → contributor +net`).
+- **Still worth adding**: a live refutation leg proving R floors at 0 (no debt)
+  under a bounded crowd. The floor math is unit-tested (`window_test.go`); the
+  live check is not yet scripted.
 
 ## Open decisions (parked)
 
