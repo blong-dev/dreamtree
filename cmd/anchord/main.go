@@ -11,22 +11,34 @@
 // the batched anchor volume. The upgrade to a native SDK client is tracked and
 // changes nothing about the HTTP contract below.
 //
+// Each accepted commit mints exactly one photon on-chain, so a duplicated or
+// retried POST must never broadcast twice. anchord is therefore idempotent: it
+// keys each request (explicit Idempotency-Key header, or an implicit hash of the
+// request fields) into a persistent local store, records the broadcast txhash
+// BEFORE polling for inclusion, and replays the cached result on retry.
+//
 // Contract:
 //
 //	POST /anchor            (Bearer ANCHORD_TOKEN)
 //	  { "subject": "...", "commitment": "<hex>", "kind": "...", "source_ref": "..." }
+//	  [ Idempotency-Key: <opaque> ]     (optional)
 //	  -> 200 { "id": 1, "txhash": "...", "height": 8 }
+//	  -> 200 + "X-Idempotent-Replay: true" when the result was replayed, not re-broadcast
 //	GET  /healthz           -> 200 { "ok": true, "height": <latest> }
 package main
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"crypto/subtle"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -44,6 +56,7 @@ type config struct {
 	fees      string
 	token     string
 	addr      string
+	state     string
 	maxCommit int
 }
 
@@ -54,22 +67,71 @@ func envOr(k, def string) string {
 	return def
 }
 
+// defaultStatePath resolves where the idempotency store lives when ANCHORD_STATE
+// is unset: under ANCHORD_HOME if set, otherwise under ~/.anchord.
+func defaultStatePath(home string) string {
+	base := home
+	if base == "" {
+		if h, err := os.UserHomeDir(); err == nil {
+			base = filepath.Join(h, ".anchord")
+		} else {
+			base = "."
+		}
+	}
+	return filepath.Join(base, "anchord-idem.json")
+}
+
 func loadConfig() config {
+	home := envOr("ANCHORD_HOME", "")
 	return config{
 		bin:       envOr("ANCHORD_BIN", "dreamtreed"),
 		key:       envOr("ANCHORD_KEY", "alice"),
 		keyring:   envOr("ANCHORD_KEYRING", "test"),
-		home:      envOr("ANCHORD_HOME", ""),
+		home:      home,
 		chainID:   envOr("ANCHORD_CHAIN_ID", "dreamtree-devnet-1"),
 		node:      envOr("ANCHORD_NODE", "tcp://localhost:26657"),
 		fees:      envOr("ANCHORD_FEES", "0photon"),
 		token:     os.Getenv("ANCHORD_TOKEN"),
 		addr:      envOr("ANCHORD_ADDR", ":9110"),
+		state:     envOr("ANCHORD_STATE", defaultStatePath(home)),
 		maxCommit: 512,
 	}
 }
 
 var hexRe = regexp.MustCompile(`^[0-9a-fA-F]+$`)
+
+// kindRe bounds the on-chain `kind` positional to a safe charset. Even with the
+// `--` argv terminator in place, keeping kind well-formed is defense in depth.
+var kindRe = regexp.MustCompile(`^[a-zA-Z0-9._:-]{1,128}$`)
+
+// validKind rejects empty, over-long, out-of-charset, and leading-dash values.
+// The leading-dash check matters because `-` is in the charset (e.g. names like
+// `a-b`) but a value like `--home` must never be mistaken for a flag.
+func validKind(k string) bool {
+	if strings.HasPrefix(k, "-") {
+		return false
+	}
+	return kindRe.MatchString(k)
+}
+
+// validField is a cheap sanity guard for flag VALUES (subject, source_ref):
+// bound the length, reject a leading dash, and reject control characters.
+func validField(v string, max int) bool {
+	if len(v) > max {
+		return false
+	}
+	if strings.HasPrefix(v, "-") {
+		return false
+	}
+	for _, r := range v {
+		if r < 0x20 {
+			return false
+		}
+	}
+	return true
+}
+
+const maxField = 1024
 
 type anchorReq struct {
 	Subject    string `json:"subject"`
@@ -84,17 +146,27 @@ type anchorResp struct {
 	Height int64  `json:"height"`
 }
 
+// txRunner executes the dreamtreed CLI and returns its combined output. It is an
+// injection point: production wires config.run, tests supply a fake so the
+// commit path can be exercised without a live chain.
+type txRunner func(args ...string) (string, error)
+
 type server struct {
-	cfg config
-	mu  sync.Mutex // serialize broadcasts: one account, one sequence
+	cfg          config
+	run          txRunner
+	store        *idemStore
+	pollInterval time.Duration
+	pollTimeout  time.Duration
+	mu           sync.Mutex // serialize broadcasts: one account, one sequence
 }
 
 func (s *server) authed(r *http.Request) bool {
 	if s.cfg.token == "" {
 		return true // no token configured: dev-only, open
 	}
-	h := r.Header.Get("Authorization")
-	return strings.TrimPrefix(h, "Bearer ") == s.cfg.token
+	provided := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
+	// Constant-time compare: don't leak the token via response timing.
+	return subtle.ConstantTimeCompare([]byte(provided), []byte(s.cfg.token)) == 1
 }
 
 // txArgs are the flags a `tx` subcommand needs (chain-id is tx-only).
@@ -112,6 +184,26 @@ func (c config) queryArgs() []string {
 	if c.home != "" {
 		args = append(args, "--home", c.home)
 	}
+	return args
+}
+
+// commitArgs builds the full argv for `tx seeds commit-seed`. All flags come
+// first, then a `--` terminator, then the positional commitment/kind. The
+// terminator stops cobra/pflag from interpreting a hostile `kind` (or, in the
+// worst case, commitment) as a flag.
+func (c config) commitArgs(req anchorReq) []string {
+	args := []string{"tx", "seeds", "commit-seed",
+		"--from", c.key, "--keyring-backend", c.keyring,
+		"--fees", c.fees, "--broadcast-mode", "sync", "-y", "--output", "json"}
+	if req.Subject != "" {
+		args = append(args, "--subject", req.Subject)
+	}
+	if req.SourceRef != "" {
+		args = append(args, "--source-ref", req.SourceRef)
+	}
+	args = append(args, c.txArgs()...)
+	// Everything past `--` is positional. commitment/kind can never be flags.
+	args = append(args, "--", req.Commitment, req.Kind)
 	return args
 }
 
@@ -144,39 +236,173 @@ type txResult struct {
 	} `json:"events"`
 }
 
-func (s *server) commit(req anchorReq) (anchorResp, error) {
+// idemStatus values for a stored idempotency record.
+const (
+	statusPending = "pending" // broadcast succeeded; inclusion not yet confirmed
+	statusDone    = "done"    // inclusion confirmed; id/height final
+)
+
+type idemRecord struct {
+	ID     uint64 `json:"id"`
+	TxHash string `json:"txhash"`
+	Height int64  `json:"height"`
+	Status string `json:"status"`
+}
+
+// idemStore is a tiny persistent map of idem-key -> record. Volume is low
+// (batched anchors), so a fsync'd JSON file guarded by a mutex is sufficient and
+// avoids a heavyweight embedded DB. An empty path keeps it purely in-memory
+// (used by tests).
+type idemStore struct {
+	path    string
+	mu      sync.Mutex
+	entries map[string]idemRecord
+}
+
+func newIdemStore(path string) (*idemStore, error) {
+	s := &idemStore{path: path, entries: map[string]idemRecord{}}
+	if path == "" {
+		return s, nil
+	}
+	if dir := filepath.Dir(path); dir != "" {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			return nil, err
+		}
+	}
+	data, err := os.ReadFile(path)
+	switch {
+	case err == nil:
+		if len(bytes.TrimSpace(data)) > 0 {
+			if err := json.Unmarshal(data, &s.entries); err != nil {
+				return nil, fmt.Errorf("load idem store %s: %w", path, err)
+			}
+		}
+	case os.IsNotExist(err):
+		// fresh store
+	default:
+		return nil, err
+	}
+	return s, nil
+}
+
+func (s *idemStore) get(key string) (idemRecord, bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	e, ok := s.entries[key]
+	return e, ok
+}
+
+func (s *idemStore) put(key string, rec idemRecord) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.entries[key] = rec
+	return s.persistLocked()
+}
+
+// persistLocked writes the whole map atomically: temp file + fsync + rename.
+func (s *idemStore) persistLocked() error {
+	if s.path == "" {
+		return nil // in-memory only
+	}
+	data, err := json.Marshal(s.entries)
+	if err != nil {
+		return err
+	}
+	tmp := s.path + ".tmp"
+	f, err := os.OpenFile(tmp, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o600)
+	if err != nil {
+		return err
+	}
+	if _, err := f.Write(data); err != nil {
+		f.Close()
+		return err
+	}
+	if err := f.Sync(); err != nil {
+		f.Close()
+		return err
+	}
+	if err := f.Close(); err != nil {
+		return err
+	}
+	return os.Rename(tmp, s.path)
+}
+
+// deriveIdemKey computes the implicit idempotency key from the request fields.
+func deriveIdemKey(req anchorReq) string {
+	h := sha256.Sum256([]byte(req.Subject + "\n" + req.Commitment + "\n" + req.Kind + "\n" + req.SourceRef))
+	return hex.EncodeToString(h[:])
+}
+
+// commit turns a validated request into (at most) one on-chain seed. The bool
+// return reports whether the result was replayed from cache (true) rather than
+// freshly broadcast (false).
+func (s *server) commit(req anchorReq, idemKey string) (anchorResp, bool, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	c := s.cfg
-	args := []string{"tx", "seeds", "commit-seed", req.Commitment, req.Kind,
-		"--from", c.key, "--keyring-backend", c.keyring,
-		"--fees", c.fees, "--broadcast-mode", "sync", "-y", "--output", "json"}
-	if req.Subject != "" {
-		args = append(args, "--subject", req.Subject)
+	// Idempotency check under the broadcast mutex.
+	if e, ok := s.store.get(idemKey); ok {
+		switch e.Status {
+		case statusDone:
+			// Already confirmed: replay, never broadcast again.
+			return anchorResp{ID: e.ID, TxHash: e.TxHash, Height: e.Height}, true, nil
+		case statusPending:
+			if e.TxHash != "" {
+				// The previous attempt broadcast successfully but its inclusion
+				// poll timed out. The tx may well have landed. Re-poll — do NOT
+				// re-broadcast (that would mint a second photon).
+				resp, err := s.pollInclusion(e.TxHash)
+				if err != nil {
+					return anchorResp{}, true, err
+				}
+				if err := s.store.put(idemKey, idemRecord{ID: resp.ID, TxHash: resp.TxHash, Height: resp.Height, Status: statusDone}); err != nil {
+					return anchorResp{}, true, err
+				}
+				return resp, true, nil
+			}
+		}
 	}
-	if req.SourceRef != "" {
-		args = append(args, "--source-ref", req.SourceRef)
-	}
-	args = append(args, c.txArgs()...)
 
-	out, err := c.run(args...)
+	args := s.cfg.commitArgs(req)
+	out, err := s.run(args...)
 	if err != nil {
-		return anchorResp{}, fmt.Errorf("broadcast failed: %v: %s", err, out)
+		return anchorResp{}, false, fmt.Errorf("broadcast failed: %v: %s", err, out)
 	}
 	var b txBroadcast
 	if err := json.Unmarshal([]byte(out), &b); err != nil {
-		return anchorResp{}, fmt.Errorf("parse broadcast: %v: %s", err, out)
+		return anchorResp{}, false, fmt.Errorf("parse broadcast: %v: %s", err, out)
 	}
 	if b.Code != 0 {
-		return anchorResp{}, fmt.Errorf("checktx rejected (code %d): %s", b.Code, b.RawLog)
+		return anchorResp{}, false, fmt.Errorf("checktx rejected (code %d): %s", b.Code, b.RawLog)
 	}
 
-	// Poll for inclusion (DeliverTx result carries the assigned seed id).
-	deadline := time.Now().Add(20 * time.Second)
+	// RACE FIX: persist key -> txhash NOW, before polling. CheckTx accepted the
+	// tx, so it will (almost certainly) land. If our poll below times out after
+	// it lands, a client retry finds this pending record and re-polls instead of
+	// broadcasting a duplicate seed.
+	if err := s.store.put(idemKey, idemRecord{TxHash: b.TxHash, Status: statusPending}); err != nil {
+		return anchorResp{}, false, fmt.Errorf("persist pending idem entry: %w", err)
+	}
+
+	resp, err := s.pollInclusion(b.TxHash)
+	if err != nil {
+		// Leave the pending record in place: a retry will re-poll this txhash.
+		return anchorResp{}, false, err
+	}
+	if err := s.store.put(idemKey, idemRecord{ID: resp.ID, TxHash: resp.TxHash, Height: resp.Height, Status: statusDone}); err != nil {
+		return anchorResp{}, false, err
+	}
+	return resp, false, nil
+}
+
+// pollInclusion polls `query tx <hash>` until the DeliverTx result is available
+// (carrying the assigned seed id) or the deadline passes.
+func (s *server) pollInclusion(txhash string) (anchorResp, error) {
+	c := s.cfg
+	deadline := time.Now().Add(s.pollTimeout)
 	for {
-		time.Sleep(1500 * time.Millisecond)
-		qout, qerr := c.run(append([]string{"query", "tx", b.TxHash, "--output", "json"}, c.queryArgs()...)...)
+		time.Sleep(s.pollInterval)
+		qout, qerr := s.run(append([]string{"query", "tx", txhash, "--output", "json"}, c.queryArgs()...)...)
 		if qerr == nil {
 			var res txResult
 			if json.Unmarshal([]byte(qout), &res) == nil {
@@ -185,11 +411,11 @@ func (s *server) commit(req anchorReq) (anchorResp, error) {
 				}
 				id := extractSeedID(res)
 				h, _ := strconv.ParseInt(res.Height, 10, 64)
-				return anchorResp{ID: id, TxHash: b.TxHash, Height: h}, nil
+				return anchorResp{ID: id, TxHash: txhash, Height: h}, nil
 			}
 		}
 		if time.Now().After(deadline) {
-			return anchorResp{}, fmt.Errorf("timed out waiting for tx %s inclusion", b.TxHash)
+			return anchorResp{}, fmt.Errorf("timed out waiting for tx %s inclusion", txhash)
 		}
 	}
 }
@@ -237,20 +463,42 @@ func (s *server) handleAnchor(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "kind is required", http.StatusBadRequest)
 		return
 	}
+	if !validKind(req.Kind) {
+		http.Error(w, "kind must match [a-zA-Z0-9._:-]{1,128} and not start with '-'", http.StatusBadRequest)
+		return
+	}
+	if !validField(req.Subject, maxField) {
+		http.Error(w, "subject invalid (too long, leading '-', or control chars)", http.StatusBadRequest)
+		return
+	}
+	if !validField(req.SourceRef, maxField) {
+		http.Error(w, "source_ref invalid (too long, leading '-', or control chars)", http.StatusBadRequest)
+		return
+	}
 
-	resp, err := s.commit(req)
+	idemKey := strings.TrimSpace(r.Header.Get("Idempotency-Key"))
+	if idemKey == "" {
+		idemKey = deriveIdemKey(req)
+	}
+
+	resp, replay, err := s.commit(req, idemKey)
 	if err != nil {
 		log.Printf("anchor error: %v", err)
 		http.Error(w, err.Error(), http.StatusBadGateway)
 		return
 	}
-	log.Printf("anchored seed #%d kind=%s subject=%s tx=%s", resp.ID, req.Kind, req.Subject, resp.TxHash)
+	if replay {
+		w.Header().Set("X-Idempotent-Replay", "true")
+		log.Printf("anchor replay seed #%d kind=%s subject=%s tx=%s", resp.ID, req.Kind, req.Subject, resp.TxHash)
+	} else {
+		log.Printf("anchored seed #%d kind=%s subject=%s tx=%s", resp.ID, req.Kind, req.Subject, resp.TxHash)
+	}
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(resp)
 }
 
 func (s *server) handleHealth(w http.ResponseWriter, r *http.Request) {
-	out, err := s.cfg.run(append([]string{"status", "--output", "json"}, s.cfg.queryArgs()...)...)
+	out, err := s.run(append([]string{"status", "--output", "json"}, s.cfg.queryArgs()...)...)
 	w.Header().Set("Content-Type", "application/json")
 	if err != nil {
 		w.WriteHeader(http.StatusServiceUnavailable)
@@ -268,7 +516,17 @@ func (s *server) handleHealth(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	cfg := loadConfig()
-	s := &server{cfg: cfg}
+	store, err := newIdemStore(cfg.state)
+	if err != nil {
+		log.Fatalf("idempotency store: %v", err)
+	}
+	s := &server{
+		cfg:          cfg,
+		run:          cfg.run,
+		store:        store,
+		pollInterval: 1500 * time.Millisecond,
+		pollTimeout:  20 * time.Second,
+	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/anchor", s.handleAnchor)
 	mux.HandleFunc("/healthz", s.handleHealth)
@@ -276,7 +534,7 @@ func main() {
 	if cfg.token == "" {
 		log.Printf("WARNING: ANCHORD_TOKEN unset — /anchor is open (dev only)")
 	}
-	log.Printf("anchord listening on %s (chain=%s node=%s key=%s)", cfg.addr, cfg.chainID, cfg.node, cfg.key)
+	log.Printf("anchord listening on %s (chain=%s node=%s key=%s state=%s)", cfg.addr, cfg.chainID, cfg.node, cfg.key, cfg.state)
 	srv := &http.Server{
 		Addr:         cfg.addr,
 		Handler:      mux,
