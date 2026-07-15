@@ -85,15 +85,16 @@ ok "node producing blocks (height $h)"
 
 # ---------------------------------------------------------------------------
 say "3. alice commits 3 'record' seeds -> 3 photons mint to alice"
+A_PRE=$(bal "$ALICE" uphoton)
 for n in 1 2 3; do
   send seeds commit-seed "$(printf 'deadbeef%064x' $n | head -c64)" record \
       --data-type record --subject "did:dream:work$n" --from alice >/dev/null
 done
 SUPPLY=$("$BIN" q photons supply "${Q[@]}" | jq -r '.minted // .supply // .count')
-APHOT=$(bal "$ALICE" photon)
+A_POST=$(bal "$ALICE" uphoton)
 [ "$SUPPLY" = "3" ] || die "photon supply = $SUPPLY, want 3 (peg photons=seeds)"
-[ "$APHOT" = "3" ]  || die "alice photon balance = $APHOT, want 3"
-ok "photon supply=$SUPPLY, alice balance=$APHOT (mint-on-ingest to storer works)"
+[ "$((A_POST - A_PRE))" = "3000000" ] || die "alice uphoton delta = $((A_POST - A_PRE)), want 3000000 (3 photons)"
+ok "photon supply=$SUPPLY, storer +3,000,000 uphoton (mint-on-ingest works)"
 
 say "4. bob attests alice's work (rigor, science/x) -> bet window"
 send attest attest "did:dream:work1" rigor --domain science/x --specificity-bps 5000 \
@@ -124,10 +125,10 @@ ok "bob R(science/x) = $R  (> baseline 1.0 — validated work paid out)"
 
 say "8. marketplace: alice funds bob, bob buys access to seed 1"
 send bank send "$ALICE" "$BOB" 2photon --from alice >/dev/null
-BOB_P0=$(bal "$BOB" photon); ALICE_P0=$(bal "$ALICE" photon)
+BOB_P0=$(bal "$BOB" uphoton); ALICE_P0=$(bal "$ALICE" uphoton)
 send licenses purchase 1 --from bob >/dev/null
 ACCESS=$("$BIN" q licenses access "$BOB" 1 "${Q[@]}" | jq -r '.has_access // .access // .held')
-BOB_P1=$(bal "$BOB" photon); ALICE_P1=$(bal "$ALICE" photon)
+BOB_P1=$(bal "$BOB" uphoton); ALICE_P1=$(bal "$ALICE" uphoton)
 SUP2=$("$BIN" q photons supply "${Q[@]}" | jq -r '.minted // .supply // .count')
 [ "$ACCESS" = "true" ] || die "bob does not hold access to seed 1 (got '$ACCESS')"
 [ "$BOB_P1" -lt "$BOB_P0" ]     || die "buyer photons did not decrease ($BOB_P0 -> $BOB_P1)"

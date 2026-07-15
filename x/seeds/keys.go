@@ -12,8 +12,9 @@ var (
 
 	// SeqKey is the prefix for the monotonic leaf-seed id sequence.
 	SeqKey = collections.NewPrefix(2)
-	// SubjectIndexKey is the prefix for the (subject, first_seed_id) index —
-	// one entry per BATCH, not per leaf (a batch may register thousands).
+	// SubjectIndexKey is the prefix for the (subject, batch_id) index — one
+	// entry per BATCH, not per leaf (a batch may register thousands), keyed by
+	// batch id so pure-convergence batches (no seed range) index too.
 	SubjectIndexKey = collections.NewPrefix(3)
 	// BatchesKey is the prefix for the batch_id -> Batch map (the stored unit).
 	BatchesKey = collections.NewPrefix(4)

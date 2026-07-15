@@ -38,16 +38,39 @@ func (gs *GenesisState) Validate() error {
 		ranges = append(ranges, b)
 	}
 	sort.Slice(ranges, func(i, j int) bool { return ranges[i].FirstSeedId < ranges[j].FirstSeedId })
+	for _, b := range ranges {
+		// Wraparound guard: first + new_count must not overflow uint64, or
+		// both this check and read-time resolution would wrap.
+		if b.FirstSeedId > ^uint64(0)-uint64(b.NewCount) {
+			return ErrBadCounts.Wrapf("batch %d: seed range overflows uint64", b.Id)
+		}
+	}
 	for i := 1; i < len(ranges); i++ {
 		prev := ranges[i-1]
 		if prev.FirstSeedId+uint64(prev.NewCount) > ranges[i].FirstSeedId {
 			return ErrBadCounts.Wrapf("batches %d and %d have overlapping seed ranges", prev.Id, ranges[i].Id)
 		}
 	}
+	// Sequence guards — mirror InitGenesis's 0→1 defaulting, then require the
+	// sequences to clear every carried batch: a reissued batch id silently
+	// OVERWRITES anchored state; a reissued leaf id corrupts RangeIndex.
+	nextID := gs.NextId
+	if nextID == 0 {
+		nextID = 1
+	}
 	if n := len(ranges); n > 0 {
 		last := ranges[n-1]
-		if gs.NextId != 0 && last.FirstSeedId+uint64(last.NewCount) > gs.NextId {
-			return ErrBadCounts.Wrapf("next_id %d overlaps batch %d's range", gs.NextId, last.Id)
+		if last.FirstSeedId+uint64(last.NewCount) > nextID {
+			return ErrBadCounts.Wrapf("next_id %d does not clear batch %d's range", gs.NextId, last.Id)
+		}
+	}
+	nextBatch := gs.NextBatchId
+	if nextBatch == 0 {
+		nextBatch = 1
+	}
+	for _, b := range gs.Batches {
+		if b.Id >= nextBatch {
+			return ErrBadCounts.Wrapf("next_batch_id %d does not clear batch id %d (reissue would overwrite it)", gs.NextBatchId, b.Id)
 		}
 	}
 	return gs.Params.Validate()

@@ -184,6 +184,12 @@ func TestBatchValidation(t *testing.T) {
 		Committer: f.addr, MerkleRoot: "not-hex!", LeafCount: 1, NewCount: 1, Kind: "record",
 	})
 	require.ErrorIs(t, err, seeds.ErrCommitmentNotHex)
+	// supply-griefing guard: new_count above the per-batch cap
+	over := seeds.DefaultMaxBatchNewCount + 1
+	_, err = f.msg.CommitBatch(f.ctx, &seeds.MsgCommitBatch{
+		Committer: f.addr, MerkleRoot: root, LeafCount: over, NewCount: over, Kind: "record",
+	})
+	require.ErrorIs(t, err, seeds.ErrBadCounts)
 	// nothing allocated, nothing minted
 	require.Empty(t, f.photons.calls)
 	_, ok, _ := f.k.BatchOf(f.ctx, 1)
@@ -241,4 +247,21 @@ func TestGenesisRoundtripAndValidate(t *testing.T) {
 	bad.Batches = append([]seeds.Batch{}, exported.Batches...)
 	bad.Batches[1].FirstSeedId = bad.Batches[0].FirstSeedId + 1 // overlaps batch 0 (new_count 2)
 	require.Error(t, bad.Validate())
+
+	// Sequence-reissue guards: sequences that don't clear the carried batches
+	// would silently overwrite anchored state on the next commit.
+	badSeq := *exported
+	badSeq.Batches = exported.Batches
+	badSeq.NextId = 0 // defaults to 1 — inside batch 0's range
+	require.Error(t, badSeq.Validate(), "next_id must clear every carried range")
+	badBatchSeq := *exported
+	badBatchSeq.Batches = exported.Batches
+	badBatchSeq.NextBatchId = exported.Batches[len(exported.Batches)-1].Id // == max id, would reissue
+	require.Error(t, badBatchSeq.Validate(), "next_batch_id must clear every carried batch id")
+
+	// uint64 wraparound in a range must be rejected, not wrapped past.
+	wrap := *exported
+	wrap.Batches = append([]seeds.Batch{}, exported.Batches...)
+	wrap.Batches[0].FirstSeedId = ^uint64(0) - 1 // first + new_count(2) overflows
+	require.Error(t, wrap.Validate())
 }

@@ -69,6 +69,7 @@ ok "genesis account funded with corpus supply"
 
 # Patch app_state BEFORE gentx: corpus batches into x/seeds, minted count into
 # x/photons, recipients, gov deposits in uphoton, photon denom metadata.
+export GENESIS_UPHOTON="$UPHOTON" GENESIS_BOND="$BOND"
 python3 - "$HOME_DIR/config/genesis.json" "$CORPUS_JSON" "$DT_TREASURY" <<'PY'
 import json, sys
 g, corpus_path, treasury = sys.argv[1], sys.argv[2], sys.argv[3]
@@ -85,10 +86,18 @@ d['app_state']['photons']['minted'] = c['minted']
 d['app_state']['photons']['params']['storer_reward_recipient'] = treasury
 d['app_state']['licenses']['params']['treasury_recipient'] = treasury
 
-# gov deposits in uphoton (10,000 / 50,000 photons).
+# gov deposits in uphoton (10,000 / 50,000 photons). Guard: the deposits must
+# be fundable from the LIQUID supply (supply - bond), else governance — the
+# only way to change min_deposit itself — is dead from block 0.
 gp = d['app_state']['gov']['params']
-gp['min_deposit'] = [{"denom": "uphoton", "amount": "10000000000"}]
-gp['expedited_min_deposit'] = [{"denom": "uphoton", "amount": "50000000000"}]
+min_dep, exp_dep = 10_000_000_000, 50_000_000_000
+import os as _os
+liquid = int(_os.environ["GENESIS_UPHOTON"]) - int(_os.environ["GENESIS_BOND"])
+assert liquid >= exp_dep, (
+    f"liquid supply {liquid} uphoton cannot fund the expedited gov deposit "
+    f"{exp_dep} — lower BOND_FRACTION or the corpus is too small to govern")
+gp['min_deposit'] = [{"denom": "uphoton", "amount": str(min_dep)}]
+gp['expedited_min_deposit'] = [{"denom": "uphoton", "amount": str(exp_dep)}]
 
 # bank: photon display metadata (base uphoton, exponent 6).
 d['app_state']['bank']['denom_metadata'] = [{
@@ -100,8 +109,18 @@ d['app_state']['bank']['denom_metadata'] = [{
     "base": "uphoton", "display": "photon", "name": "Photon", "symbol": "PHOTON",
 }]
 
-# sanity: dtvp must not exist anywhere in genesis.
-assert 'dtvp' not in json.dumps(d), "dtvp found in genesis — the fork must not survive"
+# sanity: dtvp must not exist as a DENOM anywhere (bank, staking, gov). A raw
+# substring check would false-positive on bech32 addresses ('d','t','v','p'
+# are all in the charset), so check the actual denom fields.
+denoms = set()
+for balo in d['app_state']['bank'].get('balances', []):
+    denoms.update(c['denom'] for c in balo.get('coins', []))
+for c in d['app_state']['bank'].get('supply', []):
+    denoms.add(c['denom'])
+denoms.add(d['app_state']['staking']['params']['bond_denom'])
+for c in gp['min_deposit'] + gp['expedited_min_deposit']:
+    denoms.add(c['denom'])
+assert 'dtvp' not in denoms, "dtvp denom found in genesis — the fork must not survive"
 json.dump(d, open(g, 'w'), indent=1)
 print("patched: %d corpus batches, minted=%s, storer=%s treasury=%s gov-denom=uphoton"
       % (len(c['batches']), c['minted'], treasury, treasury))

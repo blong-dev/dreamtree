@@ -103,6 +103,11 @@ func (ms msgServer) commit(ctx context.Context, req commitReq) (seeds.Batch, err
 	if uint32(len(req.sourceRef)) > params.MaxSourceRef() {
 		return seeds.Batch{}, seeds.ErrSourceRefTooLong.Wrapf("got %d, max %d", len(req.sourceRef), params.MaxSourceRef())
 	}
+	// new_count is committer-asserted and each new leaf mints a photon: cap
+	// the per-tx blast radius (supply-griefing guard; governance-tunable).
+	if req.newCount > params.MaxBatchNew() {
+		return seeds.Batch{}, seeds.ErrBadCounts.Wrapf("new_count %d exceeds max_batch_new_count %d", req.newCount, params.MaxBatchNew())
+	}
 
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 

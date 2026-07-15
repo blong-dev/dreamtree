@@ -18,6 +18,14 @@ message Params {
 
   // max_source_ref_bytes bounds the opaque origin reference length.
   uint32 max_source_ref_bytes = 2;
+
+  // max_batch_new_count caps a single batch's new_count. new_count is
+  // committer-asserted and each new leaf mints a photon, so an uncapped batch
+  // is a single-tx supply-griefing vector (photons = seeds only holds if
+  // new_count claims stay honest AND bounded). 0 means the module default.
+  // The long-term gate is committer authorization/economics — this cap bounds
+  // the blast radius until then.
+  uint32 max_batch_new_count = 3;
 }
 
 // Seed is a commitment anchored on-chain: the hash (or Merkle root) of a

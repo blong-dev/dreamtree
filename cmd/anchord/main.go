@@ -360,9 +360,18 @@ func (s *idemStore) persistLocked() error {
 }
 
 // deriveIdemKey computes the implicit idempotency key from the request fields.
+// Single-seed requests MUST keep the exact legacy derivation: the persistent
+// idem store carries pre-batch-era records under it, and changing the key
+// would orphan them — a pre-upgrade pending record would then re-broadcast on
+// retry and double-mint (the precise failure this store exists to prevent).
+// Batch requests are new, so their counts join the key without collision.
 func deriveIdemKey(req anchorReq) string {
-	h := sha256.Sum256([]byte(req.Subject + "\n" + req.Commitment + "\n" + req.Kind + "\n" + req.SourceRef +
-		"\n" + strconv.FormatUint(uint64(req.LeafCount), 10) + "\n" + strconv.FormatUint(uint64(req.NewCount), 10)))
+	base := req.Subject + "\n" + req.Commitment + "\n" + req.Kind + "\n" + req.SourceRef
+	if req.isBatch() {
+		base += "\n" + strconv.FormatUint(uint64(req.LeafCount), 10) +
+			"\n" + strconv.FormatUint(uint64(req.NewCount), 10)
+	}
+	h := sha256.Sum256([]byte(base))
 	return hex.EncodeToString(h[:])
 }
 

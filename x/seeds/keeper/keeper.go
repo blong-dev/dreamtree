@@ -36,7 +36,8 @@ type Keeper struct {
 	RangeIndex collections.Map[uint64, uint64]
 	// Seq assigns the monotonic leaf-seed id (advanced by new_count per batch).
 	Seq collections.Sequence
-	// SubjectIndex is a (subject, first_seed_id) key set — one entry per batch.
+	// SubjectIndex is a (subject, batch_id) key set — one entry per batch,
+	// keyed by batch id so pure-convergence batches index too.
 	SubjectIndex collections.KeySet[collections.Pair[string, uint64]]
 
 	// photons is the ingestion mint seam; nil when x/photons is absent.

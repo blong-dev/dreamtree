@@ -88,7 +88,8 @@ func (m *Params) GetTreasuryRecipient() string {
 	return ""
 }
 
-// TypePrice — the current market rate N_a for a data type, in photons. Uniform
+// TypePrice — the current market rate N_a for a data type, in uphoton (the
+// base denom; 1 photon = 10^6 uphoton). Uniform
 // across every creator of the type (creator_equality_within_type). v0: set by
 // authority as a market stand-in; real price discovery is a later mechanism.
 type TypePrice struct {
