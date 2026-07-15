@@ -114,12 +114,12 @@ d['app_state']['bank']['denom_metadata'] = [{
 # are all in the charset), so check the actual denom fields.
 denoms = set()
 for balo in d['app_state']['bank'].get('balances', []):
-    denoms.update(c['denom'] for c in balo.get('coins', []))
-for c in d['app_state']['bank'].get('supply', []):
-    denoms.add(c['denom'])
+    denoms.update(coin['denom'] for coin in balo.get('coins', []))
+for coin in d['app_state']['bank'].get('supply', []):
+    denoms.add(coin['denom'])
 denoms.add(d['app_state']['staking']['params']['bond_denom'])
-for c in gp['min_deposit'] + gp['expedited_min_deposit']:
-    denoms.add(c['denom'])
+for coin in gp['min_deposit'] + gp['expedited_min_deposit']:
+    denoms.add(coin['denom'])
 assert 'dtvp' not in denoms, "dtvp denom found in genesis — the fork must not survive"
 json.dump(d, open(g, 'w'), indent=1)
 print("patched: %d corpus batches, minted=%s, storer=%s treasury=%s gov-denom=uphoton"

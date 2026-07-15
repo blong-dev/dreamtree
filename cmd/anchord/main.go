@@ -237,13 +237,19 @@ func (c config) commitArgs(req anchorReq) []string {
 	return args
 }
 
-// run executes dreamtreed and returns combined output.
+// run executes dreamtreed and returns STDOUT (what callers JSON-parse).
+// stderr is kept separate: the CLI writes warnings there (e.g. the go1.24
+// sonic notice), and merging streams contaminated the JSON. On error, stderr
+// is folded into the error so failures stay diagnosable.
 func (c config) run(args ...string) (string, error) {
 	cmd := exec.Command(c.bin, args...)
-	var out bytes.Buffer
+	var out, errBuf bytes.Buffer
 	cmd.Stdout = &out
-	cmd.Stderr = &out
+	cmd.Stderr = &errBuf
 	err := cmd.Run()
+	if err != nil && errBuf.Len() > 0 {
+		err = fmt.Errorf("%w: %s", err, strings.TrimSpace(errBuf.String()))
+	}
 	return out.String(), err
 }
 

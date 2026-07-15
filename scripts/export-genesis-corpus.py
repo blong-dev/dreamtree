@@ -56,6 +56,10 @@ def main() -> int:
     pw = os.environ.get("POSTGRES_PASSWORD", "")
     conn = psycopg.connect(host=args.pg_host, user=args.pg_user, dbname=args.pg_db, password=pw)
     cur = conn.cursor()
+    # One REPEATABLE READ snapshot for every query: the peg check compares
+    # counts across statements, and a concurrent writer (worker, backfill,
+    # enhance) would otherwise race the comparison into false failures.
+    cur.execute("begin isolation level repeatable read")
     packs = [p.strip() for p in args.packs.split(",") if p.strip()]
 
     distinct_atoms = 0
