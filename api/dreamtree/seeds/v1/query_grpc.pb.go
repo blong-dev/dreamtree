@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	Query_Seed_FullMethodName           = "/dreamtree.seeds.v1.Query/Seed"
+	Query_Batch_FullMethodName          = "/dreamtree.seeds.v1.Query/Batch"
 	Query_Seeds_FullMethodName          = "/dreamtree.seeds.v1.Query/Seeds"
 	Query_SeedsBySubject_FullMethodName = "/dreamtree.seeds.v1.Query/SeedsBySubject"
 	Query_Params_FullMethodName         = "/dreamtree.seeds.v1.Query/Params"
@@ -31,9 +32,12 @@ const (
 //
 // Query defines the seeds gRPC query service.
 type QueryClient interface {
-	// Seed returns a single anchored commitment by id.
+	// Seed returns a single leaf-seed by id (synthesized from its batch).
 	Seed(ctx context.Context, in *QuerySeedRequest, opts ...grpc.CallOption) (*QuerySeedResponse, error)
-	// Seeds returns all anchored commitments, paginated.
+	// Batch returns a stored anchoring batch by batch id.
+	Batch(ctx context.Context, in *QueryBatchRequest, opts ...grpc.CallOption) (*QueryBatchResponse, error)
+	// Seeds lists anchored batches (one entry per batch — a batch may register
+	// thousands of leaf-seeds; resolve individual leaves via Seed(id)).
 	Seeds(ctx context.Context, in *QuerySeedsRequest, opts ...grpc.CallOption) (*QuerySeedsResponse, error)
 	// SeedsBySubject returns commitments for a given subject (e.g. a wallet DID).
 	SeedsBySubject(ctx context.Context, in *QuerySeedsBySubjectRequest, opts ...grpc.CallOption) (*QuerySeedsBySubjectResponse, error)
@@ -53,6 +57,16 @@ func (c *queryClient) Seed(ctx context.Context, in *QuerySeedRequest, opts ...gr
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(QuerySeedResponse)
 	err := c.cc.Invoke(ctx, Query_Seed_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) Batch(ctx context.Context, in *QueryBatchRequest, opts ...grpc.CallOption) (*QueryBatchResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(QueryBatchResponse)
+	err := c.cc.Invoke(ctx, Query_Batch_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -95,9 +109,12 @@ func (c *queryClient) Params(ctx context.Context, in *QueryParamsRequest, opts .
 //
 // Query defines the seeds gRPC query service.
 type QueryServer interface {
-	// Seed returns a single anchored commitment by id.
+	// Seed returns a single leaf-seed by id (synthesized from its batch).
 	Seed(context.Context, *QuerySeedRequest) (*QuerySeedResponse, error)
-	// Seeds returns all anchored commitments, paginated.
+	// Batch returns a stored anchoring batch by batch id.
+	Batch(context.Context, *QueryBatchRequest) (*QueryBatchResponse, error)
+	// Seeds lists anchored batches (one entry per batch — a batch may register
+	// thousands of leaf-seeds; resolve individual leaves via Seed(id)).
 	Seeds(context.Context, *QuerySeedsRequest) (*QuerySeedsResponse, error)
 	// SeedsBySubject returns commitments for a given subject (e.g. a wallet DID).
 	SeedsBySubject(context.Context, *QuerySeedsBySubjectRequest) (*QuerySeedsBySubjectResponse, error)
@@ -115,6 +132,9 @@ type UnimplementedQueryServer struct{}
 
 func (UnimplementedQueryServer) Seed(context.Context, *QuerySeedRequest) (*QuerySeedResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Seed not implemented")
+}
+func (UnimplementedQueryServer) Batch(context.Context, *QueryBatchRequest) (*QueryBatchResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method Batch not implemented")
 }
 func (UnimplementedQueryServer) Seeds(context.Context, *QuerySeedsRequest) (*QuerySeedsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Seeds not implemented")
@@ -160,6 +180,24 @@ func _Query_Seed_Handler(srv interface{}, ctx context.Context, dec func(interfac
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).Seed(ctx, req.(*QuerySeedRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_Batch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryBatchRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).Batch(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Query_Batch_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).Batch(ctx, req.(*QueryBatchRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -228,6 +266,10 @@ var Query_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Seed",
 			Handler:    _Query_Seed_Handler,
+		},
+		{
+			MethodName: "Batch",
+			Handler:    _Query_Batch_Handler,
 		},
 		{
 			MethodName: "Seeds",

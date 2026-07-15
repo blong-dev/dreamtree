@@ -18,24 +18,24 @@ wait_tx() { local h=$1 i out; for i in $(seq 1 30); do if out=$("$BIN" q tx "$h"
 send() { local out h; out=$("$BIN" tx "$@" "${TX[@]}"); h=$(echo "$out"|jq -r .txhash); wait_tx "$h" >&2; echo "$h"; }
 
 rm -rf "$HOME_DIR"; mkdir -p "$HOME_DIR"
-"$BIN" init up --chain-id "$CHAIN" --default-denom dtvp --home "$HOME_DIR" >/dev/null 2>&1
+"$BIN" init up --chain-id "$CHAIN" --default-denom uphoton --home "$HOME_DIR" >/dev/null 2>&1
 "$BIN" keys add alice "${KR[@]}" >/dev/null 2>&1
 ALICE=$("$BIN" keys show alice -a "${KR[@]}")
-"$BIN" genesis add-genesis-account alice 1000000000dtvp "${KR[@]}" >/dev/null
-"$BIN" genesis gentx alice 500000000dtvp --chain-id "$CHAIN" "${KR[@]}" >/dev/null 2>&1
+"$BIN" genesis add-genesis-account alice 1000000000uphoton "${KR[@]}" >/dev/null
+"$BIN" genesis gentx alice 500000000uphoton --chain-id "$CHAIN" "${KR[@]}" >/dev/null 2>&1
 "$BIN" genesis collect-gentxs --home "$HOME_DIR" >/dev/null 2>&1
 python3 - "$HOME_DIR/config/genesis.json" <<'PY'
 import json, sys
 g = sys.argv[1]; d = json.load(open(g))
 gp = d['app_state']['gov']['params']
-gp['min_deposit'] = [{"denom": "dtvp", "amount": "1"}]
-gp['expedited_min_deposit'] = [{"denom": "dtvp", "amount": "1"}]
+gp['min_deposit'] = [{"denom": "uphoton", "amount": "1"}]
+gp['expedited_min_deposit'] = [{"denom": "uphoton", "amount": "1"}]
 gp['max_deposit_period'] = "10s"; gp['voting_period'] = "6s"; gp['expedited_voting_period'] = "5s"
 json.dump(d, open(g, 'w'), indent=1)
 PY
 sed -i 's/^timeout_commit = .*/timeout_commit = "1s"/' "$HOME_DIR/config/config.toml"
 
-"$BIN" start --home "$HOME_DIR" --minimum-gas-prices 0dtvp >"$HOME_DIR/node.log" 2>&1 &
+"$BIN" start --home "$HOME_DIR" --minimum-gas-prices 0uphoton >"$HOME_DIR/node.log" 2>&1 &
 NODE=$!; trap 'kill $NODE 2>/dev/null || true' EXIT
 for i in $(seq 1 40); do h=$("$BIN" status "${Q[@]}" 2>/dev/null|jq -r '.sync_info.latest_block_height' 2>/dev/null||echo 0); [ "${h:-0}" -ge 1 ] 2>/dev/null && break; sleep 1; done
 [ "${h:-0}" -ge 1 ] || die "node never produced a block"
@@ -54,7 +54,7 @@ cat > "$HOME_DIR/up.json" <<JSON
     "plan": { "name": "v2", "height": "$TARGET", "info": "governance-scheduled upgrade proof" }
   }],
   "metadata": "ipfs://none",
-  "deposit": "1dtvp",
+  "deposit": "1uphoton",
   "title": "Schedule upgrade v2",
   "summary": "upgrade proof: gov schedules a software upgrade plan"
 }

@@ -24,6 +24,16 @@
 //	  [ Idempotency-Key: <opaque> ]     (optional)
 //	  -> 200 { "id": 1, "txhash": "...", "height": 8 }
 //	  -> 200 + "X-Idempotent-Replay: true" when the result was replayed, not re-broadcast
+//
+//	Batch anchoring (the leaf model — docs/specs/seed-atom-conformance.md): add
+//	"leaf_count" and "new_count" to the same POST; the commitment is the Merkle
+//	root over the batch's leaf ids. new_count leaf-seeds are registered (and
+//	new_count photons minted); converged re-observations count only in
+//	leaf_count. Response gains the batch fields:
+//	  { "subject": "...", "commitment": "<merkle root hex>", "kind": "record",
+//	    "source_ref": "reflow:gen:61932", "leaf_count": 190, "new_count": 187 }
+//	  -> 200 { "id": <first_id>, "batch_id": 7, "new_count": 187, "txhash": "...", "height": 8 }
+//
 //	GET  /healthz           -> 200 { "ok": true, "height": <latest> }
 package main
 
@@ -90,7 +100,7 @@ func loadConfig() config {
 		home:      home,
 		chainID:   envOr("ANCHORD_CHAIN_ID", "dreamtree-devnet-1"),
 		node:      envOr("ANCHORD_NODE", "tcp://localhost:26657"),
-		fees:      envOr("ANCHORD_FEES", "0photon"),
+		fees:      envOr("ANCHORD_FEES", "0uphoton"),
 		token:     os.Getenv("ANCHORD_TOKEN"),
 		addr:      envOr("ANCHORD_ADDR", ":9110"),
 		state:     envOr("ANCHORD_STATE", defaultStatePath(home)),
@@ -138,12 +148,20 @@ type anchorReq struct {
 	Commitment string `json:"commitment"`
 	Kind       string `json:"kind"`
 	SourceRef  string `json:"source_ref"`
+	// Batch fields (leaf model). Both zero => single-seed path (batch of one).
+	LeafCount uint32 `json:"leaf_count,omitempty"`
+	NewCount  uint32 `json:"new_count,omitempty"`
 }
 
+// isBatch reports whether the request takes the commit-batch path.
+func (r anchorReq) isBatch() bool { return r.LeafCount > 0 || r.NewCount > 0 }
+
 type anchorResp struct {
-	ID     uint64 `json:"id"`
-	TxHash string `json:"txhash"`
-	Height int64  `json:"height"`
+	ID       uint64 `json:"id"` // first (or only) leaf-seed id
+	BatchID  uint64 `json:"batch_id,omitempty"`
+	NewCount uint32 `json:"new_count,omitempty"`
+	TxHash   string `json:"txhash"`
+	Height   int64  `json:"height"`
 }
 
 // txRunner executes the dreamtreed CLI and returns its combined output. It is an
@@ -187,12 +205,16 @@ func (c config) queryArgs() []string {
 	return args
 }
 
-// commitArgs builds the full argv for `tx seeds commit-seed`. All flags come
-// first, then a `--` terminator, then the positional commitment/kind. The
-// terminator stops cobra/pflag from interpreting a hostile `kind` (or, in the
-// worst case, commitment) as a flag.
+// commitArgs builds the full argv for `tx seeds commit-seed` (single) or
+// `tx seeds commit-batch` (leaf model). All flags come first, then a `--`
+// terminator, then the positionals. The terminator stops cobra/pflag from
+// interpreting a hostile `kind` (or, in the worst case, commitment) as a flag.
 func (c config) commitArgs(req anchorReq) []string {
-	args := []string{"tx", "seeds", "commit-seed",
+	sub := "commit-seed"
+	if req.isBatch() {
+		sub = "commit-batch"
+	}
+	args := []string{"tx", "seeds", sub,
 		"--from", c.key, "--keyring-backend", c.keyring,
 		"--fees", c.fees, "--broadcast-mode", "sync", "-y", "--output", "json"}
 	if req.Subject != "" {
@@ -202,8 +224,16 @@ func (c config) commitArgs(req anchorReq) []string {
 		args = append(args, "--source-ref", req.SourceRef)
 	}
 	args = append(args, c.txArgs()...)
-	// Everything past `--` is positional. commitment/kind can never be flags.
-	args = append(args, "--", req.Commitment, req.Kind)
+	// Everything past `--` is positional; values can never be read as flags.
+	if req.isBatch() {
+		// autocli positional order: merkle-root, leaf-count, new-count, kind.
+		args = append(args, "--", req.Commitment,
+			strconv.FormatUint(uint64(req.LeafCount), 10),
+			strconv.FormatUint(uint64(req.NewCount), 10),
+			req.Kind)
+	} else {
+		args = append(args, "--", req.Commitment, req.Kind)
+	}
 	return args
 }
 
@@ -243,10 +273,12 @@ const (
 )
 
 type idemRecord struct {
-	ID     uint64 `json:"id"`
-	TxHash string `json:"txhash"`
-	Height int64  `json:"height"`
-	Status string `json:"status"`
+	ID       uint64 `json:"id"`
+	BatchID  uint64 `json:"batch_id,omitempty"`
+	NewCount uint32 `json:"new_count,omitempty"`
+	TxHash   string `json:"txhash"`
+	Height   int64  `json:"height"`
+	Status   string `json:"status"`
 }
 
 // idemStore is a tiny persistent map of idem-key -> record. Volume is low
@@ -329,7 +361,8 @@ func (s *idemStore) persistLocked() error {
 
 // deriveIdemKey computes the implicit idempotency key from the request fields.
 func deriveIdemKey(req anchorReq) string {
-	h := sha256.Sum256([]byte(req.Subject + "\n" + req.Commitment + "\n" + req.Kind + "\n" + req.SourceRef))
+	h := sha256.Sum256([]byte(req.Subject + "\n" + req.Commitment + "\n" + req.Kind + "\n" + req.SourceRef +
+		"\n" + strconv.FormatUint(uint64(req.LeafCount), 10) + "\n" + strconv.FormatUint(uint64(req.NewCount), 10)))
 	return hex.EncodeToString(h[:])
 }
 
@@ -345,17 +378,17 @@ func (s *server) commit(req anchorReq, idemKey string) (anchorResp, bool, error)
 		switch e.Status {
 		case statusDone:
 			// Already confirmed: replay, never broadcast again.
-			return anchorResp{ID: e.ID, TxHash: e.TxHash, Height: e.Height}, true, nil
+			return anchorResp{ID: e.ID, BatchID: e.BatchID, NewCount: e.NewCount, TxHash: e.TxHash, Height: e.Height}, true, nil
 		case statusPending:
 			if e.TxHash != "" {
 				// The previous attempt broadcast successfully but its inclusion
 				// poll timed out. The tx may well have landed. Re-poll — do NOT
-				// re-broadcast (that would mint a second photon).
+				// re-broadcast (that would mint the photons a second time).
 				resp, err := s.pollInclusion(e.TxHash)
 				if err != nil {
 					return anchorResp{}, true, err
 				}
-				if err := s.store.put(idemKey, idemRecord{ID: resp.ID, TxHash: resp.TxHash, Height: resp.Height, Status: statusDone}); err != nil {
+				if err := s.store.put(idemKey, idemRecord{ID: resp.ID, BatchID: resp.BatchID, NewCount: resp.NewCount, TxHash: resp.TxHash, Height: resp.Height, Status: statusDone}); err != nil {
 					return anchorResp{}, true, err
 				}
 				return resp, true, nil
@@ -389,7 +422,7 @@ func (s *server) commit(req anchorReq, idemKey string) (anchorResp, bool, error)
 		// Leave the pending record in place: a retry will re-poll this txhash.
 		return anchorResp{}, false, err
 	}
-	if err := s.store.put(idemKey, idemRecord{ID: resp.ID, TxHash: resp.TxHash, Height: resp.Height, Status: statusDone}); err != nil {
+	if err := s.store.put(idemKey, idemRecord{ID: resp.ID, BatchID: resp.BatchID, NewCount: resp.NewCount, TxHash: resp.TxHash, Height: resp.Height, Status: statusDone}); err != nil {
 		return anchorResp{}, false, err
 	}
 	return resp, false, nil
@@ -409,9 +442,9 @@ func (s *server) pollInclusion(txhash string) (anchorResp, error) {
 				if res.Code != 0 {
 					return anchorResp{}, fmt.Errorf("delivertx failed (code %d): %s", res.Code, res.RawLog)
 				}
-				id := extractSeedID(res)
+				id, batchID, newCount := extractAnchorIDs(res)
 				h, _ := strconv.ParseInt(res.Height, 10, 64)
-				return anchorResp{ID: id, TxHash: txhash, Height: h}, nil
+				return anchorResp{ID: id, BatchID: batchID, NewCount: newCount, TxHash: txhash, Height: h}, nil
 			}
 		}
 		if time.Now().After(deadline) {
@@ -420,19 +453,39 @@ func (s *server) pollInclusion(txhash string) (anchorResp, error) {
 	}
 }
 
-func extractSeedID(res txResult) uint64 {
+// extractAnchorIDs reads the batch event (the canonical emission — single
+// commits are batches of one) and returns (first_id, batch_id, new_count).
+// Falls back to the legacy seed_committed event if only that is present.
+func extractAnchorIDs(res txResult) (id, batchID uint64, newCount uint32) {
+	for _, ev := range res.Events {
+		if ev.Type != "seed_batch_committed" {
+			continue
+		}
+		for _, a := range ev.Attributes {
+			switch a.Key {
+			case "first_id":
+				id, _ = strconv.ParseUint(a.Value, 10, 64)
+			case "batch_id":
+				batchID, _ = strconv.ParseUint(a.Value, 10, 64)
+			case "new_count":
+				n, _ := strconv.ParseUint(a.Value, 10, 32)
+				newCount = uint32(n)
+			}
+		}
+		return id, batchID, newCount
+	}
 	for _, ev := range res.Events {
 		if ev.Type != "seed_committed" {
 			continue
 		}
 		for _, a := range ev.Attributes {
 			if a.Key == "id" {
-				id, _ := strconv.ParseUint(a.Value, 10, 64)
-				return id
+				id, _ = strconv.ParseUint(a.Value, 10, 64)
+				return id, 0, 1
 			}
 		}
 	}
-	return 0
+	return 0, 0, 0
 }
 
 func (s *server) handleAnchor(w http.ResponseWriter, r *http.Request) {
@@ -474,6 +527,13 @@ func (s *server) handleAnchor(w http.ResponseWriter, r *http.Request) {
 	if !validField(req.SourceRef, maxField) {
 		http.Error(w, "source_ref invalid (too long, leading '-', or control chars)", http.StatusBadRequest)
 		return
+	}
+	if req.isBatch() {
+		// new_count == 0 is a valid pure-convergence batch (provenance only).
+		if req.NewCount > req.LeafCount {
+			http.Error(w, "batch counts invalid: need new_count <= leaf_count", http.StatusBadRequest)
+			return
+		}
 	}
 
 	idemKey := strings.TrimSpace(r.Header.Get("Idempotency-Key"))

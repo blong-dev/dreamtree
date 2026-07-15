@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	Msg_CommitSeed_FullMethodName   = "/dreamtree.seeds.v1.Msg/CommitSeed"
+	Msg_CommitBatch_FullMethodName  = "/dreamtree.seeds.v1.Msg/CommitBatch"
 	Msg_UpdateParams_FullMethodName = "/dreamtree.seeds.v1.Msg/UpdateParams"
 )
 
@@ -29,8 +30,11 @@ const (
 //
 // Msg defines the seeds Msg service.
 type MsgClient interface {
-	// CommitSeed anchors a commitment on-chain.
+	// CommitSeed anchors a single commitment on-chain (stored as a batch of one).
 	CommitSeed(ctx context.Context, in *MsgCommitSeed, opts ...grpc.CallOption) (*MsgCommitSeedResponse, error)
+	// CommitBatch anchors N leaf-seeds under one Merkle root in one tx
+	// (seed = atom; docs/specs/seed-atom-conformance.md).
+	CommitBatch(ctx context.Context, in *MsgCommitBatch, opts ...grpc.CallOption) (*MsgCommitBatchResponse, error)
 	// UpdateParams updates the module parameters.
 	UpdateParams(ctx context.Context, in *MsgUpdateParams, opts ...grpc.CallOption) (*MsgUpdateParamsResponse, error)
 }
@@ -53,6 +57,16 @@ func (c *msgClient) CommitSeed(ctx context.Context, in *MsgCommitSeed, opts ...g
 	return out, nil
 }
 
+func (c *msgClient) CommitBatch(ctx context.Context, in *MsgCommitBatch, opts ...grpc.CallOption) (*MsgCommitBatchResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MsgCommitBatchResponse)
+	err := c.cc.Invoke(ctx, Msg_CommitBatch_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *msgClient) UpdateParams(ctx context.Context, in *MsgUpdateParams, opts ...grpc.CallOption) (*MsgUpdateParamsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(MsgUpdateParamsResponse)
@@ -69,8 +83,11 @@ func (c *msgClient) UpdateParams(ctx context.Context, in *MsgUpdateParams, opts 
 //
 // Msg defines the seeds Msg service.
 type MsgServer interface {
-	// CommitSeed anchors a commitment on-chain.
+	// CommitSeed anchors a single commitment on-chain (stored as a batch of one).
 	CommitSeed(context.Context, *MsgCommitSeed) (*MsgCommitSeedResponse, error)
+	// CommitBatch anchors N leaf-seeds under one Merkle root in one tx
+	// (seed = atom; docs/specs/seed-atom-conformance.md).
+	CommitBatch(context.Context, *MsgCommitBatch) (*MsgCommitBatchResponse, error)
 	// UpdateParams updates the module parameters.
 	UpdateParams(context.Context, *MsgUpdateParams) (*MsgUpdateParamsResponse, error)
 	mustEmbedUnimplementedMsgServer()
@@ -85,6 +102,9 @@ type UnimplementedMsgServer struct{}
 
 func (UnimplementedMsgServer) CommitSeed(context.Context, *MsgCommitSeed) (*MsgCommitSeedResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CommitSeed not implemented")
+}
+func (UnimplementedMsgServer) CommitBatch(context.Context, *MsgCommitBatch) (*MsgCommitBatchResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CommitBatch not implemented")
 }
 func (UnimplementedMsgServer) UpdateParams(context.Context, *MsgUpdateParams) (*MsgUpdateParamsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateParams not implemented")
@@ -128,6 +148,24 @@ func _Msg_CommitSeed_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_CommitBatch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgCommitBatch)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).CommitBatch(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Msg_CommitBatch_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).CommitBatch(ctx, req.(*MsgCommitBatch))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Msg_UpdateParams_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(MsgUpdateParams)
 	if err := dec(in); err != nil {
@@ -156,6 +194,10 @@ var Msg_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CommitSeed",
 			Handler:    _Msg_CommitSeed_Handler,
+		},
+		{
+			MethodName: "CommitBatch",
+			Handler:    _Msg_CommitBatch_Handler,
 		},
 		{
 			MethodName: "UpdateParams",

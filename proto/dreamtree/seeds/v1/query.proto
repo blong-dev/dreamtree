@@ -12,13 +12,20 @@ import "dreamtree/seeds/v1/types.proto";
 
 // Query defines the seeds gRPC query service.
 service Query {
-  // Seed returns a single anchored commitment by id.
+  // Seed returns a single leaf-seed by id (synthesized from its batch).
   rpc Seed(QuerySeedRequest) returns (QuerySeedResponse) {
     option (cosmos.query.v1.module_query_safe) = true;
     option (google.api.http).get = "/dreamtree/seeds/v1/seed/{id}";
   }
 
-  // Seeds returns all anchored commitments, paginated.
+  // Batch returns a stored anchoring batch by batch id.
+  rpc Batch(QueryBatchRequest) returns (QueryBatchResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/dreamtree/seeds/v1/batch/{id}";
+  }
+
+  // Seeds lists anchored batches (one entry per batch — a batch may register
+  // thousands of leaf-seeds; resolve individual leaves via Seed(id)).
   rpc Seeds(QuerySeedsRequest) returns (QuerySeedsResponse) {
     option (cosmos.query.v1.module_query_safe) = true;
     option (google.api.http).get = "/dreamtree/seeds/v1/seeds";
@@ -43,11 +50,17 @@ message QuerySeedResponse {
   Seed seed = 1 [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
 }
 
+message QueryBatchRequest { uint64 id = 1; }
+message QueryBatchResponse {
+  Batch batch = 1
+      [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+}
+
 message QuerySeedsRequest {
   cosmos.base.query.v1beta1.PageRequest pagination = 1;
 }
 message QuerySeedsResponse {
-  repeated Seed seeds = 1
+  repeated Batch batches = 1
       [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
@@ -57,7 +70,7 @@ message QuerySeedsBySubjectRequest {
   cosmos.base.query.v1beta1.PageRequest pagination = 2;
 }
 message QuerySeedsBySubjectResponse {
-  repeated Seed seeds = 1
+  repeated Batch batches = 1
       [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }

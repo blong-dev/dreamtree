@@ -23,43 +23,57 @@ type queryServer struct {
 	k Keeper
 }
 
-// Seed returns a single commitment by id.
+// Seed returns a single leaf-seed by id, synthesized from its batch.
 func (qs queryServer) Seed(ctx context.Context, req *seeds.QuerySeedRequest) (*seeds.QuerySeedResponse, error) {
-	seed, err := qs.k.Seeds.Get(ctx, req.Id)
+	b, ok, err := qs.k.BatchOf(ctx, req.Id)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if !ok {
+		return nil, status.Errorf(codes.NotFound, "seed %d not found", req.Id)
+	}
+	return &seeds.QuerySeedResponse{Seed: SynthesizeSeed(b, req.Id)}, nil
+}
+
+// Batch returns a stored anchoring batch by batch id.
+func (qs queryServer) Batch(ctx context.Context, req *seeds.QueryBatchRequest) (*seeds.QueryBatchResponse, error) {
+	b, err := qs.k.Batches.Get(ctx, req.Id)
 	if err != nil {
 		if errors.Is(err, collections.ErrNotFound) {
-			return nil, status.Errorf(codes.NotFound, "seed %d not found", req.Id)
+			return nil, status.Errorf(codes.NotFound, "batch %d not found", req.Id)
 		}
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	return &seeds.QuerySeedResponse{Seed: seed}, nil
+	return &seeds.QueryBatchResponse{Batch: b}, nil
 }
 
-// Seeds returns all commitments, paginated.
+// Seeds lists anchored batches, paginated (one entry per batch — a batch may
+// register thousands of leaf-seeds; resolve individual leaves via Seed(id)).
 func (qs queryServer) Seeds(ctx context.Context, req *seeds.QuerySeedsRequest) (*seeds.QuerySeedsResponse, error) {
 	list, pageRes, err := query.CollectionPaginate(
-		ctx, qs.k.Seeds, req.Pagination,
-		func(_ uint64, value seeds.Seed) (seeds.Seed, error) { return value, nil },
+		ctx, qs.k.Batches, req.Pagination,
+		func(_ uint64, value seeds.Batch) (seeds.Batch, error) { return value, nil },
 	)
 	if err != nil {
 		return nil, err
 	}
-	return &seeds.QuerySeedsResponse{Seeds: list, Pagination: pageRes}, nil
+	return &seeds.QuerySeedsResponse{Batches: list, Pagination: pageRes}, nil
 }
 
-// SeedsBySubject returns commitments for a subject, paginated.
+// SeedsBySubject lists batches for a subject, paginated. The index is keyed
+// (subject, batch_id) so pure-convergence batches (no seed range) list too.
 func (qs queryServer) SeedsBySubject(ctx context.Context, req *seeds.QuerySeedsBySubjectRequest) (*seeds.QuerySeedsBySubjectResponse, error) {
 	list, pageRes, err := query.CollectionPaginate(
 		ctx, qs.k.SubjectIndex, req.Pagination,
-		func(key collections.Pair[string, uint64], _ collections.NoValue) (seeds.Seed, error) {
-			return qs.k.Seeds.Get(ctx, key.K2())
+		func(key collections.Pair[string, uint64], _ collections.NoValue) (seeds.Batch, error) {
+			return qs.k.Batches.Get(ctx, key.K2())
 		},
 		query.WithCollectionPaginationPairPrefix[string, uint64](req.Subject),
 	)
 	if err != nil {
 		return nil, err
 	}
-	return &seeds.QuerySeedsBySubjectResponse{Seeds: list, Pagination: pageRes}, nil
+	return &seeds.QuerySeedsBySubjectResponse{Batches: list, Pagination: pageRes}, nil
 }
 
 // Params returns the module parameters.

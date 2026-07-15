@@ -478,6 +478,8 @@ var (
 	fd_Seed_height       protoreflect.FieldDescriptor
 	fd_Seed_committed_at protoreflect.FieldDescriptor
 	fd_Seed_data_type    protoreflect.FieldDescriptor
+	fd_Seed_batch_id     protoreflect.FieldDescriptor
+	fd_Seed_leaf_index   protoreflect.FieldDescriptor
 )
 
 func init() {
@@ -492,6 +494,8 @@ func init() {
 	fd_Seed_height = md_Seed.Fields().ByName("height")
 	fd_Seed_committed_at = md_Seed.Fields().ByName("committed_at")
 	fd_Seed_data_type = md_Seed.Fields().ByName("data_type")
+	fd_Seed_batch_id = md_Seed.Fields().ByName("batch_id")
+	fd_Seed_leaf_index = md_Seed.Fields().ByName("leaf_index")
 }
 
 var _ protoreflect.Message = (*fastReflection_Seed)(nil)
@@ -613,6 +617,18 @@ func (x *fastReflection_Seed) Range(f func(protoreflect.FieldDescriptor, protore
 			return
 		}
 	}
+	if x.BatchId != uint64(0) {
+		value := protoreflect.ValueOfUint64(x.BatchId)
+		if !f(fd_Seed_batch_id, value) {
+			return
+		}
+	}
+	if x.LeafIndex != uint32(0) {
+		value := protoreflect.ValueOfUint32(x.LeafIndex)
+		if !f(fd_Seed_leaf_index, value) {
+			return
+		}
+	}
 }
 
 // Has reports whether a field is populated.
@@ -646,6 +662,10 @@ func (x *fastReflection_Seed) Has(fd protoreflect.FieldDescriptor) bool {
 		return x.CommittedAt != int64(0)
 	case "dreamtree.seeds.v1.Seed.data_type":
 		return x.DataType != ""
+	case "dreamtree.seeds.v1.Seed.batch_id":
+		return x.BatchId != uint64(0)
+	case "dreamtree.seeds.v1.Seed.leaf_index":
+		return x.LeafIndex != uint32(0)
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: dreamtree.seeds.v1.Seed"))
@@ -680,6 +700,10 @@ func (x *fastReflection_Seed) Clear(fd protoreflect.FieldDescriptor) {
 		x.CommittedAt = int64(0)
 	case "dreamtree.seeds.v1.Seed.data_type":
 		x.DataType = ""
+	case "dreamtree.seeds.v1.Seed.batch_id":
+		x.BatchId = uint64(0)
+	case "dreamtree.seeds.v1.Seed.leaf_index":
+		x.LeafIndex = uint32(0)
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: dreamtree.seeds.v1.Seed"))
@@ -723,6 +747,12 @@ func (x *fastReflection_Seed) Get(descriptor protoreflect.FieldDescriptor) proto
 	case "dreamtree.seeds.v1.Seed.data_type":
 		value := x.DataType
 		return protoreflect.ValueOfString(value)
+	case "dreamtree.seeds.v1.Seed.batch_id":
+		value := x.BatchId
+		return protoreflect.ValueOfUint64(value)
+	case "dreamtree.seeds.v1.Seed.leaf_index":
+		value := x.LeafIndex
+		return protoreflect.ValueOfUint32(value)
 	default:
 		if descriptor.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: dreamtree.seeds.v1.Seed"))
@@ -761,6 +791,10 @@ func (x *fastReflection_Seed) Set(fd protoreflect.FieldDescriptor, value protore
 		x.CommittedAt = value.Int()
 	case "dreamtree.seeds.v1.Seed.data_type":
 		x.DataType = value.Interface().(string)
+	case "dreamtree.seeds.v1.Seed.batch_id":
+		x.BatchId = value.Uint()
+	case "dreamtree.seeds.v1.Seed.leaf_index":
+		x.LeafIndex = uint32(value.Uint())
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: dreamtree.seeds.v1.Seed"))
@@ -799,6 +833,10 @@ func (x *fastReflection_Seed) Mutable(fd protoreflect.FieldDescriptor) protorefl
 		panic(fmt.Errorf("field committed_at of message dreamtree.seeds.v1.Seed is not mutable"))
 	case "dreamtree.seeds.v1.Seed.data_type":
 		panic(fmt.Errorf("field data_type of message dreamtree.seeds.v1.Seed is not mutable"))
+	case "dreamtree.seeds.v1.Seed.batch_id":
+		panic(fmt.Errorf("field batch_id of message dreamtree.seeds.v1.Seed is not mutable"))
+	case "dreamtree.seeds.v1.Seed.leaf_index":
+		panic(fmt.Errorf("field leaf_index of message dreamtree.seeds.v1.Seed is not mutable"))
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: dreamtree.seeds.v1.Seed"))
@@ -830,6 +868,10 @@ func (x *fastReflection_Seed) NewField(fd protoreflect.FieldDescriptor) protoref
 		return protoreflect.ValueOfInt64(int64(0))
 	case "dreamtree.seeds.v1.Seed.data_type":
 		return protoreflect.ValueOfString("")
+	case "dreamtree.seeds.v1.Seed.batch_id":
+		return protoreflect.ValueOfUint64(uint64(0))
+	case "dreamtree.seeds.v1.Seed.leaf_index":
+		return protoreflect.ValueOfUint32(uint32(0))
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: dreamtree.seeds.v1.Seed"))
@@ -932,6 +974,12 @@ func (x *fastReflection_Seed) ProtoMethods() *protoiface.Methods {
 		if l > 0 {
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
+		if x.BatchId != 0 {
+			n += 1 + runtime.Sov(uint64(x.BatchId))
+		}
+		if x.LeafIndex != 0 {
+			n += 1 + runtime.Sov(uint64(x.LeafIndex))
+		}
 		if x.unknownFields != nil {
 			n += len(x.unknownFields)
 		}
@@ -960,6 +1008,16 @@ func (x *fastReflection_Seed) ProtoMethods() *protoiface.Methods {
 		if x.unknownFields != nil {
 			i -= len(x.unknownFields)
 			copy(dAtA[i:], x.unknownFields)
+		}
+		if x.LeafIndex != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.LeafIndex))
+			i--
+			dAtA[i] = 0x58
+		}
+		if x.BatchId != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.BatchId))
+			i--
+			dAtA[i] = 0x50
 		}
 		if len(x.DataType) > 0 {
 			i -= len(x.DataType)
@@ -1316,6 +1374,1072 @@ func (x *fastReflection_Seed) ProtoMethods() *protoiface.Methods {
 				}
 				x.DataType = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
+			case 10:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field BatchId", wireType)
+				}
+				x.BatchId = 0
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					x.BatchId |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+			case 11:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field LeafIndex", wireType)
+				}
+				x.LeafIndex = 0
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					x.LeafIndex |= uint32(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+			default:
+				iNdEx = preIndex
+				skippy, err := runtime.Skip(dAtA[iNdEx:])
+				if err != nil {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
+				}
+				if (skippy < 0) || (iNdEx+skippy) < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if (iNdEx + skippy) > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				if !options.DiscardUnknown {
+					x.unknownFields = append(x.unknownFields, dAtA[iNdEx:iNdEx+skippy]...)
+				}
+				iNdEx += skippy
+			}
+		}
+
+		if iNdEx > l {
+			return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+		}
+		return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, nil
+	}
+	return &protoiface.Methods{
+		NoUnkeyedLiterals: struct{}{},
+		Flags:             protoiface.SupportMarshalDeterministic | protoiface.SupportUnmarshalDiscardUnknown,
+		Size:              size,
+		Marshal:           marshal,
+		Unmarshal:         unmarshal,
+		Merge:             nil,
+		CheckInitialized:  nil,
+	}
+}
+
+var (
+	md_Batch               protoreflect.MessageDescriptor
+	fd_Batch_id            protoreflect.FieldDescriptor
+	fd_Batch_first_seed_id protoreflect.FieldDescriptor
+	fd_Batch_new_count     protoreflect.FieldDescriptor
+	fd_Batch_leaf_count    protoreflect.FieldDescriptor
+	fd_Batch_merkle_root   protoreflect.FieldDescriptor
+	fd_Batch_committer     protoreflect.FieldDescriptor
+	fd_Batch_subject       protoreflect.FieldDescriptor
+	fd_Batch_kind          protoreflect.FieldDescriptor
+	fd_Batch_source_ref    protoreflect.FieldDescriptor
+	fd_Batch_data_type     protoreflect.FieldDescriptor
+	fd_Batch_height        protoreflect.FieldDescriptor
+	fd_Batch_committed_at  protoreflect.FieldDescriptor
+)
+
+func init() {
+	file_dreamtree_seeds_v1_types_proto_init()
+	md_Batch = File_dreamtree_seeds_v1_types_proto.Messages().ByName("Batch")
+	fd_Batch_id = md_Batch.Fields().ByName("id")
+	fd_Batch_first_seed_id = md_Batch.Fields().ByName("first_seed_id")
+	fd_Batch_new_count = md_Batch.Fields().ByName("new_count")
+	fd_Batch_leaf_count = md_Batch.Fields().ByName("leaf_count")
+	fd_Batch_merkle_root = md_Batch.Fields().ByName("merkle_root")
+	fd_Batch_committer = md_Batch.Fields().ByName("committer")
+	fd_Batch_subject = md_Batch.Fields().ByName("subject")
+	fd_Batch_kind = md_Batch.Fields().ByName("kind")
+	fd_Batch_source_ref = md_Batch.Fields().ByName("source_ref")
+	fd_Batch_data_type = md_Batch.Fields().ByName("data_type")
+	fd_Batch_height = md_Batch.Fields().ByName("height")
+	fd_Batch_committed_at = md_Batch.Fields().ByName("committed_at")
+}
+
+var _ protoreflect.Message = (*fastReflection_Batch)(nil)
+
+type fastReflection_Batch Batch
+
+func (x *Batch) ProtoReflect() protoreflect.Message {
+	return (*fastReflection_Batch)(x)
+}
+
+func (x *Batch) slowProtoReflect() protoreflect.Message {
+	mi := &file_dreamtree_seeds_v1_types_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+var _fastReflection_Batch_messageType fastReflection_Batch_messageType
+var _ protoreflect.MessageType = fastReflection_Batch_messageType{}
+
+type fastReflection_Batch_messageType struct{}
+
+func (x fastReflection_Batch_messageType) Zero() protoreflect.Message {
+	return (*fastReflection_Batch)(nil)
+}
+func (x fastReflection_Batch_messageType) New() protoreflect.Message {
+	return new(fastReflection_Batch)
+}
+func (x fastReflection_Batch_messageType) Descriptor() protoreflect.MessageDescriptor {
+	return md_Batch
+}
+
+// Descriptor returns message descriptor, which contains only the protobuf
+// type information for the message.
+func (x *fastReflection_Batch) Descriptor() protoreflect.MessageDescriptor {
+	return md_Batch
+}
+
+// Type returns the message type, which encapsulates both Go and protobuf
+// type information. If the Go type information is not needed,
+// it is recommended that the message descriptor be used instead.
+func (x *fastReflection_Batch) Type() protoreflect.MessageType {
+	return _fastReflection_Batch_messageType
+}
+
+// New returns a newly allocated and mutable empty message.
+func (x *fastReflection_Batch) New() protoreflect.Message {
+	return new(fastReflection_Batch)
+}
+
+// Interface unwraps the message reflection interface and
+// returns the underlying ProtoMessage interface.
+func (x *fastReflection_Batch) Interface() protoreflect.ProtoMessage {
+	return (*Batch)(x)
+}
+
+// Range iterates over every populated field in an undefined order,
+// calling f for each field descriptor and value encountered.
+// Range returns immediately if f returns false.
+// While iterating, mutating operations may only be performed
+// on the current field descriptor.
+func (x *fastReflection_Batch) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
+	if x.Id != uint64(0) {
+		value := protoreflect.ValueOfUint64(x.Id)
+		if !f(fd_Batch_id, value) {
+			return
+		}
+	}
+	if x.FirstSeedId != uint64(0) {
+		value := protoreflect.ValueOfUint64(x.FirstSeedId)
+		if !f(fd_Batch_first_seed_id, value) {
+			return
+		}
+	}
+	if x.NewCount != uint32(0) {
+		value := protoreflect.ValueOfUint32(x.NewCount)
+		if !f(fd_Batch_new_count, value) {
+			return
+		}
+	}
+	if x.LeafCount != uint32(0) {
+		value := protoreflect.ValueOfUint32(x.LeafCount)
+		if !f(fd_Batch_leaf_count, value) {
+			return
+		}
+	}
+	if x.MerkleRoot != "" {
+		value := protoreflect.ValueOfString(x.MerkleRoot)
+		if !f(fd_Batch_merkle_root, value) {
+			return
+		}
+	}
+	if x.Committer != "" {
+		value := protoreflect.ValueOfString(x.Committer)
+		if !f(fd_Batch_committer, value) {
+			return
+		}
+	}
+	if x.Subject != "" {
+		value := protoreflect.ValueOfString(x.Subject)
+		if !f(fd_Batch_subject, value) {
+			return
+		}
+	}
+	if x.Kind != "" {
+		value := protoreflect.ValueOfString(x.Kind)
+		if !f(fd_Batch_kind, value) {
+			return
+		}
+	}
+	if x.SourceRef != "" {
+		value := protoreflect.ValueOfString(x.SourceRef)
+		if !f(fd_Batch_source_ref, value) {
+			return
+		}
+	}
+	if x.DataType != "" {
+		value := protoreflect.ValueOfString(x.DataType)
+		if !f(fd_Batch_data_type, value) {
+			return
+		}
+	}
+	if x.Height != int64(0) {
+		value := protoreflect.ValueOfInt64(x.Height)
+		if !f(fd_Batch_height, value) {
+			return
+		}
+	}
+	if x.CommittedAt != int64(0) {
+		value := protoreflect.ValueOfInt64(x.CommittedAt)
+		if !f(fd_Batch_committed_at, value) {
+			return
+		}
+	}
+}
+
+// Has reports whether a field is populated.
+//
+// Some fields have the property of nullability where it is possible to
+// distinguish between the default value of a field and whether the field
+// was explicitly populated with the default value. Singular message fields,
+// member fields of a oneof, and proto2 scalar fields are nullable. Such
+// fields are populated only if explicitly set.
+//
+// In other cases (aside from the nullable cases above),
+// a proto3 scalar field is populated if it contains a non-zero value, and
+// a repeated field is populated if it is non-empty.
+func (x *fastReflection_Batch) Has(fd protoreflect.FieldDescriptor) bool {
+	switch fd.FullName() {
+	case "dreamtree.seeds.v1.Batch.id":
+		return x.Id != uint64(0)
+	case "dreamtree.seeds.v1.Batch.first_seed_id":
+		return x.FirstSeedId != uint64(0)
+	case "dreamtree.seeds.v1.Batch.new_count":
+		return x.NewCount != uint32(0)
+	case "dreamtree.seeds.v1.Batch.leaf_count":
+		return x.LeafCount != uint32(0)
+	case "dreamtree.seeds.v1.Batch.merkle_root":
+		return x.MerkleRoot != ""
+	case "dreamtree.seeds.v1.Batch.committer":
+		return x.Committer != ""
+	case "dreamtree.seeds.v1.Batch.subject":
+		return x.Subject != ""
+	case "dreamtree.seeds.v1.Batch.kind":
+		return x.Kind != ""
+	case "dreamtree.seeds.v1.Batch.source_ref":
+		return x.SourceRef != ""
+	case "dreamtree.seeds.v1.Batch.data_type":
+		return x.DataType != ""
+	case "dreamtree.seeds.v1.Batch.height":
+		return x.Height != int64(0)
+	case "dreamtree.seeds.v1.Batch.committed_at":
+		return x.CommittedAt != int64(0)
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: dreamtree.seeds.v1.Batch"))
+		}
+		panic(fmt.Errorf("message dreamtree.seeds.v1.Batch does not contain field %s", fd.FullName()))
+	}
+}
+
+// Clear clears the field such that a subsequent Has call reports false.
+//
+// Clearing an extension field clears both the extension type and value
+// associated with the given field number.
+//
+// Clear is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_Batch) Clear(fd protoreflect.FieldDescriptor) {
+	switch fd.FullName() {
+	case "dreamtree.seeds.v1.Batch.id":
+		x.Id = uint64(0)
+	case "dreamtree.seeds.v1.Batch.first_seed_id":
+		x.FirstSeedId = uint64(0)
+	case "dreamtree.seeds.v1.Batch.new_count":
+		x.NewCount = uint32(0)
+	case "dreamtree.seeds.v1.Batch.leaf_count":
+		x.LeafCount = uint32(0)
+	case "dreamtree.seeds.v1.Batch.merkle_root":
+		x.MerkleRoot = ""
+	case "dreamtree.seeds.v1.Batch.committer":
+		x.Committer = ""
+	case "dreamtree.seeds.v1.Batch.subject":
+		x.Subject = ""
+	case "dreamtree.seeds.v1.Batch.kind":
+		x.Kind = ""
+	case "dreamtree.seeds.v1.Batch.source_ref":
+		x.SourceRef = ""
+	case "dreamtree.seeds.v1.Batch.data_type":
+		x.DataType = ""
+	case "dreamtree.seeds.v1.Batch.height":
+		x.Height = int64(0)
+	case "dreamtree.seeds.v1.Batch.committed_at":
+		x.CommittedAt = int64(0)
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: dreamtree.seeds.v1.Batch"))
+		}
+		panic(fmt.Errorf("message dreamtree.seeds.v1.Batch does not contain field %s", fd.FullName()))
+	}
+}
+
+// Get retrieves the value for a field.
+//
+// For unpopulated scalars, it returns the default value, where
+// the default value of a bytes scalar is guaranteed to be a copy.
+// For unpopulated composite types, it returns an empty, read-only view
+// of the value; to obtain a mutable reference, use Mutable.
+func (x *fastReflection_Batch) Get(descriptor protoreflect.FieldDescriptor) protoreflect.Value {
+	switch descriptor.FullName() {
+	case "dreamtree.seeds.v1.Batch.id":
+		value := x.Id
+		return protoreflect.ValueOfUint64(value)
+	case "dreamtree.seeds.v1.Batch.first_seed_id":
+		value := x.FirstSeedId
+		return protoreflect.ValueOfUint64(value)
+	case "dreamtree.seeds.v1.Batch.new_count":
+		value := x.NewCount
+		return protoreflect.ValueOfUint32(value)
+	case "dreamtree.seeds.v1.Batch.leaf_count":
+		value := x.LeafCount
+		return protoreflect.ValueOfUint32(value)
+	case "dreamtree.seeds.v1.Batch.merkle_root":
+		value := x.MerkleRoot
+		return protoreflect.ValueOfString(value)
+	case "dreamtree.seeds.v1.Batch.committer":
+		value := x.Committer
+		return protoreflect.ValueOfString(value)
+	case "dreamtree.seeds.v1.Batch.subject":
+		value := x.Subject
+		return protoreflect.ValueOfString(value)
+	case "dreamtree.seeds.v1.Batch.kind":
+		value := x.Kind
+		return protoreflect.ValueOfString(value)
+	case "dreamtree.seeds.v1.Batch.source_ref":
+		value := x.SourceRef
+		return protoreflect.ValueOfString(value)
+	case "dreamtree.seeds.v1.Batch.data_type":
+		value := x.DataType
+		return protoreflect.ValueOfString(value)
+	case "dreamtree.seeds.v1.Batch.height":
+		value := x.Height
+		return protoreflect.ValueOfInt64(value)
+	case "dreamtree.seeds.v1.Batch.committed_at":
+		value := x.CommittedAt
+		return protoreflect.ValueOfInt64(value)
+	default:
+		if descriptor.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: dreamtree.seeds.v1.Batch"))
+		}
+		panic(fmt.Errorf("message dreamtree.seeds.v1.Batch does not contain field %s", descriptor.FullName()))
+	}
+}
+
+// Set stores the value for a field.
+//
+// For a field belonging to a oneof, it implicitly clears any other field
+// that may be currently set within the same oneof.
+// For extension fields, it implicitly stores the provided ExtensionType.
+// When setting a composite type, it is unspecified whether the stored value
+// aliases the source's memory in any way. If the composite value is an
+// empty, read-only value, then it panics.
+//
+// Set is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_Batch) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
+	switch fd.FullName() {
+	case "dreamtree.seeds.v1.Batch.id":
+		x.Id = value.Uint()
+	case "dreamtree.seeds.v1.Batch.first_seed_id":
+		x.FirstSeedId = value.Uint()
+	case "dreamtree.seeds.v1.Batch.new_count":
+		x.NewCount = uint32(value.Uint())
+	case "dreamtree.seeds.v1.Batch.leaf_count":
+		x.LeafCount = uint32(value.Uint())
+	case "dreamtree.seeds.v1.Batch.merkle_root":
+		x.MerkleRoot = value.Interface().(string)
+	case "dreamtree.seeds.v1.Batch.committer":
+		x.Committer = value.Interface().(string)
+	case "dreamtree.seeds.v1.Batch.subject":
+		x.Subject = value.Interface().(string)
+	case "dreamtree.seeds.v1.Batch.kind":
+		x.Kind = value.Interface().(string)
+	case "dreamtree.seeds.v1.Batch.source_ref":
+		x.SourceRef = value.Interface().(string)
+	case "dreamtree.seeds.v1.Batch.data_type":
+		x.DataType = value.Interface().(string)
+	case "dreamtree.seeds.v1.Batch.height":
+		x.Height = value.Int()
+	case "dreamtree.seeds.v1.Batch.committed_at":
+		x.CommittedAt = value.Int()
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: dreamtree.seeds.v1.Batch"))
+		}
+		panic(fmt.Errorf("message dreamtree.seeds.v1.Batch does not contain field %s", fd.FullName()))
+	}
+}
+
+// Mutable returns a mutable reference to a composite type.
+//
+// If the field is unpopulated, it may allocate a composite value.
+// For a field belonging to a oneof, it implicitly clears any other field
+// that may be currently set within the same oneof.
+// For extension fields, it implicitly stores the provided ExtensionType
+// if not already stored.
+// It panics if the field does not contain a composite type.
+//
+// Mutable is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_Batch) Mutable(fd protoreflect.FieldDescriptor) protoreflect.Value {
+	switch fd.FullName() {
+	case "dreamtree.seeds.v1.Batch.id":
+		panic(fmt.Errorf("field id of message dreamtree.seeds.v1.Batch is not mutable"))
+	case "dreamtree.seeds.v1.Batch.first_seed_id":
+		panic(fmt.Errorf("field first_seed_id of message dreamtree.seeds.v1.Batch is not mutable"))
+	case "dreamtree.seeds.v1.Batch.new_count":
+		panic(fmt.Errorf("field new_count of message dreamtree.seeds.v1.Batch is not mutable"))
+	case "dreamtree.seeds.v1.Batch.leaf_count":
+		panic(fmt.Errorf("field leaf_count of message dreamtree.seeds.v1.Batch is not mutable"))
+	case "dreamtree.seeds.v1.Batch.merkle_root":
+		panic(fmt.Errorf("field merkle_root of message dreamtree.seeds.v1.Batch is not mutable"))
+	case "dreamtree.seeds.v1.Batch.committer":
+		panic(fmt.Errorf("field committer of message dreamtree.seeds.v1.Batch is not mutable"))
+	case "dreamtree.seeds.v1.Batch.subject":
+		panic(fmt.Errorf("field subject of message dreamtree.seeds.v1.Batch is not mutable"))
+	case "dreamtree.seeds.v1.Batch.kind":
+		panic(fmt.Errorf("field kind of message dreamtree.seeds.v1.Batch is not mutable"))
+	case "dreamtree.seeds.v1.Batch.source_ref":
+		panic(fmt.Errorf("field source_ref of message dreamtree.seeds.v1.Batch is not mutable"))
+	case "dreamtree.seeds.v1.Batch.data_type":
+		panic(fmt.Errorf("field data_type of message dreamtree.seeds.v1.Batch is not mutable"))
+	case "dreamtree.seeds.v1.Batch.height":
+		panic(fmt.Errorf("field height of message dreamtree.seeds.v1.Batch is not mutable"))
+	case "dreamtree.seeds.v1.Batch.committed_at":
+		panic(fmt.Errorf("field committed_at of message dreamtree.seeds.v1.Batch is not mutable"))
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: dreamtree.seeds.v1.Batch"))
+		}
+		panic(fmt.Errorf("message dreamtree.seeds.v1.Batch does not contain field %s", fd.FullName()))
+	}
+}
+
+// NewField returns a new value that is assignable to the field
+// for the given descriptor. For scalars, this returns the default value.
+// For lists, maps, and messages, this returns a new, empty, mutable value.
+func (x *fastReflection_Batch) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
+	switch fd.FullName() {
+	case "dreamtree.seeds.v1.Batch.id":
+		return protoreflect.ValueOfUint64(uint64(0))
+	case "dreamtree.seeds.v1.Batch.first_seed_id":
+		return protoreflect.ValueOfUint64(uint64(0))
+	case "dreamtree.seeds.v1.Batch.new_count":
+		return protoreflect.ValueOfUint32(uint32(0))
+	case "dreamtree.seeds.v1.Batch.leaf_count":
+		return protoreflect.ValueOfUint32(uint32(0))
+	case "dreamtree.seeds.v1.Batch.merkle_root":
+		return protoreflect.ValueOfString("")
+	case "dreamtree.seeds.v1.Batch.committer":
+		return protoreflect.ValueOfString("")
+	case "dreamtree.seeds.v1.Batch.subject":
+		return protoreflect.ValueOfString("")
+	case "dreamtree.seeds.v1.Batch.kind":
+		return protoreflect.ValueOfString("")
+	case "dreamtree.seeds.v1.Batch.source_ref":
+		return protoreflect.ValueOfString("")
+	case "dreamtree.seeds.v1.Batch.data_type":
+		return protoreflect.ValueOfString("")
+	case "dreamtree.seeds.v1.Batch.height":
+		return protoreflect.ValueOfInt64(int64(0))
+	case "dreamtree.seeds.v1.Batch.committed_at":
+		return protoreflect.ValueOfInt64(int64(0))
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: dreamtree.seeds.v1.Batch"))
+		}
+		panic(fmt.Errorf("message dreamtree.seeds.v1.Batch does not contain field %s", fd.FullName()))
+	}
+}
+
+// WhichOneof reports which field within the oneof is populated,
+// returning nil if none are populated.
+// It panics if the oneof descriptor does not belong to this message.
+func (x *fastReflection_Batch) WhichOneof(d protoreflect.OneofDescriptor) protoreflect.FieldDescriptor {
+	switch d.FullName() {
+	default:
+		panic(fmt.Errorf("%s is not a oneof field in dreamtree.seeds.v1.Batch", d.FullName()))
+	}
+	panic("unreachable")
+}
+
+// GetUnknown retrieves the entire list of unknown fields.
+// The caller may only mutate the contents of the RawFields
+// if the mutated bytes are stored back into the message with SetUnknown.
+func (x *fastReflection_Batch) GetUnknown() protoreflect.RawFields {
+	return x.unknownFields
+}
+
+// SetUnknown stores an entire list of unknown fields.
+// The raw fields must be syntactically valid according to the wire format.
+// An implementation may panic if this is not the case.
+// Once stored, the caller must not mutate the content of the RawFields.
+// An empty RawFields may be passed to clear the fields.
+//
+// SetUnknown is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_Batch) SetUnknown(fields protoreflect.RawFields) {
+	x.unknownFields = fields
+}
+
+// IsValid reports whether the message is valid.
+//
+// An invalid message is an empty, read-only value.
+//
+// An invalid message often corresponds to a nil pointer of the concrete
+// message type, but the details are implementation dependent.
+// Validity is not part of the protobuf data model, and may not
+// be preserved in marshaling or other operations.
+func (x *fastReflection_Batch) IsValid() bool {
+	return x != nil
+}
+
+// ProtoMethods returns optional fastReflectionFeature-path implementations of various operations.
+// This method may return nil.
+//
+// The returned methods type is identical to
+// "google.golang.org/protobuf/runtime/protoiface".Methods.
+// Consult the protoiface package documentation for details.
+func (x *fastReflection_Batch) ProtoMethods() *protoiface.Methods {
+	size := func(input protoiface.SizeInput) protoiface.SizeOutput {
+		x := input.Message.Interface().(*Batch)
+		if x == nil {
+			return protoiface.SizeOutput{
+				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+				Size:              0,
+			}
+		}
+		options := runtime.SizeInputToOptions(input)
+		_ = options
+		var n int
+		var l int
+		_ = l
+		if x.Id != 0 {
+			n += 1 + runtime.Sov(uint64(x.Id))
+		}
+		if x.FirstSeedId != 0 {
+			n += 1 + runtime.Sov(uint64(x.FirstSeedId))
+		}
+		if x.NewCount != 0 {
+			n += 1 + runtime.Sov(uint64(x.NewCount))
+		}
+		if x.LeafCount != 0 {
+			n += 1 + runtime.Sov(uint64(x.LeafCount))
+		}
+		l = len(x.MerkleRoot)
+		if l > 0 {
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
+		l = len(x.Committer)
+		if l > 0 {
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
+		l = len(x.Subject)
+		if l > 0 {
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
+		l = len(x.Kind)
+		if l > 0 {
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
+		l = len(x.SourceRef)
+		if l > 0 {
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
+		l = len(x.DataType)
+		if l > 0 {
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
+		if x.Height != 0 {
+			n += 1 + runtime.Sov(uint64(x.Height))
+		}
+		if x.CommittedAt != 0 {
+			n += 1 + runtime.Sov(uint64(x.CommittedAt))
+		}
+		if x.unknownFields != nil {
+			n += len(x.unknownFields)
+		}
+		return protoiface.SizeOutput{
+			NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+			Size:              n,
+		}
+	}
+
+	marshal := func(input protoiface.MarshalInput) (protoiface.MarshalOutput, error) {
+		x := input.Message.Interface().(*Batch)
+		if x == nil {
+			return protoiface.MarshalOutput{
+				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+				Buf:               input.Buf,
+			}, nil
+		}
+		options := runtime.MarshalInputToOptions(input)
+		_ = options
+		size := options.Size(x)
+		dAtA := make([]byte, size)
+		i := len(dAtA)
+		_ = i
+		var l int
+		_ = l
+		if x.unknownFields != nil {
+			i -= len(x.unknownFields)
+			copy(dAtA[i:], x.unknownFields)
+		}
+		if x.CommittedAt != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.CommittedAt))
+			i--
+			dAtA[i] = 0x60
+		}
+		if x.Height != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.Height))
+			i--
+			dAtA[i] = 0x58
+		}
+		if len(x.DataType) > 0 {
+			i -= len(x.DataType)
+			copy(dAtA[i:], x.DataType)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.DataType)))
+			i--
+			dAtA[i] = 0x52
+		}
+		if len(x.SourceRef) > 0 {
+			i -= len(x.SourceRef)
+			copy(dAtA[i:], x.SourceRef)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.SourceRef)))
+			i--
+			dAtA[i] = 0x4a
+		}
+		if len(x.Kind) > 0 {
+			i -= len(x.Kind)
+			copy(dAtA[i:], x.Kind)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Kind)))
+			i--
+			dAtA[i] = 0x42
+		}
+		if len(x.Subject) > 0 {
+			i -= len(x.Subject)
+			copy(dAtA[i:], x.Subject)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Subject)))
+			i--
+			dAtA[i] = 0x3a
+		}
+		if len(x.Committer) > 0 {
+			i -= len(x.Committer)
+			copy(dAtA[i:], x.Committer)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Committer)))
+			i--
+			dAtA[i] = 0x32
+		}
+		if len(x.MerkleRoot) > 0 {
+			i -= len(x.MerkleRoot)
+			copy(dAtA[i:], x.MerkleRoot)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.MerkleRoot)))
+			i--
+			dAtA[i] = 0x2a
+		}
+		if x.LeafCount != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.LeafCount))
+			i--
+			dAtA[i] = 0x20
+		}
+		if x.NewCount != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.NewCount))
+			i--
+			dAtA[i] = 0x18
+		}
+		if x.FirstSeedId != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.FirstSeedId))
+			i--
+			dAtA[i] = 0x10
+		}
+		if x.Id != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.Id))
+			i--
+			dAtA[i] = 0x8
+		}
+		if input.Buf != nil {
+			input.Buf = append(input.Buf, dAtA...)
+		} else {
+			input.Buf = dAtA
+		}
+		return protoiface.MarshalOutput{
+			NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+			Buf:               input.Buf,
+		}, nil
+	}
+	unmarshal := func(input protoiface.UnmarshalInput) (protoiface.UnmarshalOutput, error) {
+		x := input.Message.Interface().(*Batch)
+		if x == nil {
+			return protoiface.UnmarshalOutput{
+				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+				Flags:             input.Flags,
+			}, nil
+		}
+		options := runtime.UnmarshalInputToOptions(input)
+		_ = options
+		dAtA := input.Buf
+		l := len(dAtA)
+		iNdEx := 0
+		for iNdEx < l {
+			preIndex := iNdEx
+			var wire uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				wire |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			fieldNum := int32(wire >> 3)
+			wireType := int(wire & 0x7)
+			if wireType == 4 {
+				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: Batch: wiretype end group for non-group")
+			}
+			if fieldNum <= 0 {
+				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: Batch: illegal tag %d (wire type %d)", fieldNum, wire)
+			}
+			switch fieldNum {
+			case 1:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
+				}
+				x.Id = 0
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					x.Id |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+			case 2:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field FirstSeedId", wireType)
+				}
+				x.FirstSeedId = 0
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					x.FirstSeedId |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+			case 3:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field NewCount", wireType)
+				}
+				x.NewCount = 0
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					x.NewCount |= uint32(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+			case 4:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field LeafCount", wireType)
+				}
+				x.LeafCount = 0
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					x.LeafCount |= uint32(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+			case 5:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field MerkleRoot", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.MerkleRoot = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			case 6:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Committer", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.Committer = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			case 7:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Subject", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.Subject = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			case 8:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Kind", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.Kind = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			case 9:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field SourceRef", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.SourceRef = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			case 10:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field DataType", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.DataType = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			case 11:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Height", wireType)
+				}
+				x.Height = 0
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					x.Height |= int64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+			case 12:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field CommittedAt", wireType)
+				}
+				x.CommittedAt = 0
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					x.CommittedAt |= int64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
 			default:
 				iNdEx = preIndex
 				skippy, err := runtime.Skip(dAtA[iNdEx:])
@@ -1354,7 +2478,7 @@ func (x *fastReflection_Seed) ProtoMethods() *protoiface.Methods {
 var _ protoreflect.List = (*_GenesisState_2_list)(nil)
 
 type _GenesisState_2_list struct {
-	list *[]*Seed
+	list *[]*Batch
 }
 
 func (x *_GenesisState_2_list) Len() int {
@@ -1370,18 +2494,18 @@ func (x *_GenesisState_2_list) Get(i int) protoreflect.Value {
 
 func (x *_GenesisState_2_list) Set(i int, value protoreflect.Value) {
 	valueUnwrapped := value.Message()
-	concreteValue := valueUnwrapped.Interface().(*Seed)
+	concreteValue := valueUnwrapped.Interface().(*Batch)
 	(*x.list)[i] = concreteValue
 }
 
 func (x *_GenesisState_2_list) Append(value protoreflect.Value) {
 	valueUnwrapped := value.Message()
-	concreteValue := valueUnwrapped.Interface().(*Seed)
+	concreteValue := valueUnwrapped.Interface().(*Batch)
 	*x.list = append(*x.list, concreteValue)
 }
 
 func (x *_GenesisState_2_list) AppendMutable() protoreflect.Value {
-	v := new(Seed)
+	v := new(Batch)
 	*x.list = append(*x.list, v)
 	return protoreflect.ValueOfMessage(v.ProtoReflect())
 }
@@ -1394,7 +2518,7 @@ func (x *_GenesisState_2_list) Truncate(n int) {
 }
 
 func (x *_GenesisState_2_list) NewElement() protoreflect.Value {
-	v := new(Seed)
+	v := new(Batch)
 	return protoreflect.ValueOfMessage(v.ProtoReflect())
 }
 
@@ -1403,18 +2527,20 @@ func (x *_GenesisState_2_list) IsValid() bool {
 }
 
 var (
-	md_GenesisState         protoreflect.MessageDescriptor
-	fd_GenesisState_params  protoreflect.FieldDescriptor
-	fd_GenesisState_seeds   protoreflect.FieldDescriptor
-	fd_GenesisState_next_id protoreflect.FieldDescriptor
+	md_GenesisState               protoreflect.MessageDescriptor
+	fd_GenesisState_params        protoreflect.FieldDescriptor
+	fd_GenesisState_batches       protoreflect.FieldDescriptor
+	fd_GenesisState_next_id       protoreflect.FieldDescriptor
+	fd_GenesisState_next_batch_id protoreflect.FieldDescriptor
 )
 
 func init() {
 	file_dreamtree_seeds_v1_types_proto_init()
 	md_GenesisState = File_dreamtree_seeds_v1_types_proto.Messages().ByName("GenesisState")
 	fd_GenesisState_params = md_GenesisState.Fields().ByName("params")
-	fd_GenesisState_seeds = md_GenesisState.Fields().ByName("seeds")
+	fd_GenesisState_batches = md_GenesisState.Fields().ByName("batches")
 	fd_GenesisState_next_id = md_GenesisState.Fields().ByName("next_id")
+	fd_GenesisState_next_batch_id = md_GenesisState.Fields().ByName("next_batch_id")
 }
 
 var _ protoreflect.Message = (*fastReflection_GenesisState)(nil)
@@ -1426,7 +2552,7 @@ func (x *GenesisState) ProtoReflect() protoreflect.Message {
 }
 
 func (x *GenesisState) slowProtoReflect() protoreflect.Message {
-	mi := &file_dreamtree_seeds_v1_types_proto_msgTypes[2]
+	mi := &file_dreamtree_seeds_v1_types_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1488,15 +2614,21 @@ func (x *fastReflection_GenesisState) Range(f func(protoreflect.FieldDescriptor,
 			return
 		}
 	}
-	if len(x.Seeds) != 0 {
-		value := protoreflect.ValueOfList(&_GenesisState_2_list{list: &x.Seeds})
-		if !f(fd_GenesisState_seeds, value) {
+	if len(x.Batches) != 0 {
+		value := protoreflect.ValueOfList(&_GenesisState_2_list{list: &x.Batches})
+		if !f(fd_GenesisState_batches, value) {
 			return
 		}
 	}
 	if x.NextId != uint64(0) {
 		value := protoreflect.ValueOfUint64(x.NextId)
 		if !f(fd_GenesisState_next_id, value) {
+			return
+		}
+	}
+	if x.NextBatchId != uint64(0) {
+		value := protoreflect.ValueOfUint64(x.NextBatchId)
+		if !f(fd_GenesisState_next_batch_id, value) {
 			return
 		}
 	}
@@ -1517,10 +2649,12 @@ func (x *fastReflection_GenesisState) Has(fd protoreflect.FieldDescriptor) bool 
 	switch fd.FullName() {
 	case "dreamtree.seeds.v1.GenesisState.params":
 		return x.Params != nil
-	case "dreamtree.seeds.v1.GenesisState.seeds":
-		return len(x.Seeds) != 0
+	case "dreamtree.seeds.v1.GenesisState.batches":
+		return len(x.Batches) != 0
 	case "dreamtree.seeds.v1.GenesisState.next_id":
 		return x.NextId != uint64(0)
+	case "dreamtree.seeds.v1.GenesisState.next_batch_id":
+		return x.NextBatchId != uint64(0)
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: dreamtree.seeds.v1.GenesisState"))
@@ -1539,10 +2673,12 @@ func (x *fastReflection_GenesisState) Clear(fd protoreflect.FieldDescriptor) {
 	switch fd.FullName() {
 	case "dreamtree.seeds.v1.GenesisState.params":
 		x.Params = nil
-	case "dreamtree.seeds.v1.GenesisState.seeds":
-		x.Seeds = nil
+	case "dreamtree.seeds.v1.GenesisState.batches":
+		x.Batches = nil
 	case "dreamtree.seeds.v1.GenesisState.next_id":
 		x.NextId = uint64(0)
+	case "dreamtree.seeds.v1.GenesisState.next_batch_id":
+		x.NextBatchId = uint64(0)
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: dreamtree.seeds.v1.GenesisState"))
@@ -1562,14 +2698,17 @@ func (x *fastReflection_GenesisState) Get(descriptor protoreflect.FieldDescripto
 	case "dreamtree.seeds.v1.GenesisState.params":
 		value := x.Params
 		return protoreflect.ValueOfMessage(value.ProtoReflect())
-	case "dreamtree.seeds.v1.GenesisState.seeds":
-		if len(x.Seeds) == 0 {
+	case "dreamtree.seeds.v1.GenesisState.batches":
+		if len(x.Batches) == 0 {
 			return protoreflect.ValueOfList(&_GenesisState_2_list{})
 		}
-		listValue := &_GenesisState_2_list{list: &x.Seeds}
+		listValue := &_GenesisState_2_list{list: &x.Batches}
 		return protoreflect.ValueOfList(listValue)
 	case "dreamtree.seeds.v1.GenesisState.next_id":
 		value := x.NextId
+		return protoreflect.ValueOfUint64(value)
+	case "dreamtree.seeds.v1.GenesisState.next_batch_id":
+		value := x.NextBatchId
 		return protoreflect.ValueOfUint64(value)
 	default:
 		if descriptor.IsExtension() {
@@ -1593,12 +2732,14 @@ func (x *fastReflection_GenesisState) Set(fd protoreflect.FieldDescriptor, value
 	switch fd.FullName() {
 	case "dreamtree.seeds.v1.GenesisState.params":
 		x.Params = value.Message().Interface().(*Params)
-	case "dreamtree.seeds.v1.GenesisState.seeds":
+	case "dreamtree.seeds.v1.GenesisState.batches":
 		lv := value.List()
 		clv := lv.(*_GenesisState_2_list)
-		x.Seeds = *clv.list
+		x.Batches = *clv.list
 	case "dreamtree.seeds.v1.GenesisState.next_id":
 		x.NextId = value.Uint()
+	case "dreamtree.seeds.v1.GenesisState.next_batch_id":
+		x.NextBatchId = value.Uint()
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: dreamtree.seeds.v1.GenesisState"))
@@ -1624,14 +2765,16 @@ func (x *fastReflection_GenesisState) Mutable(fd protoreflect.FieldDescriptor) p
 			x.Params = new(Params)
 		}
 		return protoreflect.ValueOfMessage(x.Params.ProtoReflect())
-	case "dreamtree.seeds.v1.GenesisState.seeds":
-		if x.Seeds == nil {
-			x.Seeds = []*Seed{}
+	case "dreamtree.seeds.v1.GenesisState.batches":
+		if x.Batches == nil {
+			x.Batches = []*Batch{}
 		}
-		value := &_GenesisState_2_list{list: &x.Seeds}
+		value := &_GenesisState_2_list{list: &x.Batches}
 		return protoreflect.ValueOfList(value)
 	case "dreamtree.seeds.v1.GenesisState.next_id":
 		panic(fmt.Errorf("field next_id of message dreamtree.seeds.v1.GenesisState is not mutable"))
+	case "dreamtree.seeds.v1.GenesisState.next_batch_id":
+		panic(fmt.Errorf("field next_batch_id of message dreamtree.seeds.v1.GenesisState is not mutable"))
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: dreamtree.seeds.v1.GenesisState"))
@@ -1648,10 +2791,12 @@ func (x *fastReflection_GenesisState) NewField(fd protoreflect.FieldDescriptor) 
 	case "dreamtree.seeds.v1.GenesisState.params":
 		m := new(Params)
 		return protoreflect.ValueOfMessage(m.ProtoReflect())
-	case "dreamtree.seeds.v1.GenesisState.seeds":
-		list := []*Seed{}
+	case "dreamtree.seeds.v1.GenesisState.batches":
+		list := []*Batch{}
 		return protoreflect.ValueOfList(&_GenesisState_2_list{list: &list})
 	case "dreamtree.seeds.v1.GenesisState.next_id":
+		return protoreflect.ValueOfUint64(uint64(0))
+	case "dreamtree.seeds.v1.GenesisState.next_batch_id":
 		return protoreflect.ValueOfUint64(uint64(0))
 	default:
 		if fd.IsExtension() {
@@ -1726,14 +2871,17 @@ func (x *fastReflection_GenesisState) ProtoMethods() *protoiface.Methods {
 			l = options.Size(x.Params)
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
-		if len(x.Seeds) > 0 {
-			for _, e := range x.Seeds {
+		if len(x.Batches) > 0 {
+			for _, e := range x.Batches {
 				l = options.Size(e)
 				n += 1 + l + runtime.Sov(uint64(l))
 			}
 		}
 		if x.NextId != 0 {
 			n += 1 + runtime.Sov(uint64(x.NextId))
+		}
+		if x.NextBatchId != 0 {
+			n += 1 + runtime.Sov(uint64(x.NextBatchId))
 		}
 		if x.unknownFields != nil {
 			n += len(x.unknownFields)
@@ -1764,14 +2912,19 @@ func (x *fastReflection_GenesisState) ProtoMethods() *protoiface.Methods {
 			i -= len(x.unknownFields)
 			copy(dAtA[i:], x.unknownFields)
 		}
+		if x.NextBatchId != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.NextBatchId))
+			i--
+			dAtA[i] = 0x20
+		}
 		if x.NextId != 0 {
 			i = runtime.EncodeVarint(dAtA, i, uint64(x.NextId))
 			i--
 			dAtA[i] = 0x18
 		}
-		if len(x.Seeds) > 0 {
-			for iNdEx := len(x.Seeds) - 1; iNdEx >= 0; iNdEx-- {
-				encoded, err := options.Marshal(x.Seeds[iNdEx])
+		if len(x.Batches) > 0 {
+			for iNdEx := len(x.Batches) - 1; iNdEx >= 0; iNdEx-- {
+				encoded, err := options.Marshal(x.Batches[iNdEx])
 				if err != nil {
 					return protoiface.MarshalOutput{
 						NoUnkeyedLiterals: input.NoUnkeyedLiterals,
@@ -1886,7 +3039,7 @@ func (x *fastReflection_GenesisState) ProtoMethods() *protoiface.Methods {
 				iNdEx = postIndex
 			case 2:
 				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Seeds", wireType)
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Batches", wireType)
 				}
 				var msglen int
 				for shift := uint(0); ; shift += 7 {
@@ -1913,8 +3066,8 @@ func (x *fastReflection_GenesisState) ProtoMethods() *protoiface.Methods {
 				if postIndex > l {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
 				}
-				x.Seeds = append(x.Seeds, &Seed{})
-				if err := options.Unmarshal(dAtA[iNdEx:postIndex], x.Seeds[len(x.Seeds)-1]); err != nil {
+				x.Batches = append(x.Batches, &Batch{})
+				if err := options.Unmarshal(dAtA[iNdEx:postIndex], x.Batches[len(x.Batches)-1]); err != nil {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
 				}
 				iNdEx = postIndex
@@ -1933,6 +3086,25 @@ func (x *fastReflection_GenesisState) ProtoMethods() *protoiface.Methods {
 					b := dAtA[iNdEx]
 					iNdEx++
 					x.NextId |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+			case 4:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field NextBatchId", wireType)
+				}
+				x.NextBatchId = 0
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					x.NextBatchId |= uint64(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
@@ -2065,6 +3237,12 @@ type Seed struct {
 	// data_type is the dt.*@v type of the underlying record — the priceable type
 	// for the marketplace (per-type N_a). Empty for non-priceable commits.
 	DataType string `protobuf:"bytes,9,opt,name=data_type,json=dataType,proto3" json:"data_type,omitempty"`
+	// batch_id is the containing batch (synthesized on read; seeds are stored
+	// as batches — see Batch).
+	BatchId uint64 `protobuf:"varint,10,opt,name=batch_id,json=batchId,proto3" json:"batch_id,omitempty"`
+	// leaf_index is this seed's position among the batch's NEW leaves
+	// (id - batch.first_seed_id); synthesized on read.
+	LeafIndex uint32 `protobuf:"varint,11,opt,name=leaf_index,json=leafIndex,proto3" json:"leaf_index,omitempty"`
 }
 
 func (x *Seed) Reset() {
@@ -2150,6 +3328,164 @@ func (x *Seed) GetDataType() string {
 	return ""
 }
 
+func (x *Seed) GetBatchId() uint64 {
+	if x != nil {
+		return x.BatchId
+	}
+	return 0
+}
+
+func (x *Seed) GetLeafIndex() uint32 {
+	if x != nil {
+		return x.LeafIndex
+	}
+	return 0
+}
+
+// Batch is the stored anchoring unit (seed = atom; batching is a commitment
+// strategy, never a unit change — docs/specs/seed-atom-conformance.md). A batch
+// registers new_count leaf-seeds [first_seed_id, first_seed_id+new_count) under
+// one Merkle root; individual Seed objects are synthesized on read. A single
+// CommitSeed is stored as a batch of one (merkle_root = the commitment).
+type Batch struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// id is the monotonic batch sequence.
+	Id uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// first_seed_id is the first leaf-seed id this batch registered.
+	FirstSeedId uint64 `protobuf:"varint,2,opt,name=first_seed_id,json=firstSeedId,proto3" json:"first_seed_id,omitempty"`
+	// new_count is how many NEW distinct contributions this batch registered
+	// (seed ids allocated, photons minted). Convergence rule: re-observed atoms
+	// do not re-mint — sigma accrues, supply doesn't.
+	NewCount uint32 `protobuf:"varint,3,opt,name=new_count,json=newCount,proto3" json:"new_count,omitempty"`
+	// leaf_count is the total number of leaves under merkle_root (>= new_count);
+	// converged (already-registered) atoms stay provable against this root too.
+	LeafCount uint32 `protobuf:"varint,4,opt,name=leaf_count,json=leafCount,proto3" json:"leaf_count,omitempty"`
+	// merkle_root is the hex-encoded root over the batch's leaf ids (for a
+	// batch of one, the leaf digest itself).
+	MerkleRoot string `protobuf:"bytes,5,opt,name=merkle_root,json=merkleRoot,proto3" json:"merkle_root,omitempty"`
+	// committer is the address that anchored this batch.
+	Committer string `protobuf:"bytes,6,opt,name=committer,proto3" json:"committer,omitempty"`
+	// subject identifies what the leaves are about (owning wallet DID etc.).
+	Subject string `protobuf:"bytes,7,opt,name=subject,proto3" json:"subject,omitempty"`
+	// kind names what each LEAF is: "record", "kg_claim", ... ("batch_root" is
+	// retired as a kind — the aggregate is no longer a seed kind).
+	Kind string `protobuf:"bytes,8,opt,name=kind,proto3" json:"kind,omitempty"`
+	// source_ref is an opaque origin pointer (e.g. "reflow:gen:61932").
+	SourceRef string `protobuf:"bytes,9,opt,name=source_ref,json=sourceRef,proto3" json:"source_ref,omitempty"`
+	// data_type is the dt.*@v type of the leaves (per-type N_a pricing).
+	DataType string `protobuf:"bytes,10,opt,name=data_type,json=dataType,proto3" json:"data_type,omitempty"`
+	// height / committed_at anchor the batch in chain time.
+	Height      int64 `protobuf:"varint,11,opt,name=height,proto3" json:"height,omitempty"`
+	CommittedAt int64 `protobuf:"varint,12,opt,name=committed_at,json=committedAt,proto3" json:"committed_at,omitempty"`
+}
+
+func (x *Batch) Reset() {
+	*x = Batch{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_dreamtree_seeds_v1_types_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Batch) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Batch) ProtoMessage() {}
+
+// Deprecated: Use Batch.ProtoReflect.Descriptor instead.
+func (*Batch) Descriptor() ([]byte, []int) {
+	return file_dreamtree_seeds_v1_types_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *Batch) GetId() uint64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *Batch) GetFirstSeedId() uint64 {
+	if x != nil {
+		return x.FirstSeedId
+	}
+	return 0
+}
+
+func (x *Batch) GetNewCount() uint32 {
+	if x != nil {
+		return x.NewCount
+	}
+	return 0
+}
+
+func (x *Batch) GetLeafCount() uint32 {
+	if x != nil {
+		return x.LeafCount
+	}
+	return 0
+}
+
+func (x *Batch) GetMerkleRoot() string {
+	if x != nil {
+		return x.MerkleRoot
+	}
+	return ""
+}
+
+func (x *Batch) GetCommitter() string {
+	if x != nil {
+		return x.Committer
+	}
+	return ""
+}
+
+func (x *Batch) GetSubject() string {
+	if x != nil {
+		return x.Subject
+	}
+	return ""
+}
+
+func (x *Batch) GetKind() string {
+	if x != nil {
+		return x.Kind
+	}
+	return ""
+}
+
+func (x *Batch) GetSourceRef() string {
+	if x != nil {
+		return x.SourceRef
+	}
+	return ""
+}
+
+func (x *Batch) GetDataType() string {
+	if x != nil {
+		return x.DataType
+	}
+	return ""
+}
+
+func (x *Batch) GetHeight() int64 {
+	if x != nil {
+		return x.Height
+	}
+	return 0
+}
+
+func (x *Batch) GetCommittedAt() int64 {
+	if x != nil {
+		return x.CommittedAt
+	}
+	return 0
+}
+
 // GenesisState is the seeds state provided at genesis.
 type GenesisState struct {
 	state         protoimpl.MessageState
@@ -2158,16 +3494,18 @@ type GenesisState struct {
 
 	// params defines the module parameters.
 	Params *Params `protobuf:"bytes,1,opt,name=params,proto3" json:"params,omitempty"`
-	// seeds is the set of anchored commitments (for export/import).
-	Seeds []*Seed `protobuf:"bytes,2,rep,name=seeds,proto3" json:"seeds,omitempty"`
-	// next_id is the sequence value the next commit will take.
+	// batches is the set of anchored batches (for export/import).
+	Batches []*Batch `protobuf:"bytes,2,rep,name=batches,proto3" json:"batches,omitempty"`
+	// next_id is the leaf-seed sequence value the next commit will take.
 	NextId uint64 `protobuf:"varint,3,opt,name=next_id,json=nextId,proto3" json:"next_id,omitempty"`
+	// next_batch_id is the batch sequence value the next commit will take.
+	NextBatchId uint64 `protobuf:"varint,4,opt,name=next_batch_id,json=nextBatchId,proto3" json:"next_batch_id,omitempty"`
 }
 
 func (x *GenesisState) Reset() {
 	*x = GenesisState{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_dreamtree_seeds_v1_types_proto_msgTypes[2]
+		mi := &file_dreamtree_seeds_v1_types_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2181,7 +3519,7 @@ func (*GenesisState) ProtoMessage() {}
 
 // Deprecated: Use GenesisState.ProtoReflect.Descriptor instead.
 func (*GenesisState) Descriptor() ([]byte, []int) {
-	return file_dreamtree_seeds_v1_types_proto_rawDescGZIP(), []int{2}
+	return file_dreamtree_seeds_v1_types_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *GenesisState) GetParams() *Params {
@@ -2191,9 +3529,9 @@ func (x *GenesisState) GetParams() *Params {
 	return nil
 }
 
-func (x *GenesisState) GetSeeds() []*Seed {
+func (x *GenesisState) GetBatches() []*Batch {
 	if x != nil {
-		return x.Seeds
+		return x.Batches
 	}
 	return nil
 }
@@ -2201,6 +3539,13 @@ func (x *GenesisState) GetSeeds() []*Seed {
 func (x *GenesisState) GetNextId() uint64 {
 	if x != nil {
 		return x.NextId
+	}
+	return 0
+}
+
+func (x *GenesisState) GetNextBatchId() uint64 {
+	if x != nil {
+		return x.NextBatchId
 	}
 	return 0
 }
@@ -2224,7 +3569,7 @@ var file_dreamtree_seeds_v1_types_proto_rawDesc = []byte{
 	0x01, 0x28, 0x0d, 0x52, 0x11, 0x6d, 0x61, 0x78, 0x53, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x52, 0x65,
 	0x66, 0x42, 0x79, 0x74, 0x65, 0x73, 0x3a, 0x1d, 0x8a, 0xe7, 0xb0, 0x2a, 0x18, 0x64, 0x72, 0x65,
 	0x61, 0x6d, 0x74, 0x72, 0x65, 0x65, 0x2f, 0x78, 0x2f, 0x73, 0x65, 0x65, 0x64, 0x73, 0x2f, 0x50,
-	0x61, 0x72, 0x61, 0x6d, 0x73, 0x22, 0xb0, 0x02, 0x0a, 0x04, 0x53, 0x65, 0x65, 0x64, 0x12, 0x0e,
+	0x61, 0x72, 0x61, 0x6d, 0x73, 0x22, 0xea, 0x02, 0x0a, 0x04, 0x53, 0x65, 0x65, 0x64, 0x12, 0x0e,
 	0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x02, 0x69, 0x64, 0x12, 0x36,
 	0x0a, 0x09, 0x63, 0x6f, 0x6d, 0x6d, 0x69, 0x74, 0x74, 0x65, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28,
 	0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64,
@@ -2241,33 +3586,64 @@ var file_dreamtree_seeds_v1_types_proto_rawDesc = []byte{
 	0x6f, 0x6d, 0x6d, 0x69, 0x74, 0x74, 0x65, 0x64, 0x5f, 0x61, 0x74, 0x18, 0x08, 0x20, 0x01, 0x28,
 	0x03, 0x52, 0x0b, 0x63, 0x6f, 0x6d, 0x6d, 0x69, 0x74, 0x74, 0x65, 0x64, 0x41, 0x74, 0x12, 0x1b,
 	0x0a, 0x09, 0x64, 0x61, 0x74, 0x61, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x18, 0x09, 0x20, 0x01, 0x28,
-	0x09, 0x52, 0x08, 0x64, 0x61, 0x74, 0x61, 0x54, 0x79, 0x70, 0x65, 0x3a, 0x1b, 0x8a, 0xe7, 0xb0,
-	0x2a, 0x16, 0x64, 0x72, 0x65, 0x61, 0x6d, 0x74, 0x72, 0x65, 0x65, 0x2f, 0x78, 0x2f, 0x73, 0x65,
-	0x65, 0x64, 0x73, 0x2f, 0x53, 0x65, 0x65, 0x64, 0x22, 0xa1, 0x01, 0x0a, 0x0c, 0x47, 0x65, 0x6e,
+	0x09, 0x52, 0x08, 0x64, 0x61, 0x74, 0x61, 0x54, 0x79, 0x70, 0x65, 0x12, 0x19, 0x0a, 0x08, 0x62,
+	0x61, 0x74, 0x63, 0x68, 0x5f, 0x69, 0x64, 0x18, 0x0a, 0x20, 0x01, 0x28, 0x04, 0x52, 0x07, 0x62,
+	0x61, 0x74, 0x63, 0x68, 0x49, 0x64, 0x12, 0x1d, 0x0a, 0x0a, 0x6c, 0x65, 0x61, 0x66, 0x5f, 0x69,
+	0x6e, 0x64, 0x65, 0x78, 0x18, 0x0b, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x09, 0x6c, 0x65, 0x61, 0x66,
+	0x49, 0x6e, 0x64, 0x65, 0x78, 0x3a, 0x1b, 0x8a, 0xe7, 0xb0, 0x2a, 0x16, 0x64, 0x72, 0x65, 0x61,
+	0x6d, 0x74, 0x72, 0x65, 0x65, 0x2f, 0x78, 0x2f, 0x73, 0x65, 0x65, 0x64, 0x73, 0x2f, 0x53, 0x65,
+	0x65, 0x64, 0x22, 0x93, 0x03, 0x0a, 0x05, 0x42, 0x61, 0x74, 0x63, 0x68, 0x12, 0x0e, 0x0a, 0x02,
+	0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x02, 0x69, 0x64, 0x12, 0x22, 0x0a, 0x0d,
+	0x66, 0x69, 0x72, 0x73, 0x74, 0x5f, 0x73, 0x65, 0x65, 0x64, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x04, 0x52, 0x0b, 0x66, 0x69, 0x72, 0x73, 0x74, 0x53, 0x65, 0x65, 0x64, 0x49, 0x64,
+	0x12, 0x1b, 0x0a, 0x09, 0x6e, 0x65, 0x77, 0x5f, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x03, 0x20,
+	0x01, 0x28, 0x0d, 0x52, 0x08, 0x6e, 0x65, 0x77, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x1d, 0x0a,
+	0x0a, 0x6c, 0x65, 0x61, 0x66, 0x5f, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x04, 0x20, 0x01, 0x28,
+	0x0d, 0x52, 0x09, 0x6c, 0x65, 0x61, 0x66, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x1f, 0x0a, 0x0b,
+	0x6d, 0x65, 0x72, 0x6b, 0x6c, 0x65, 0x5f, 0x72, 0x6f, 0x6f, 0x74, 0x18, 0x05, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x0a, 0x6d, 0x65, 0x72, 0x6b, 0x6c, 0x65, 0x52, 0x6f, 0x6f, 0x74, 0x12, 0x36, 0x0a,
+	0x09, 0x63, 0x6f, 0x6d, 0x6d, 0x69, 0x74, 0x74, 0x65, 0x72, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09,
+	0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64,
+	0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x09, 0x63, 0x6f, 0x6d, 0x6d,
+	0x69, 0x74, 0x74, 0x65, 0x72, 0x12, 0x18, 0x0a, 0x07, 0x73, 0x75, 0x62, 0x6a, 0x65, 0x63, 0x74,
+	0x18, 0x07, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x73, 0x75, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x12,
+	0x12, 0x0a, 0x04, 0x6b, 0x69, 0x6e, 0x64, 0x18, 0x08, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6b,
+	0x69, 0x6e, 0x64, 0x12, 0x1d, 0x0a, 0x0a, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x5f, 0x72, 0x65,
+	0x66, 0x18, 0x09, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x52,
+	0x65, 0x66, 0x12, 0x1b, 0x0a, 0x09, 0x64, 0x61, 0x74, 0x61, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x18,
+	0x0a, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x64, 0x61, 0x74, 0x61, 0x54, 0x79, 0x70, 0x65, 0x12,
+	0x16, 0x0a, 0x06, 0x68, 0x65, 0x69, 0x67, 0x68, 0x74, 0x18, 0x0b, 0x20, 0x01, 0x28, 0x03, 0x52,
+	0x06, 0x68, 0x65, 0x69, 0x67, 0x68, 0x74, 0x12, 0x21, 0x0a, 0x0c, 0x63, 0x6f, 0x6d, 0x6d, 0x69,
+	0x74, 0x74, 0x65, 0x64, 0x5f, 0x61, 0x74, 0x18, 0x0c, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0b, 0x63,
+	0x6f, 0x6d, 0x6d, 0x69, 0x74, 0x74, 0x65, 0x64, 0x41, 0x74, 0x3a, 0x1c, 0x8a, 0xe7, 0xb0, 0x2a,
+	0x17, 0x64, 0x72, 0x65, 0x61, 0x6d, 0x74, 0x72, 0x65, 0x65, 0x2f, 0x78, 0x2f, 0x73, 0x65, 0x65,
+	0x64, 0x73, 0x2f, 0x42, 0x61, 0x74, 0x63, 0x68, 0x22, 0xca, 0x01, 0x0a, 0x0c, 0x47, 0x65, 0x6e,
 	0x65, 0x73, 0x69, 0x73, 0x53, 0x74, 0x61, 0x74, 0x65, 0x12, 0x3d, 0x0a, 0x06, 0x70, 0x61, 0x72,
 	0x61, 0x6d, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x64, 0x72, 0x65, 0x61,
 	0x6d, 0x74, 0x72, 0x65, 0x65, 0x2e, 0x73, 0x65, 0x65, 0x64, 0x73, 0x2e, 0x76, 0x31, 0x2e, 0x50,
 	0x61, 0x72, 0x61, 0x6d, 0x73, 0x42, 0x09, 0xc8, 0xde, 0x1f, 0x00, 0xa8, 0xe7, 0xb0, 0x2a, 0x01,
-	0x52, 0x06, 0x70, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x12, 0x39, 0x0a, 0x05, 0x73, 0x65, 0x65, 0x64,
-	0x73, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x18, 0x2e, 0x64, 0x72, 0x65, 0x61, 0x6d, 0x74,
-	0x72, 0x65, 0x65, 0x2e, 0x73, 0x65, 0x65, 0x64, 0x73, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x65, 0x65,
-	0x64, 0x42, 0x09, 0xc8, 0xde, 0x1f, 0x00, 0xa8, 0xe7, 0xb0, 0x2a, 0x01, 0x52, 0x05, 0x73, 0x65,
-	0x65, 0x64, 0x73, 0x12, 0x17, 0x0a, 0x07, 0x6e, 0x65, 0x78, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x03,
-	0x20, 0x01, 0x28, 0x04, 0x52, 0x06, 0x6e, 0x65, 0x78, 0x74, 0x49, 0x64, 0x42, 0xcd, 0x01, 0x0a,
-	0x16, 0x63, 0x6f, 0x6d, 0x2e, 0x64, 0x72, 0x65, 0x61, 0x6d, 0x74, 0x72, 0x65, 0x65, 0x2e, 0x73,
-	0x65, 0x65, 0x64, 0x73, 0x2e, 0x76, 0x31, 0x42, 0x0a, 0x54, 0x79, 0x70, 0x65, 0x73, 0x50, 0x72,
-	0x6f, 0x74, 0x6f, 0x50, 0x01, 0x5a, 0x3d, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f,
-	0x6d, 0x2f, 0x62, 0x6c, 0x6f, 0x6e, 0x67, 0x2d, 0x64, 0x65, 0x76, 0x2f, 0x64, 0x72, 0x65, 0x61,
-	0x6d, 0x74, 0x72, 0x65, 0x65, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x64, 0x72, 0x65, 0x61, 0x6d, 0x74,
-	0x72, 0x65, 0x65, 0x2f, 0x73, 0x65, 0x65, 0x64, 0x73, 0x2f, 0x76, 0x31, 0x3b, 0x73, 0x65, 0x65,
-	0x64, 0x73, 0x76, 0x31, 0xa2, 0x02, 0x03, 0x44, 0x53, 0x58, 0xaa, 0x02, 0x12, 0x44, 0x72, 0x65,
-	0x61, 0x6d, 0x74, 0x72, 0x65, 0x65, 0x2e, 0x53, 0x65, 0x65, 0x64, 0x73, 0x2e, 0x56, 0x31, 0xca,
-	0x02, 0x12, 0x44, 0x72, 0x65, 0x61, 0x6d, 0x74, 0x72, 0x65, 0x65, 0x5c, 0x53, 0x65, 0x65, 0x64,
-	0x73, 0x5c, 0x56, 0x31, 0xe2, 0x02, 0x1e, 0x44, 0x72, 0x65, 0x61, 0x6d, 0x74, 0x72, 0x65, 0x65,
-	0x5c, 0x53, 0x65, 0x65, 0x64, 0x73, 0x5c, 0x56, 0x31, 0x5c, 0x47, 0x50, 0x42, 0x4d, 0x65, 0x74,
-	0x61, 0x64, 0x61, 0x74, 0x61, 0xea, 0x02, 0x14, 0x44, 0x72, 0x65, 0x61, 0x6d, 0x74, 0x72, 0x65,
-	0x65, 0x3a, 0x3a, 0x53, 0x65, 0x65, 0x64, 0x73, 0x3a, 0x3a, 0x56, 0x31, 0x62, 0x06, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x33,
+	0x52, 0x06, 0x70, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x12, 0x3e, 0x0a, 0x07, 0x62, 0x61, 0x74, 0x63,
+	0x68, 0x65, 0x73, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x64, 0x72, 0x65, 0x61,
+	0x6d, 0x74, 0x72, 0x65, 0x65, 0x2e, 0x73, 0x65, 0x65, 0x64, 0x73, 0x2e, 0x76, 0x31, 0x2e, 0x42,
+	0x61, 0x74, 0x63, 0x68, 0x42, 0x09, 0xc8, 0xde, 0x1f, 0x00, 0xa8, 0xe7, 0xb0, 0x2a, 0x01, 0x52,
+	0x07, 0x62, 0x61, 0x74, 0x63, 0x68, 0x65, 0x73, 0x12, 0x17, 0x0a, 0x07, 0x6e, 0x65, 0x78, 0x74,
+	0x5f, 0x69, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x04, 0x52, 0x06, 0x6e, 0x65, 0x78, 0x74, 0x49,
+	0x64, 0x12, 0x22, 0x0a, 0x0d, 0x6e, 0x65, 0x78, 0x74, 0x5f, 0x62, 0x61, 0x74, 0x63, 0x68, 0x5f,
+	0x69, 0x64, 0x18, 0x04, 0x20, 0x01, 0x28, 0x04, 0x52, 0x0b, 0x6e, 0x65, 0x78, 0x74, 0x42, 0x61,
+	0x74, 0x63, 0x68, 0x49, 0x64, 0x42, 0xcd, 0x01, 0x0a, 0x16, 0x63, 0x6f, 0x6d, 0x2e, 0x64, 0x72,
+	0x65, 0x61, 0x6d, 0x74, 0x72, 0x65, 0x65, 0x2e, 0x73, 0x65, 0x65, 0x64, 0x73, 0x2e, 0x76, 0x31,
+	0x42, 0x0a, 0x54, 0x79, 0x70, 0x65, 0x73, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x50, 0x01, 0x5a, 0x3d,
+	0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x62, 0x6c, 0x6f, 0x6e, 0x67,
+	0x2d, 0x64, 0x65, 0x76, 0x2f, 0x64, 0x72, 0x65, 0x61, 0x6d, 0x74, 0x72, 0x65, 0x65, 0x2f, 0x61,
+	0x70, 0x69, 0x2f, 0x64, 0x72, 0x65, 0x61, 0x6d, 0x74, 0x72, 0x65, 0x65, 0x2f, 0x73, 0x65, 0x65,
+	0x64, 0x73, 0x2f, 0x76, 0x31, 0x3b, 0x73, 0x65, 0x65, 0x64, 0x73, 0x76, 0x31, 0xa2, 0x02, 0x03,
+	0x44, 0x53, 0x58, 0xaa, 0x02, 0x12, 0x44, 0x72, 0x65, 0x61, 0x6d, 0x74, 0x72, 0x65, 0x65, 0x2e,
+	0x53, 0x65, 0x65, 0x64, 0x73, 0x2e, 0x56, 0x31, 0xca, 0x02, 0x12, 0x44, 0x72, 0x65, 0x61, 0x6d,
+	0x74, 0x72, 0x65, 0x65, 0x5c, 0x53, 0x65, 0x65, 0x64, 0x73, 0x5c, 0x56, 0x31, 0xe2, 0x02, 0x1e,
+	0x44, 0x72, 0x65, 0x61, 0x6d, 0x74, 0x72, 0x65, 0x65, 0x5c, 0x53, 0x65, 0x65, 0x64, 0x73, 0x5c,
+	0x56, 0x31, 0x5c, 0x47, 0x50, 0x42, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0xea, 0x02,
+	0x14, 0x44, 0x72, 0x65, 0x61, 0x6d, 0x74, 0x72, 0x65, 0x65, 0x3a, 0x3a, 0x53, 0x65, 0x65, 0x64,
+	0x73, 0x3a, 0x3a, 0x56, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -2282,15 +3658,16 @@ func file_dreamtree_seeds_v1_types_proto_rawDescGZIP() []byte {
 	return file_dreamtree_seeds_v1_types_proto_rawDescData
 }
 
-var file_dreamtree_seeds_v1_types_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_dreamtree_seeds_v1_types_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_dreamtree_seeds_v1_types_proto_goTypes = []interface{}{
 	(*Params)(nil),       // 0: dreamtree.seeds.v1.Params
 	(*Seed)(nil),         // 1: dreamtree.seeds.v1.Seed
-	(*GenesisState)(nil), // 2: dreamtree.seeds.v1.GenesisState
+	(*Batch)(nil),        // 2: dreamtree.seeds.v1.Batch
+	(*GenesisState)(nil), // 3: dreamtree.seeds.v1.GenesisState
 }
 var file_dreamtree_seeds_v1_types_proto_depIdxs = []int32{
 	0, // 0: dreamtree.seeds.v1.GenesisState.params:type_name -> dreamtree.seeds.v1.Params
-	1, // 1: dreamtree.seeds.v1.GenesisState.seeds:type_name -> dreamtree.seeds.v1.Seed
+	2, // 1: dreamtree.seeds.v1.GenesisState.batches:type_name -> dreamtree.seeds.v1.Batch
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
@@ -2329,6 +3706,18 @@ func file_dreamtree_seeds_v1_types_proto_init() {
 			}
 		}
 		file_dreamtree_seeds_v1_types_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Batch); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_dreamtree_seeds_v1_types_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GenesisState); i {
 			case 0:
 				return &v.state
@@ -2347,7 +3736,7 @@ func file_dreamtree_seeds_v1_types_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_dreamtree_seeds_v1_types_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

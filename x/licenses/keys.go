@@ -4,7 +4,7 @@ import "cosmossdk.io/collections"
 
 const (
 	ModuleName  = "licenses"
-	PhotonDenom = "photon" // the currency sales settle in
+	PhotonDenom = "uphoton" // the base denom sales settle in (1 photon = 10^6 uphoton; type prices N_a are in uphoton)
 )
 
 var (

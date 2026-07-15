@@ -110,6 +110,12 @@ type Seed struct {
 	// data_type is the dt.*@v type of the underlying record — the priceable type
 	// for the marketplace (per-type N_a). Empty for non-priceable commits.
 	DataType string `protobuf:"bytes,9,opt,name=data_type,json=dataType,proto3" json:"data_type,omitempty"`
+	// batch_id is the containing batch (synthesized on read; seeds are stored
+	// as batches — see Batch).
+	BatchId uint64 `protobuf:"varint,10,opt,name=batch_id,json=batchId,proto3" json:"batch_id,omitempty"`
+	// leaf_index is this seed's position among the batch's NEW leaves
+	// (id - batch.first_seed_id); synthesized on read.
+	LeafIndex uint32 `protobuf:"varint,11,opt,name=leaf_index,json=leafIndex,proto3" json:"leaf_index,omitempty"`
 }
 
 func (m *Seed) Reset()         { *m = Seed{} }
@@ -208,21 +214,190 @@ func (m *Seed) GetDataType() string {
 	return ""
 }
 
+func (m *Seed) GetBatchId() uint64 {
+	if m != nil {
+		return m.BatchId
+	}
+	return 0
+}
+
+func (m *Seed) GetLeafIndex() uint32 {
+	if m != nil {
+		return m.LeafIndex
+	}
+	return 0
+}
+
+// Batch is the stored anchoring unit (seed = atom; batching is a commitment
+// strategy, never a unit change — docs/specs/seed-atom-conformance.md). A batch
+// registers new_count leaf-seeds [first_seed_id, first_seed_id+new_count) under
+// one Merkle root; individual Seed objects are synthesized on read. A single
+// CommitSeed is stored as a batch of one (merkle_root = the commitment).
+type Batch struct {
+	// id is the monotonic batch sequence.
+	Id uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// first_seed_id is the first leaf-seed id this batch registered.
+	FirstSeedId uint64 `protobuf:"varint,2,opt,name=first_seed_id,json=firstSeedId,proto3" json:"first_seed_id,omitempty"`
+	// new_count is how many NEW distinct contributions this batch registered
+	// (seed ids allocated, photons minted). Convergence rule: re-observed atoms
+	// do not re-mint — sigma accrues, supply doesn't.
+	NewCount uint32 `protobuf:"varint,3,opt,name=new_count,json=newCount,proto3" json:"new_count,omitempty"`
+	// leaf_count is the total number of leaves under merkle_root (>= new_count);
+	// converged (already-registered) atoms stay provable against this root too.
+	LeafCount uint32 `protobuf:"varint,4,opt,name=leaf_count,json=leafCount,proto3" json:"leaf_count,omitempty"`
+	// merkle_root is the hex-encoded root over the batch's leaf ids (for a
+	// batch of one, the leaf digest itself).
+	MerkleRoot string `protobuf:"bytes,5,opt,name=merkle_root,json=merkleRoot,proto3" json:"merkle_root,omitempty"`
+	// committer is the address that anchored this batch.
+	Committer string `protobuf:"bytes,6,opt,name=committer,proto3" json:"committer,omitempty"`
+	// subject identifies what the leaves are about (owning wallet DID etc.).
+	Subject string `protobuf:"bytes,7,opt,name=subject,proto3" json:"subject,omitempty"`
+	// kind names what each LEAF is: "record", "kg_claim", ... ("batch_root" is
+	// retired as a kind — the aggregate is no longer a seed kind).
+	Kind string `protobuf:"bytes,8,opt,name=kind,proto3" json:"kind,omitempty"`
+	// source_ref is an opaque origin pointer (e.g. "reflow:gen:61932").
+	SourceRef string `protobuf:"bytes,9,opt,name=source_ref,json=sourceRef,proto3" json:"source_ref,omitempty"`
+	// data_type is the dt.*@v type of the leaves (per-type N_a pricing).
+	DataType string `protobuf:"bytes,10,opt,name=data_type,json=dataType,proto3" json:"data_type,omitempty"`
+	// height / committed_at anchor the batch in chain time.
+	Height      int64 `protobuf:"varint,11,opt,name=height,proto3" json:"height,omitempty"`
+	CommittedAt int64 `protobuf:"varint,12,opt,name=committed_at,json=committedAt,proto3" json:"committed_at,omitempty"`
+}
+
+func (m *Batch) Reset()         { *m = Batch{} }
+func (m *Batch) String() string { return proto.CompactTextString(m) }
+func (*Batch) ProtoMessage()    {}
+func (*Batch) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1441d3969325b6a2, []int{2}
+}
+func (m *Batch) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *Batch) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_Batch.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *Batch) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Batch.Merge(m, src)
+}
+func (m *Batch) XXX_Size() int {
+	return m.Size()
+}
+func (m *Batch) XXX_DiscardUnknown() {
+	xxx_messageInfo_Batch.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Batch proto.InternalMessageInfo
+
+func (m *Batch) GetId() uint64 {
+	if m != nil {
+		return m.Id
+	}
+	return 0
+}
+
+func (m *Batch) GetFirstSeedId() uint64 {
+	if m != nil {
+		return m.FirstSeedId
+	}
+	return 0
+}
+
+func (m *Batch) GetNewCount() uint32 {
+	if m != nil {
+		return m.NewCount
+	}
+	return 0
+}
+
+func (m *Batch) GetLeafCount() uint32 {
+	if m != nil {
+		return m.LeafCount
+	}
+	return 0
+}
+
+func (m *Batch) GetMerkleRoot() string {
+	if m != nil {
+		return m.MerkleRoot
+	}
+	return ""
+}
+
+func (m *Batch) GetCommitter() string {
+	if m != nil {
+		return m.Committer
+	}
+	return ""
+}
+
+func (m *Batch) GetSubject() string {
+	if m != nil {
+		return m.Subject
+	}
+	return ""
+}
+
+func (m *Batch) GetKind() string {
+	if m != nil {
+		return m.Kind
+	}
+	return ""
+}
+
+func (m *Batch) GetSourceRef() string {
+	if m != nil {
+		return m.SourceRef
+	}
+	return ""
+}
+
+func (m *Batch) GetDataType() string {
+	if m != nil {
+		return m.DataType
+	}
+	return ""
+}
+
+func (m *Batch) GetHeight() int64 {
+	if m != nil {
+		return m.Height
+	}
+	return 0
+}
+
+func (m *Batch) GetCommittedAt() int64 {
+	if m != nil {
+		return m.CommittedAt
+	}
+	return 0
+}
+
 // GenesisState is the seeds state provided at genesis.
 type GenesisState struct {
 	// params defines the module parameters.
 	Params Params `protobuf:"bytes,1,opt,name=params,proto3" json:"params"`
-	// seeds is the set of anchored commitments (for export/import).
-	Seeds []Seed `protobuf:"bytes,2,rep,name=seeds,proto3" json:"seeds"`
-	// next_id is the sequence value the next commit will take.
+	// batches is the set of anchored batches (for export/import).
+	Batches []Batch `protobuf:"bytes,2,rep,name=batches,proto3" json:"batches"`
+	// next_id is the leaf-seed sequence value the next commit will take.
 	NextId uint64 `protobuf:"varint,3,opt,name=next_id,json=nextId,proto3" json:"next_id,omitempty"`
+	// next_batch_id is the batch sequence value the next commit will take.
+	NextBatchId uint64 `protobuf:"varint,4,opt,name=next_batch_id,json=nextBatchId,proto3" json:"next_batch_id,omitempty"`
 }
 
 func (m *GenesisState) Reset()         { *m = GenesisState{} }
 func (m *GenesisState) String() string { return proto.CompactTextString(m) }
 func (*GenesisState) ProtoMessage()    {}
 func (*GenesisState) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1441d3969325b6a2, []int{2}
+	return fileDescriptor_1441d3969325b6a2, []int{3}
 }
 func (m *GenesisState) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -258,9 +433,9 @@ func (m *GenesisState) GetParams() Params {
 	return Params{}
 }
 
-func (m *GenesisState) GetSeeds() []Seed {
+func (m *GenesisState) GetBatches() []Batch {
 	if m != nil {
-		return m.Seeds
+		return m.Batches
 	}
 	return nil
 }
@@ -272,48 +447,67 @@ func (m *GenesisState) GetNextId() uint64 {
 	return 0
 }
 
+func (m *GenesisState) GetNextBatchId() uint64 {
+	if m != nil {
+		return m.NextBatchId
+	}
+	return 0
+}
+
 func init() {
 	proto.RegisterType((*Params)(nil), "dreamtree.seeds.v1.Params")
 	proto.RegisterType((*Seed)(nil), "dreamtree.seeds.v1.Seed")
+	proto.RegisterType((*Batch)(nil), "dreamtree.seeds.v1.Batch")
 	proto.RegisterType((*GenesisState)(nil), "dreamtree.seeds.v1.GenesisState")
 }
 
 func init() { proto.RegisterFile("dreamtree/seeds/v1/types.proto", fileDescriptor_1441d3969325b6a2) }
 
 var fileDescriptor_1441d3969325b6a2 = []byte{
-	// 510 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x6c, 0x92, 0xc1, 0x6e, 0xd3, 0x30,
-	0x18, 0xc7, 0x9b, 0xae, 0x4b, 0x17, 0x77, 0x20, 0xcd, 0xaa, 0x86, 0xe9, 0xb4, 0x50, 0x7a, 0x40,
-	0xd5, 0xa4, 0x25, 0x6c, 0x48, 0x48, 0x4c, 0x42, 0x62, 0xe5, 0x80, 0xb8, 0xa1, 0x94, 0x13, 0x97,
-	0xc8, 0x89, 0xbf, 0xa5, 0x06, 0x1c, 0x57, 0xb1, 0x5b, 0xa5, 0xaf, 0xb0, 0x13, 0xaf, 0xc0, 0x8d,
-	0x63, 0x0f, 0x3c, 0xc4, 0x8e, 0x13, 0x27, 0x4e, 0x08, 0xb5, 0x87, 0xbd, 0x06, 0x8a, 0x93, 0xb6,
-	0x93, 0xca, 0x25, 0xf2, 0xf7, 0xfd, 0xbe, 0xbf, 0xed, 0xff, 0x3f, 0x46, 0x2e, 0xcb, 0x80, 0x0a,
-	0x9d, 0x01, 0xf8, 0x0a, 0x80, 0x29, 0x7f, 0x7a, 0xe6, 0xeb, 0xd9, 0x18, 0x94, 0x37, 0xce, 0xa4,
-	0x96, 0x18, 0xaf, 0xb9, 0x67, 0xb8, 0x37, 0x3d, 0xeb, 0xb4, 0x13, 0x99, 0x48, 0x83, 0xfd, 0x62,
-	0x55, 0x4e, 0x76, 0x0e, 0xa8, 0xe0, 0xa9, 0xf4, 0xcd, 0xb7, 0x6a, 0x3d, 0x8e, 0xa5, 0x12, 0x52,
-	0x85, 0xe5, 0x6c, 0x59, 0x94, 0xa8, 0x77, 0x6d, 0x21, 0xfb, 0x03, 0xcd, 0xa8, 0x50, 0xf8, 0x39,
-	0x6a, 0x0b, 0x9a, 0x87, 0xb1, 0x14, 0x82, 0x6b, 0x01, 0xa9, 0x0e, 0xa3, 0x99, 0x06, 0x45, 0xac,
-	0xae, 0xd5, 0x7f, 0x10, 0x60, 0x41, 0xf3, 0xb7, 0x6b, 0x34, 0x28, 0x08, 0xf6, 0x4b, 0x85, 0x92,
-	0x93, 0x2c, 0x86, 0x30, 0x83, 0xab, 0x4a, 0x51, 0x37, 0x8a, 0x03, 0x41, 0xf3, 0xa1, 0x41, 0x01,
-	0x5c, 0x19, 0xc1, 0xc5, 0xf1, 0xf5, 0xdd, 0xfc, 0x84, 0x6c, 0xac, 0xe6, 0x95, 0xd9, 0xf2, 0x06,
-	0xbd, 0x79, 0x1d, 0x35, 0x86, 0x00, 0x0c, 0x3f, 0x44, 0x75, 0xce, 0xcc, 0xc1, 0x8d, 0xa0, 0xce,
-	0x19, 0x7e, 0x89, 0x9c, 0xf2, 0x5a, 0x1a, 0x32, 0xb3, 0xbb, 0x33, 0x20, 0xbf, 0x7e, 0x9e, 0xb6,
-	0x2b, 0x2b, 0x97, 0x8c, 0x65, 0xa0, 0xd4, 0x50, 0x67, 0x3c, 0x4d, 0x82, 0xcd, 0x28, 0x26, 0xa8,
-	0xa9, 0x26, 0xd1, 0x67, 0x88, 0x35, 0xd9, 0x29, 0x54, 0xc1, 0xaa, 0xc4, 0x2e, 0x42, 0x1b, 0xa3,
-	0xa4, 0x61, 0xe0, 0xbd, 0x0e, 0xc6, 0xa8, 0xf1, 0x85, 0xa7, 0x8c, 0xec, 0x1a, 0x62, 0xd6, 0xf8,
-	0x18, 0xa1, 0x8d, 0x55, 0x62, 0x1b, 0xe2, 0xa8, 0x95, 0x43, 0x7c, 0x88, 0xec, 0x11, 0xf0, 0x64,
-	0xa4, 0x49, 0xb3, 0x6b, 0xf5, 0x77, 0x82, 0xaa, 0xc2, 0x4f, 0xd1, 0xfe, 0xea, 0x46, 0x2c, 0xa4,
-	0x9a, 0xec, 0x19, 0xda, 0x5a, 0xf7, 0x2e, 0x35, 0x3e, 0x42, 0x0e, 0xa3, 0x9a, 0x86, 0xc5, 0x1f,
-	0x27, 0x8e, 0xd9, 0x78, 0xaf, 0x68, 0x7c, 0x9c, 0x8d, 0xe1, 0xe2, 0xa8, 0x08, 0xed, 0x70, 0x3b,
-	0xb4, 0x22, 0xa9, 0xde, 0x77, 0x0b, 0xed, 0xbf, 0x83, 0x14, 0x14, 0x57, 0x43, 0x4d, 0x35, 0xe0,
-	0xd7, 0xc8, 0x1e, 0x9b, 0x34, 0x4d, 0x7c, 0xad, 0xf3, 0x8e, 0xb7, 0xfd, 0x72, 0xbc, 0x32, 0xef,
-	0x81, 0x73, 0xf3, 0xe7, 0x49, 0xed, 0xc7, 0xdd, 0xfc, 0xc4, 0x0a, 0x2a, 0x11, 0x7e, 0x85, 0x76,
-	0xcd, 0x14, 0xa9, 0x77, 0x77, 0xfa, 0xad, 0x73, 0xf2, 0x3f, 0x75, 0x71, 0xf0, 0x7d, 0x6d, 0xa9,
-	0xc0, 0x8f, 0x50, 0x33, 0x85, 0x5c, 0x87, 0x9c, 0x99, 0xb0, 0x1b, 0x81, 0x5d, 0x94, 0xef, 0xd9,
-	0xe0, 0xcd, 0xcd, 0xc2, 0xb5, 0x6e, 0x17, 0xae, 0xf5, 0x77, 0xe1, 0x5a, 0xdf, 0x96, 0x6e, 0xed,
-	0x76, 0xe9, 0xd6, 0x7e, 0x2f, 0xdd, 0xda, 0xa7, 0x67, 0x09, 0xd7, 0xa3, 0x49, 0xe4, 0xc5, 0x52,
-	0xf8, 0xd1, 0x57, 0x99, 0x26, 0xa7, 0x0c, 0xa6, 0xfe, 0x96, 0xd5, 0xc8, 0x36, 0x8f, 0xf5, 0xc5,
-	0xbf, 0x00, 0x00, 0x00, 0xff, 0xff, 0x07, 0xd2, 0x9e, 0x47, 0x26, 0x03, 0x00, 0x00,
+	// 674 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x54, 0x31, 0x4f, 0xdb, 0x40,
+	0x14, 0x8e, 0x93, 0xe0, 0xc4, 0x67, 0xa8, 0xc4, 0x09, 0x81, 0x81, 0x62, 0x68, 0x86, 0x0a, 0x21,
+	0x11, 0x17, 0x2a, 0x75, 0x40, 0x6a, 0x55, 0xc2, 0x50, 0x65, 0xab, 0x9c, 0x4e, 0x5d, 0x2c, 0xc7,
+	0xf7, 0x92, 0xb8, 0x60, 0x5f, 0xe4, 0xbb, 0x40, 0xf8, 0x0b, 0x4c, 0x95, 0xfa, 0x27, 0x3a, 0x32,
+	0xf4, 0x47, 0xa0, 0x4e, 0xa8, 0x53, 0xa7, 0xaa, 0x82, 0x01, 0xa9, 0xbf, 0xa2, 0xba, 0x77, 0x4e,
+	0x42, 0x48, 0xdb, 0xa1, 0x8b, 0xe5, 0xf7, 0xbe, 0xfb, 0xee, 0xde, 0xfb, 0xbe, 0x77, 0x47, 0x5c,
+	0x96, 0x41, 0x98, 0xc8, 0x0c, 0xc0, 0x13, 0x00, 0x4c, 0x78, 0xa7, 0x7b, 0x9e, 0x3c, 0xef, 0x83,
+	0xa8, 0xf7, 0x33, 0x2e, 0x39, 0xa5, 0x63, 0xbc, 0x8e, 0x78, 0xfd, 0x74, 0x6f, 0x6d, 0xa9, 0xcb,
+	0xbb, 0x1c, 0x61, 0x4f, 0xfd, 0xe9, 0x95, 0x6b, 0x8b, 0x61, 0x12, 0xa7, 0xdc, 0xc3, 0x6f, 0x9e,
+	0x5a, 0x8d, 0xb8, 0x48, 0xb8, 0x08, 0xf4, 0x5a, 0x1d, 0x68, 0xa8, 0x76, 0x61, 0x10, 0xf3, 0x6d,
+	0x98, 0x85, 0x89, 0xa0, 0xcf, 0xc8, 0x52, 0x12, 0x0e, 0x83, 0x88, 0x27, 0x49, 0x2c, 0x13, 0x48,
+	0x65, 0xd0, 0x3e, 0x97, 0x20, 0x1c, 0x63, 0xcb, 0xd8, 0x5e, 0xf0, 0x69, 0x12, 0x0e, 0x8f, 0xc6,
+	0x50, 0x43, 0x21, 0xd4, 0xd3, 0x0c, 0xc1, 0x07, 0x59, 0x04, 0x41, 0x06, 0x9d, 0x9c, 0x51, 0x44,
+	0xc6, 0x62, 0x12, 0x0e, 0x5b, 0x08, 0xf9, 0xd0, 0x41, 0xc2, 0xc1, 0xc6, 0xc5, 0xdd, 0xe5, 0x8e,
+	0x33, 0x69, 0x75, 0x98, 0x37, 0xab, 0x2b, 0xa8, 0xfd, 0x2a, 0x92, 0x72, 0x0b, 0x80, 0xd1, 0x47,
+	0xa4, 0x18, 0x33, 0x3c, 0xb8, 0xec, 0x17, 0x63, 0x46, 0x5f, 0x10, 0x4b, 0x97, 0x25, 0x21, 0xc3,
+	0xdd, 0xad, 0x86, 0xf3, 0xed, 0xcb, 0xee, 0x52, 0xde, 0xca, 0x21, 0x63, 0x19, 0x08, 0xd1, 0x92,
+	0x59, 0x9c, 0x76, 0xfd, 0xc9, 0x52, 0xea, 0x90, 0x8a, 0x18, 0xb4, 0x3f, 0x40, 0x24, 0x9d, 0x92,
+	0x62, 0xf9, 0xa3, 0x90, 0xba, 0x84, 0x4c, 0x1a, 0x75, 0xca, 0x08, 0xde, 0xcb, 0x50, 0x4a, 0xca,
+	0xc7, 0x71, 0xca, 0x9c, 0x39, 0x44, 0xf0, 0x9f, 0x6e, 0x10, 0x32, 0x69, 0xd5, 0x31, 0x11, 0xb1,
+	0xc4, 0xa8, 0x43, 0xba, 0x4c, 0xcc, 0x1e, 0xc4, 0xdd, 0x9e, 0x74, 0x2a, 0x5b, 0xc6, 0x76, 0xc9,
+	0xcf, 0x23, 0xfa, 0x84, 0xcc, 0x8f, 0x2a, 0x62, 0x41, 0x28, 0x9d, 0x2a, 0xa2, 0xf6, 0x38, 0x77,
+	0x28, 0xe9, 0x3a, 0xb1, 0x58, 0x28, 0xc3, 0x40, 0x39, 0xee, 0x58, 0xb8, 0x71, 0x55, 0x25, 0xde,
+	0x9d, 0xf7, 0x81, 0xae, 0x92, 0x6a, 0x3b, 0x94, 0x51, 0x2f, 0x88, 0x99, 0x43, 0x50, 0x92, 0x0a,
+	0xc6, 0x4d, 0xac, 0xe8, 0x04, 0xc2, 0x4e, 0x10, 0xa7, 0x0c, 0x86, 0x8e, 0x8d, 0xb2, 0x5b, 0x2a,
+	0xd3, 0x54, 0x89, 0x83, 0x75, 0x25, 0xf7, 0xf2, 0xac, 0xdc, 0x4a, 0xe3, 0xda, 0xa7, 0x12, 0x99,
+	0x6b, 0xa8, 0x7d, 0x66, 0xd4, 0xae, 0x91, 0x85, 0x4e, 0x9c, 0x09, 0x19, 0xa8, 0xd5, 0xea, 0xd4,
+	0x22, 0x42, 0x36, 0x26, 0x15, 0xb7, 0xc9, 0x54, 0xc5, 0x29, 0x9c, 0x05, 0x11, 0x1f, 0xa4, 0x5a,
+	0xdb, 0x05, 0xbf, 0x9a, 0xc2, 0xd9, 0x91, 0x8a, 0xc7, 0x65, 0x69, 0xb4, 0x3c, 0x29, 0x4b, 0xc3,
+	0x9b, 0xc4, 0x4e, 0x20, 0x3b, 0x3e, 0x81, 0x20, 0xe3, 0x5c, 0xe6, 0x12, 0x13, 0x9d, 0xf2, 0x39,
+	0x97, 0xd3, 0x76, 0x9b, 0xff, 0x65, 0x77, 0x65, 0xda, 0xee, 0x91, 0x9d, 0xd5, 0xbf, 0xda, 0x69,
+	0x3d, 0xb4, 0x73, 0xca, 0x13, 0xf2, 0xc0, 0x93, 0x89, 0xd7, 0xf6, 0x3f, 0xbd, 0x9e, 0x9f, 0xf1,
+	0xfa, 0xe0, 0xb1, 0x32, 0x65, 0x65, 0xd6, 0x14, 0xf4, 0xa2, 0xf6, 0xd5, 0x20, 0xf3, 0x6f, 0x20,
+	0x05, 0x11, 0x8b, 0x96, 0x0c, 0x25, 0xd0, 0x97, 0xc4, 0xec, 0xe3, 0xed, 0x40, 0x83, 0xec, 0xfd,
+	0xb5, 0xfa, 0xec, 0x4b, 0x50, 0xd7, 0xf7, 0xa7, 0x61, 0x5d, 0xfd, 0xd8, 0x2c, 0x7c, 0xbe, 0xbb,
+	0xdc, 0x31, 0xfc, 0x9c, 0x44, 0x5f, 0x11, 0x3d, 0x2c, 0x78, 0x2b, 0x4b, 0xdb, 0xf6, 0xfe, 0xea,
+	0x9f, 0xf8, 0x78, 0xf6, 0x7d, 0xfa, 0x88, 0x44, 0x57, 0x48, 0x25, 0x85, 0xa1, 0x54, 0x53, 0x50,
+	0xc2, 0x29, 0x30, 0x55, 0xd8, 0xc4, 0x21, 0x41, 0x60, 0x3c, 0x9a, 0x65, 0x3d, 0x24, 0x2a, 0xd9,
+	0xd0, 0xe3, 0xd9, 0x78, 0x7d, 0x75, 0xe3, 0x1a, 0xd7, 0x37, 0xae, 0xf1, 0xf3, 0xc6, 0x35, 0x3e,
+	0xde, 0xba, 0x85, 0xeb, 0x5b, 0xb7, 0xf0, 0xfd, 0xd6, 0x2d, 0xbc, 0x7f, 0xda, 0x8d, 0x65, 0x6f,
+	0xd0, 0xae, 0x47, 0x3c, 0xf1, 0xda, 0x27, 0x3c, 0xed, 0xee, 0x32, 0x38, 0xf5, 0x66, 0x44, 0x69,
+	0x9b, 0xf8, 0x4a, 0x3d, 0xff, 0x1d, 0x00, 0x00, 0xff, 0xff, 0x7d, 0x60, 0xc0, 0xc5, 0x1f, 0x05,
+	0x00, 0x00,
 }
 
 func (m *Params) Marshal() (dAtA []byte, err error) {
@@ -369,6 +563,16 @@ func (m *Seed) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.LeafIndex != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.LeafIndex))
+		i--
+		dAtA[i] = 0x58
+	}
+	if m.BatchId != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.BatchId))
+		i--
+		dAtA[i] = 0x50
+	}
 	if len(m.DataType) > 0 {
 		i -= len(m.DataType)
 		copy(dAtA[i:], m.DataType)
@@ -429,6 +633,101 @@ func (m *Seed) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *Batch) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *Batch) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Batch) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.CommittedAt != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.CommittedAt))
+		i--
+		dAtA[i] = 0x60
+	}
+	if m.Height != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.Height))
+		i--
+		dAtA[i] = 0x58
+	}
+	if len(m.DataType) > 0 {
+		i -= len(m.DataType)
+		copy(dAtA[i:], m.DataType)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.DataType)))
+		i--
+		dAtA[i] = 0x52
+	}
+	if len(m.SourceRef) > 0 {
+		i -= len(m.SourceRef)
+		copy(dAtA[i:], m.SourceRef)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.SourceRef)))
+		i--
+		dAtA[i] = 0x4a
+	}
+	if len(m.Kind) > 0 {
+		i -= len(m.Kind)
+		copy(dAtA[i:], m.Kind)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.Kind)))
+		i--
+		dAtA[i] = 0x42
+	}
+	if len(m.Subject) > 0 {
+		i -= len(m.Subject)
+		copy(dAtA[i:], m.Subject)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.Subject)))
+		i--
+		dAtA[i] = 0x3a
+	}
+	if len(m.Committer) > 0 {
+		i -= len(m.Committer)
+		copy(dAtA[i:], m.Committer)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.Committer)))
+		i--
+		dAtA[i] = 0x32
+	}
+	if len(m.MerkleRoot) > 0 {
+		i -= len(m.MerkleRoot)
+		copy(dAtA[i:], m.MerkleRoot)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.MerkleRoot)))
+		i--
+		dAtA[i] = 0x2a
+	}
+	if m.LeafCount != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.LeafCount))
+		i--
+		dAtA[i] = 0x20
+	}
+	if m.NewCount != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.NewCount))
+		i--
+		dAtA[i] = 0x18
+	}
+	if m.FirstSeedId != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.FirstSeedId))
+		i--
+		dAtA[i] = 0x10
+	}
+	if m.Id != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.Id))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
 func (m *GenesisState) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -449,15 +748,20 @@ func (m *GenesisState) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.NextBatchId != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.NextBatchId))
+		i--
+		dAtA[i] = 0x20
+	}
 	if m.NextId != 0 {
 		i = encodeVarintTypes(dAtA, i, uint64(m.NextId))
 		i--
 		dAtA[i] = 0x18
 	}
-	if len(m.Seeds) > 0 {
-		for iNdEx := len(m.Seeds) - 1; iNdEx >= 0; iNdEx-- {
+	if len(m.Batches) > 0 {
+		for iNdEx := len(m.Batches) - 1; iNdEx >= 0; iNdEx-- {
 			{
-				size, err := m.Seeds[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				size, err := m.Batches[iNdEx].MarshalToSizedBuffer(dAtA[:i])
 				if err != nil {
 					return 0, err
 				}
@@ -546,6 +850,63 @@ func (m *Seed) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovTypes(uint64(l))
 	}
+	if m.BatchId != 0 {
+		n += 1 + sovTypes(uint64(m.BatchId))
+	}
+	if m.LeafIndex != 0 {
+		n += 1 + sovTypes(uint64(m.LeafIndex))
+	}
+	return n
+}
+
+func (m *Batch) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Id != 0 {
+		n += 1 + sovTypes(uint64(m.Id))
+	}
+	if m.FirstSeedId != 0 {
+		n += 1 + sovTypes(uint64(m.FirstSeedId))
+	}
+	if m.NewCount != 0 {
+		n += 1 + sovTypes(uint64(m.NewCount))
+	}
+	if m.LeafCount != 0 {
+		n += 1 + sovTypes(uint64(m.LeafCount))
+	}
+	l = len(m.MerkleRoot)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	l = len(m.Committer)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	l = len(m.Subject)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	l = len(m.Kind)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	l = len(m.SourceRef)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	l = len(m.DataType)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	if m.Height != 0 {
+		n += 1 + sovTypes(uint64(m.Height))
+	}
+	if m.CommittedAt != 0 {
+		n += 1 + sovTypes(uint64(m.CommittedAt))
+	}
 	return n
 }
 
@@ -557,14 +918,17 @@ func (m *GenesisState) Size() (n int) {
 	_ = l
 	l = m.Params.Size()
 	n += 1 + l + sovTypes(uint64(l))
-	if len(m.Seeds) > 0 {
-		for _, e := range m.Seeds {
+	if len(m.Batches) > 0 {
+		for _, e := range m.Batches {
 			l = e.Size()
 			n += 1 + l + sovTypes(uint64(l))
 		}
 	}
 	if m.NextId != 0 {
 		n += 1 + sovTypes(uint64(m.NextId))
+	}
+	if m.NextBatchId != 0 {
+		n += 1 + sovTypes(uint64(m.NextBatchId))
 	}
 	return n
 }
@@ -941,6 +1305,400 @@ func (m *Seed) Unmarshal(dAtA []byte) error {
 			}
 			m.DataType = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
+		case 10:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field BatchId", wireType)
+			}
+			m.BatchId = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.BatchId |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 11:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field LeafIndex", wireType)
+			}
+			m.LeafIndex = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.LeafIndex |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *Batch) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Batch: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Batch: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
+			}
+			m.Id = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Id |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field FirstSeedId", wireType)
+			}
+			m.FirstSeedId = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.FirstSeedId |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field NewCount", wireType)
+			}
+			m.NewCount = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.NewCount |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field LeafCount", wireType)
+			}
+			m.LeafCount = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.LeafCount |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MerkleRoot", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.MerkleRoot = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Committer", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Committer = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Subject", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Subject = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Kind", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Kind = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 9:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SourceRef", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.SourceRef = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 10:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DataType", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.DataType = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 11:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Height", wireType)
+			}
+			m.Height = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Height |= int64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 12:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CommittedAt", wireType)
+			}
+			m.CommittedAt = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.CommittedAt |= int64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTypes(dAtA[iNdEx:])
@@ -1026,7 +1784,7 @@ func (m *GenesisState) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Seeds", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Batches", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -1053,8 +1811,8 @@ func (m *GenesisState) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Seeds = append(m.Seeds, Seed{})
-			if err := m.Seeds[len(m.Seeds)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			m.Batches = append(m.Batches, Batch{})
+			if err := m.Batches[len(m.Batches)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -1073,6 +1831,25 @@ func (m *GenesisState) Unmarshal(dAtA []byte) error {
 				b := dAtA[iNdEx]
 				iNdEx++
 				m.NextId |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field NextBatchId", wireType)
+			}
+			m.NextBatchId = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.NextBatchId |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}

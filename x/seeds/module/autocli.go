@@ -15,13 +15,19 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				{
 					RpcMethod:      "Seed",
 					Use:            "seed [id]",
-					Short:          "Get a single anchored commitment by id",
+					Short:          "Get a single leaf-seed by id (synthesized from its batch)",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "id"}},
+				},
+				{
+					RpcMethod:      "Batch",
+					Use:            "batch [id]",
+					Short:          "Get a stored anchoring batch by batch id",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "id"}},
 				},
 				{
 					RpcMethod: "Seeds",
 					Use:       "seeds",
-					Short:     "List all anchored commitments",
+					Short:     "List anchored batches (one entry per batch; use 'seed [id]' for a leaf)",
 				},
 				{
 					RpcMethod:      "SeedsBySubject",
@@ -42,9 +48,20 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				{
 					RpcMethod: "CommitSeed",
 					Use:       "commit-seed [commitment] [kind]",
-					Short:     "Anchor a commitment (digest or Merkle root) on-chain; set --subject and --source-ref as needed",
+					Short:     "Anchor a single commitment on-chain (stored as a batch of one); set --subject and --source-ref as needed",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{ProtoField: "commitment"},
+						{ProtoField: "kind"},
+					},
+				},
+				{
+					RpcMethod: "CommitBatch",
+					Use:       "commit-batch [merkle-root] [leaf-count] [new-count] [kind]",
+					Short:     "Anchor N leaf-seeds under one Merkle root (seed = atom); new-count excludes converged re-observations",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{ProtoField: "merkle_root"},
+						{ProtoField: "leaf_count"},
+						{ProtoField: "new_count"},
 						{ProtoField: "kind"},
 					},
 				},

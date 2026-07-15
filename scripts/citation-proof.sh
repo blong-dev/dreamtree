@@ -20,14 +20,14 @@ att(){ local from=$1; shift; local h; h=$("$BIN" tx attest attest "$@" --from "$
 V(){ "$BIN" q attest work-value "$1" "${Q[@]}" | jq -r '.value'; }
 
 rm -rf "$HOME_DIR"; mkdir -p "$HOME_DIR"
-"$BIN" init cite --chain-id "$CHAIN" --default-denom dtvp --home "$HOME_DIR" >/dev/null 2>&1
+"$BIN" init cite --chain-id "$CHAIN" --default-denom uphoton --home "$HOME_DIR" >/dev/null 2>&1
 for k in alice bob carol dave; do "$BIN" keys add "$k" "${KR[@]}" >/dev/null 2>&1; done
-"$BIN" genesis add-genesis-account alice 1000000000dtvp "${KR[@]}" >/dev/null
-for k in bob carol dave; do "$BIN" genesis add-genesis-account "$k" 1000000dtvp "${KR[@]}" >/dev/null; done
-"$BIN" genesis gentx alice 500000000dtvp --chain-id "$CHAIN" "${KR[@]}" >/dev/null 2>&1
+"$BIN" genesis add-genesis-account alice 1000000000uphoton "${KR[@]}" >/dev/null
+for k in bob carol dave; do "$BIN" genesis add-genesis-account "$k" 1000000uphoton "${KR[@]}" >/dev/null; done
+"$BIN" genesis gentx alice 500000000uphoton --chain-id "$CHAIN" "${KR[@]}" >/dev/null 2>&1
 "$BIN" genesis collect-gentxs --home "$HOME_DIR" >/dev/null 2>&1
 sed -i 's/^timeout_commit = .*/timeout_commit = "1s"/' "$HOME_DIR/config/config.toml"
-"$BIN" start --home "$HOME_DIR" --minimum-gas-prices 0dtvp >"$HOME_DIR/node.log" 2>&1 &
+"$BIN" start --home "$HOME_DIR" --minimum-gas-prices 0uphoton >"$HOME_DIR/node.log" 2>&1 &
 NODE=$!; trap 'kill $NODE 2>/dev/null || true' EXIT
 for i in $(seq 1 40); do h=$("$BIN" status "${Q[@]}" 2>/dev/null|jq -r '.sync_info.latest_block_height' 2>/dev/null||echo 0); [ "${h:-0}" -ge 1 ] 2>/dev/null && break; sleep 1; done
 [ "${h:-0}" -ge 1 ] || die "node never produced a block"

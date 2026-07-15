@@ -10,13 +10,14 @@ import (
 )
 
 const (
-	// CoinUnit is the currency denom (photons = seeds; minted per data-seed).
-	CoinUnit = "photon"
-	// BondDenom is the SEPARATE, non-circulating validator-power denom. Photon is
-	// deliberately NOT the staking/gas token (no-ICO framing); validators bond
-	// dtvp. The live bond_denom is set in staking genesis (scripts/init.sh); this
-	// records the intended default.
-	BondDenom = "dtvp"
+	// CoinUnit is the base denom: micro-photon (1 photon = 10^6 uphoton).
+	// Photons = seeds = distinct atoms; minted per NEW leaf-seed at ingestion.
+	CoinUnit = "uphoton"
+	// BondDenom is the photon base unit: the photon IS the chain's native asset
+	// per the protocol spec (seed-atom conformance, 2026-07-15). Validators bond
+	// genesis-corpus photons; dtvp (the 2026-07-10 staking expedient) is retired.
+	// With the SDK's default PowerReduction (10^6), voting power = whole photons.
+	BondDenom = CoinUnit
 
 	DefaultBondDenom = BondDenom
 
@@ -43,12 +44,13 @@ func init() {
 }
 
 func RegisterDenoms() {
-	// Register only the currency base unit. Do NOT register the bond denom here:
-	// two denoms at factor 1.0 make sdk's coin normalizer treat one as the base
-	// and rewrite the other (it silently converted "…dtvp" → photon, corrupting
-	// the gentx). dtvp is a valid denom without registration (registration is for
-	// display-unit conversion, which these integer base denoms don't need).
-	if err := sdk.RegisterDenom(CoinUnit, math.LegacyOneDec()); err != nil {
+	// Register the photon display unit and its micro base unit (single-token
+	// chain — the two-denoms-at-factor-1.0 normalizer gotcha that bit the dtvp
+	// era no longer applies: these register at distinct factors).
+	if err := sdk.RegisterDenom("photon", math.LegacyOneDec()); err != nil {
+		panic(err)
+	}
+	if err := sdk.RegisterDenom(CoinUnit, math.LegacyNewDecWithPrec(1, 6)); err != nil {
 		panic(err)
 	}
 }

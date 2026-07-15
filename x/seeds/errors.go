@@ -12,4 +12,13 @@ var (
 	// ErrEmptyKind is returned when a commit carries no kind label.
 	ErrEmptyKind        = errors.Register(ModuleName, 5, "kind must not be empty")
 	ErrCommitmentNotHex = errors.Register(ModuleName, 6, "commitment must be hex (a digest or Merkle root, not a body)")
+	// ErrBadCounts is returned when a batch's counts are invalid
+	// (need 0 < new_count <= leaf_count).
+	ErrBadCounts = errors.Register(ModuleName, 7, "batch counts invalid: need 0 < new_count <= leaf_count")
+	// ErrRetiredKind is returned for aggregate kind labels — the aggregate is
+	// no longer a seed kind; kind names the LEAF (seed = atom,
+	// docs/specs/seed-atom-conformance.md).
+	ErrRetiredKind = errors.Register(ModuleName, 8, "kind names the leaf; batch_root-style aggregate kinds are retired (seed = atom)")
+	// ErrSeedNotFound is returned when a leaf-seed id resolves to no batch.
+	ErrSeedNotFound = errors.Register(ModuleName, 9, "seed id not found")
 )

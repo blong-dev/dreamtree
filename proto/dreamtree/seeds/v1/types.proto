@@ -58,6 +58,62 @@ message Seed {
   // data_type is the dt.*@v type of the underlying record — the priceable type
   // for the marketplace (per-type N_a). Empty for non-priceable commits.
   string data_type = 9;
+
+  // batch_id is the containing batch (synthesized on read; seeds are stored
+  // as batches — see Batch).
+  uint64 batch_id = 10;
+
+  // leaf_index is this seed's position among the batch's NEW leaves
+  // (id - batch.first_seed_id); synthesized on read.
+  uint32 leaf_index = 11;
+}
+
+// Batch is the stored anchoring unit (seed = atom; batching is a commitment
+// strategy, never a unit change — docs/specs/seed-atom-conformance.md). A batch
+// registers new_count leaf-seeds [first_seed_id, first_seed_id+new_count) under
+// one Merkle root; individual Seed objects are synthesized on read. A single
+// CommitSeed is stored as a batch of one (merkle_root = the commitment).
+message Batch {
+  option (amino.name) = "dreamtree/x/seeds/Batch";
+
+  // id is the monotonic batch sequence.
+  uint64 id = 1;
+
+  // first_seed_id is the first leaf-seed id this batch registered.
+  uint64 first_seed_id = 2;
+
+  // new_count is how many NEW distinct contributions this batch registered
+  // (seed ids allocated, photons minted). Convergence rule: re-observed atoms
+  // do not re-mint — sigma accrues, supply doesn't.
+  uint32 new_count = 3;
+
+  // leaf_count is the total number of leaves under merkle_root (>= new_count);
+  // converged (already-registered) atoms stay provable against this root too.
+  uint32 leaf_count = 4;
+
+  // merkle_root is the hex-encoded root over the batch's leaf ids (for a
+  // batch of one, the leaf digest itself).
+  string merkle_root = 5;
+
+  // committer is the address that anchored this batch.
+  string committer = 6 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+
+  // subject identifies what the leaves are about (owning wallet DID etc.).
+  string subject = 7;
+
+  // kind names what each LEAF is: "record", "kg_claim", ... ("batch_root" is
+  // retired as a kind — the aggregate is no longer a seed kind).
+  string kind = 8;
+
+  // source_ref is an opaque origin pointer (e.g. "reflow:gen:61932").
+  string source_ref = 9;
+
+  // data_type is the dt.*@v type of the leaves (per-type N_a pricing).
+  string data_type = 10;
+
+  // height / committed_at anchor the batch in chain time.
+  int64 height = 11;
+  int64 committed_at = 12;
 }
 
 // GenesisState is the seeds state provided at genesis.
@@ -66,10 +122,13 @@ message GenesisState {
   Params params = 1
       [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
 
-  // seeds is the set of anchored commitments (for export/import).
-  repeated Seed seeds = 2
+  // batches is the set of anchored batches (for export/import).
+  repeated Batch batches = 2
       [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
 
-  // next_id is the sequence value the next commit will take.
+  // next_id is the leaf-seed sequence value the next commit will take.
   uint64 next_id = 3;
+
+  // next_batch_id is the batch sequence value the next commit will take.
+  uint64 next_batch_id = 4;
 }

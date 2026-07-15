@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
 # Dev devnet init. Strict tokenomics (2026-07-10): the validator bonds a
-# separate non-circulating denom `dtvp` (dreamtree validator power); the currency
-# `photon` starts at supply 0 and mints ONLY per data-seed (photons = seeds).
+# native asset uphoton (micro-photon; 1 photon = 10^6 uphoton). Extra dev supply
+# is pre-funded for dev convenience; real photons mint per data-seed (leaf model).
 # Photon is never the staking/gas token.
 
 rm -rf $HOME/.dreamtreed
@@ -21,11 +21,11 @@ $DREAMTREED_BIN config set client chain-id demo
 $DREAMTREED_BIN config set client keyring-backend test
 $DREAMTREED_BIN keys add alice
 $DREAMTREED_BIN keys add bob
-# bond denom = dtvp (permissioning power, not economic stake); photon absent from genesis.
-$DREAMTREED_BIN init test --chain-id dreamtree-devnet-1 --default-denom dtvp
-$DREAMTREED_BIN genesis add-genesis-account alice 1000000000dtvp --keyring-backend test
-$DREAMTREED_BIN genesis add-genesis-account bob 1000000dtvp --keyring-backend test
-$DREAMTREED_BIN genesis gentx alice 500000000dtvp --chain-id dreamtree-devnet-1
+# bond denom = uphoton (the photon IS the native asset — seed-atom conformance).
+$DREAMTREED_BIN init test --chain-id dreamtree-devnet-1 --default-denom uphoton
+$DREAMTREED_BIN genesis add-genesis-account alice 1000000000uphoton --keyring-backend test
+$DREAMTREED_BIN genesis add-genesis-account bob 1000000uphoton --keyring-backend test
+$DREAMTREED_BIN genesis gentx alice 500000000uphoton --chain-id dreamtree-devnet-1
 $DREAMTREED_BIN genesis collect-gentxs
 
 # route the per-seed ingestion photon to alice (dreamtree stand-in) for dev.
@@ -36,10 +36,10 @@ import json, sys
 g, alice = sys.argv[1], sys.argv[2]
 d = json.load(open(g))
 d['app_state']['photons']['params']['storer_reward_recipient'] = alice
-# gov deposits must be in dtvp — the default min_deposit denom is "stake",
+# gov deposits must be in uphoton — the default min_deposit denom is "stake",
 # which does not exist on this chain, so governance would be unusable.
 gp = d['app_state']['gov']['params']
-gp['min_deposit'] = [{"denom": "dtvp", "amount": "10000000"}]
-gp['expedited_min_deposit'] = [{"denom": "dtvp", "amount": "50000000"}]
+gp['min_deposit'] = [{"denom": "uphoton", "amount": "10000000"}]
+gp['expedited_min_deposit'] = [{"denom": "uphoton", "amount": "50000000"}]
 json.dump(d, open(g, 'w'), indent=1)
 PY

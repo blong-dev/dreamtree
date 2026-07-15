@@ -47,13 +47,13 @@ bal() { "$BIN" q bank balances "$1" "${Q[@]}" | jq -r --arg d "$2" '.balances[]|
 # ---------------------------------------------------------------------------
 say "1. init isolated devnet ($HOME_DIR)"
 rm -rf "$HOME_DIR"; mkdir -p "$HOME_DIR"
-"$BIN" init e2e --chain-id "$CHAIN" --default-denom dtvp --home "$HOME_DIR" >/dev/null 2>&1
+"$BIN" init e2e --chain-id "$CHAIN" --default-denom uphoton --home "$HOME_DIR" >/dev/null 2>&1
 for k in alice bob; do "$BIN" keys add "$k" "${KR[@]}" >/dev/null 2>&1; done
 ALICE=$("$BIN" keys show alice -a "${KR[@]}")
 BOB=$("$BIN" keys show bob -a "${KR[@]}")
-"$BIN" genesis add-genesis-account alice 1000000000dtvp "${KR[@]}" >/dev/null
-"$BIN" genesis add-genesis-account bob 1000000dtvp "${KR[@]}" >/dev/null
-"$BIN" genesis gentx alice 500000000dtvp --chain-id "$CHAIN" "${KR[@]}" >/dev/null 2>&1
+"$BIN" genesis add-genesis-account alice 1000000000uphoton "${KR[@]}" >/dev/null
+"$BIN" genesis add-genesis-account bob 1000000uphoton "${KR[@]}" >/dev/null
+"$BIN" genesis gentx alice 500000000uphoton --chain-id "$CHAIN" "${KR[@]}" >/dev/null 2>&1
 "$BIN" genesis collect-gentxs --home "$HOME_DIR" >/dev/null 2>&1
 
 # Patch genesis: storer reward -> alice; tiny review window; price "record"=1.
@@ -73,7 +73,7 @@ sed -i 's/^timeout_commit = .*/timeout_commit = "1s"/' "$HOME_DIR/config/config.
 ok "genesis: storer=alice, review_window_base=0.0005, price[record]=1"
 
 say "2. start node"
-"$BIN" start --home "$HOME_DIR" --minimum-gas-prices 0dtvp >"$HOME_DIR/node.log" 2>&1 &
+"$BIN" start --home "$HOME_DIR" --minimum-gas-prices 0uphoton >"$HOME_DIR/node.log" 2>&1 &
 NODE=$!
 trap 'kill $NODE 2>/dev/null || true' EXIT
 for i in $(seq 1 40); do

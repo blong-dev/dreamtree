@@ -1,23 +1,53 @@
 package seeds
 
+import "sort"
+
 // NewGenesisState creates a new genesis state with default values.
 func NewGenesisState() *GenesisState {
 	return &GenesisState{
-		Params: DefaultParams(),
-		NextId: 1,
+		Params:      DefaultParams(),
+		NextId:      1,
+		NextBatchId: 1,
 	}
 }
 
-// Validate performs basic genesis state validation.
+// Validate performs basic genesis state validation: unique batch ids, valid
+// counts, non-empty roots, and non-overlapping leaf-seed id ranges that stay
+// below next_id.
 func (gs *GenesisState) Validate() error {
-	seen := make(map[uint64]bool, len(gs.Seeds))
-	for _, s := range gs.Seeds {
-		if seen[s.Id] {
-			return ErrEmptyCommitment.Wrapf("duplicate seed id %d", s.Id)
+	seen := make(map[uint64]bool, len(gs.Batches))
+	ranges := make([]Batch, 0, len(gs.Batches))
+	for _, b := range gs.Batches {
+		if seen[b.Id] {
+			return ErrEmptyCommitment.Wrapf("duplicate batch id %d", b.Id)
 		}
-		seen[s.Id] = true
-		if s.Commitment == "" {
-			return ErrEmptyCommitment
+		seen[b.Id] = true
+		if b.MerkleRoot == "" {
+			return ErrEmptyCommitment.Wrapf("batch %d", b.Id)
+		}
+		// new_count == 0 is a pure-convergence batch (provenance only).
+		if b.LeafCount == 0 || b.NewCount > b.LeafCount {
+			return ErrBadCounts.Wrapf("batch %d: new_count=%d leaf_count=%d", b.Id, b.NewCount, b.LeafCount)
+		}
+		if b.NewCount == 0 {
+			continue // no seed range to check
+		}
+		if b.FirstSeedId == 0 {
+			return ErrBadCounts.Wrapf("batch %d: first_seed_id must be >= 1", b.Id)
+		}
+		ranges = append(ranges, b)
+	}
+	sort.Slice(ranges, func(i, j int) bool { return ranges[i].FirstSeedId < ranges[j].FirstSeedId })
+	for i := 1; i < len(ranges); i++ {
+		prev := ranges[i-1]
+		if prev.FirstSeedId+uint64(prev.NewCount) > ranges[i].FirstSeedId {
+			return ErrBadCounts.Wrapf("batches %d and %d have overlapping seed ranges", prev.Id, ranges[i].Id)
+		}
+	}
+	if n := len(ranges); n > 0 {
+		last := ranges[n-1]
+		if gs.NextId != 0 && last.FirstSeedId+uint64(last.NewCount) > gs.NextId {
+			return ErrBadCounts.Wrapf("next_id %d overlaps batch %d's range", gs.NextId, last.Id)
 		}
 	}
 	return gs.Params.Validate()

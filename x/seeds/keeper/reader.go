@@ -2,13 +2,13 @@ package keeper
 
 import "context"
 
-// SeedInfo returns a seed's marketplace-relevant facts: its data_type (the
+// SeedInfo returns a leaf-seed's marketplace-relevant facts: its data_type (the
 // priceable type) and its producer (the committer, who earns from sales). Used
-// by x/licenses via the SeedReader seam. found=false if the seed doesn't exist.
+// by x/licenses via the SeedReader seam. found=false if the id doesn't resolve.
 func (k Keeper) SeedInfo(ctx context.Context, id uint64) (dataType string, producer string, found bool) {
-	s, err := k.Seeds.Get(ctx, id)
-	if err != nil {
+	b, ok, err := k.BatchOf(ctx, id)
+	if err != nil || !ok {
 		return "", "", false
 	}
-	return s.DataType, s.Committer, true
+	return b.DataType, b.Committer, true
 }

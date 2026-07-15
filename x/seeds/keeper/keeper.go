@@ -12,6 +12,12 @@ import (
 )
 
 // Keeper manages the seeds module state.
+//
+// Storage model (leaf model — docs/specs/seed-atom-conformance.md): the stored
+// unit is the Batch; a batch registers new_count leaf-seeds
+// [first_seed_id, first_seed_id+new_count) under one Merkle root. Individual
+// Seed objects are synthesized on read (see resolve.go). O(1) state per batch
+// regardless of leaf count.
 type Keeper struct {
 	cdc          codec.BinaryCodec
 	addressCodec address.Codec
@@ -21,11 +27,16 @@ type Keeper struct {
 
 	Schema collections.Schema
 	Params collections.Item[seeds.Params]
-	// Seeds maps a global id -> the anchored commitment.
-	Seeds collections.Map[uint64, seeds.Seed]
-	// Seq assigns the monotonic commitment id.
+	// Batches maps batch_id -> the anchored batch (the stored unit).
+	Batches collections.Map[uint64, seeds.Batch]
+	// BatchSeq assigns the monotonic batch id.
+	BatchSeq collections.Sequence
+	// RangeIndex maps first_seed_id -> batch_id (ordered; a leaf id resolves
+	// to the greatest first_seed_id <= id, then bounds-checks new_count).
+	RangeIndex collections.Map[uint64, uint64]
+	// Seq assigns the monotonic leaf-seed id (advanced by new_count per batch).
 	Seq collections.Sequence
-	// SubjectIndex is a (subject, id) key set for by-subject lookups.
+	// SubjectIndex is a (subject, first_seed_id) key set — one entry per batch.
 	SubjectIndex collections.KeySet[collections.Pair[string, uint64]]
 
 	// photons is the ingestion mint seam; nil when x/photons is absent.
@@ -50,7 +61,9 @@ func NewKeeper(cdc codec.BinaryCodec, addressCodec address.Codec, storeService s
 		addressCodec: addressCodec,
 		authority:    authority,
 		Params:       collections.NewItem(sb, seeds.ParamsKey, "params", codec.CollValue[seeds.Params](cdc)),
-		Seeds:        collections.NewMap(sb, seeds.SeedsKey, "seeds", collections.Uint64Key, codec.CollValue[seeds.Seed](cdc)),
+		Batches:      collections.NewMap(sb, seeds.BatchesKey, "batches", collections.Uint64Key, codec.CollValue[seeds.Batch](cdc)),
+		BatchSeq:     collections.NewSequence(sb, seeds.BatchSeqKey, "batch_seq"),
+		RangeIndex:   collections.NewMap(sb, seeds.RangeIndexKey, "range_index", collections.Uint64Key, collections.Uint64Value),
 		Seq:          collections.NewSequence(sb, seeds.SeqKey, "seq"),
 		SubjectIndex: collections.NewKeySet(sb, seeds.SubjectIndexKey, "subject_index", collections.PairKeyCodec(collections.StringKey, collections.Uint64Key)),
 	}
