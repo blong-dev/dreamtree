@@ -262,8 +262,9 @@ Outcome O on contributor c, magnitude M_O:
   Contributor c:    ΔR(c,k)   = +M_O   (validated)  |  -2·M_O  (refuted)
   Direct attestor:  ΔR(a_i,k) = ±M_O × attestation_weight(a_i,c)
   Chain (institution behind a_i): × hop_decay (25% chain)
-  Hiring/evaluating party: ±M_O × evaluation_factor
 ```
+
+*(Superseded 2026-07-16, review-confirmed: there is no separate "hiring/evaluating party" line. A party that acts on a work attests that use — a USE attestation — which makes it a direct attestor; the propagation above already reaches it at its attestation weight. Consequence flows from the attestation graph, not from an enumerated party-type.)*
 
 Contributor moves most; everyone who staked R on them moves proportionally. This makes betting on people rewarding when right, costly when wrong — and makes shell institutions decay as their graduates underperform.
 
