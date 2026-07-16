@@ -49,11 +49,16 @@ func (k Keeper) StandingOf(ctx context.Context, signer, domain string) math.Lega
 			return false, nil
 		}
 		sum = sum.Add(c.Magnitude.Mul(rel))
+		// Running floor (Z2, spec §floor-is-zero): the walk is contribution-id
+		// order = settlement order, so flooring each step makes "recovery is
+		// genuinely from zero" literal — a hole deeper than 0 is forgiven at
+		// the moment it happened, and later positive work counts in full,
+		// instead of first refilling an invisible debt.
+		if sum.IsNegative() {
+			sum = math.LegacyZeroDec()
+		}
 		return false, nil
 	})
-	if sum.IsNegative() {
-		return math.LegacyZeroDec()
-	}
 	return sum
 }
 

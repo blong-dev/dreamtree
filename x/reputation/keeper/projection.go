@@ -88,8 +88,9 @@ func (k Keeper) domainShaping(ctx context.Context, p reputation.Params, domain s
 
 // effectiveR applies the two-piece linear+log dampening past the saturation
 // point S: R for R<=S, else S + k·log(1+(R-S)/S). Floored at 0 — a domain R can
-// be destroyed to zero (spec: no negative reputation; start fresh in a new
-// domain). The underlying contribution debt persists, so recovery is real work.
+// be destroyed to zero, and per spec §floor-is-zero recovery is genuinely from
+// zero: no contribution debt survives (running floor in reputationRaw /
+// StandingOf; floored negations in window.go's reverse path).
 func effectiveR(raw, S, kDamp float64) float64 {
 	if raw <= 0 {
 		return 0
@@ -130,6 +131,13 @@ func (k Keeper) reputationRaw(ctx context.Context, signer, domain string, now in
 		}
 		mag, _ := strconv.ParseFloat(c.Magnitude.String(), 64)
 		sum += mag * rel * decay
+		// Running floor (Z2, mirrors standing.go): id order = settlement
+		// order; a below-zero excursion is forgiven where it happened, so
+		// later work recovers from zero, not from a hole. (Read-time float
+		// projection — the rational consensus path applies the same rule.)
+		if pf(p.BaselineKyc)+sum < 0 {
+			sum = -pf(p.BaselineKyc)
+		}
 		count++
 		return false, nil
 	})

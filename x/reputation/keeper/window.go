@@ -235,7 +235,12 @@ func (k Keeper) reverse(ctx context.Context, p reputation.Params, pe reputation.
 		if err != nil {
 			continue
 		}
-		if err := k.addContribution(ctx, c.Signer, c.Domain, c.Magnitude.Neg(), c.RateBucket, pe.SourceAttId); err != nil {
+		// Floored negation (Z2 fix, DT-21 comb): if the beneficiary's standing
+		// has meanwhile decayed or been spent, the claw-back caps at driving
+		// them to 0 — never a stored net-negative. Same floor every other
+		// R-move already honors; the remainder is simply unrecoverable, which
+		// is what "no debt" means.
+		if err := k.applyFloored(ctx, c.Signer, c.Domain, c.Magnitude.Neg(), c.RateBucket, pe.SourceAttId); err != nil {
 			return err
 		}
 	}
