@@ -10,10 +10,10 @@ Environment=ANCHORD_ADDR=:9110
 Environment=ANCHORD_BIN=/home/b/go/bin/dreamtreed
 Environment=ANCHORD_KEY=anchor
 Environment=ANCHORD_KEYRING=test
-Environment=ANCHORD_HOME=/var/lib/dreamtreed
-Environment=ANCHORD_CHAIN_ID=dreamtree-devnet-1
-Environment=ANCHORD_NODE=tcp://localhost:26657
-Environment=ANCHORD_FEES=0photon
+Environment=ANCHORD_HOME=/home/b/.dreamtree
+Environment=ANCHORD_CHAIN_ID=dreamtree
+Environment=ANCHORD_NODE=tcp://localhost:16657
+Environment=ANCHORD_FEES=0uphoton
 # ANCHORD_TOKEN is supplied via an EnvironmentFile (from infra/.env), not committed:
 EnvironmentFile=/etc/dreamtree/anchord.env
 ExecStart=/home/b/go/bin/anchord

@@ -29,16 +29,16 @@ Every numeric value in the protocol is a named variable, not a hardcoded constan
 ```yaml
 # DreamTree Protocol Parameters — canonical source of truth
 # All values are stand-ins unless noted settled in the reference table.
-version: 0.1.0
-updated: 2026-05-22
+version: 0.8.0
+updated: 2026-07-16   # DT-21 reconciliation: registry catches up with the build
 
 reputation:
   baseline_kyc: 1.0              # R floor for any verified human entering a new domain
   neg_asymmetry: 2.0             # negative events hit this many times harder than positive
   endorsement_inheritance: 0.25  # fraction of R(A) inherited by B at first hop; geometric per hop
   cred_recursion_depth: 2        # hops the cred(source) recursion traverses before terminating
-  review_window_base: 1.0        # base_window in τ(M) = base · log(1 + M/threshold), days
-  review_window_threshold: 1.0   # threshold in τ(M)
+  review_window_base: 1.0        # base_window in τ(M) = base · √(M/threshold), days (√ ratified 2026-07-10: no transcendental in consensus)
+  review_window_threshold: 4.0   # threshold in τ(M) — retuned for √'s fat tail near 0 (build, 2026-07-1x; INTERIM)
   lambda_r_base: null            # TBD — base reputation decay rate, per year
   lambda_r_target: baseline_kyc  # R decays toward baseline, not zero (settled)
   saturation_point:                   # per-domain S in effective_R = S + k·log(1 + (R−S)/S) when R > S
@@ -48,7 +48,10 @@ reputation:
   dampening_k: 5                      # global k — compression strength past saturation
   outcome_magnitude_beta: 1.0         # β in M_O = min(M_cap, β · S(att, t_issuance) · √cred(reporter))
   outcome_magnitude_cap_multiplier: 5 # M_cap = (this) · S(att, t_issuance); single outcome ≤ N× original bet
-  s_max: null                         # TBD — normalizer in the V(w) aggregation
+  coattestor_weight: 0.25             # INTERIM — stands in for spec's attestation_weight(a_i,c) in outcome propagation
+  attest_bet_scale: 0.1               # INTERIM — magnitude of the unvalidated-attestation "bet" R-move
+  lambda_endorsement: 0.08            # INTERIM — endorsement-contribution decay, per year
+  s_max: 10.0                         # normalizer in the V(w) aggregation — INTERIM (build-chosen; backtest target)
 
 decay:                           # attestation-strength decay rates, per year
   proof_origin: 0.0              # permanent
@@ -56,6 +59,27 @@ decay:                           # attestation-strength decay rates, per year
   proof_rigor: 0.04              # ~17 yr half-life
   proof_use: 0.08                # ~9 yr half-life
   validated_outcome_halflife_years: 25.0
+
+attest:                          # DT-21 reconciliation — values the build runs, previously unregistered
+  type_weight:                   # INTERIM, all — the spec names the lever, never the values
+    origin: 1.0
+    rigor: 1.0
+    use: 0.5                     # a citation is weaker signal than authorship/review
+    replication: 1.0
+    outcome: 1.0
+    endorsement: 1.0             # (proof type itself pending ratification — DT-21 B8)
+  partial_outcome_refute_weight: 0.5   # INTERIM — dt.outcome.partial's weight in refuted_fraction
+  max_coattestors: 64            # INTERIM — outcome-propagation fan-out cap (2× for endorsers)
+  obsolescence_default: 1.0      # attest-side global multiplier; per-domain wiring pending (DT-21 W4)
+  citation_uplift_lambda: 1.0    # INTERIM, hardcoded const — promotion to param = backtest M2
+
+seeds:
+  max_commitment_bytes: 512      # commitment digest bound (bodies never enter consensus)
+  max_source_ref_bytes: 512
+  max_batch_new_count: 1000000   # per-batch mint cap (supply-griefing bound; ratified 2026-07-15)
+
+photons:
+  mintable_kinds: [record, kg_claim]  # INTERIM — kinds whose NEW leaves mint (peg gate; ratification = DT-21 M6/B3)
 
 domain:
   attenuation:                   # R spillover UP the 5-level taxonomy
@@ -100,8 +124,8 @@ economics:                       # founder-set at v0, governance-evolved
 | `reputation.neg_asymmetry` | 2.0 | ratio | how much harder bad signal hits than good | ≥ 1 | governance |
 | `reputation.endorsement_inheritance` | 0.25 | fraction | reputation flow A→B per hop (geometric) | [0, 1] | governance |
 | `reputation.cred_recursion_depth` | 2 | hops | credential-laundering resistance | integer ≥ 1 | governance |
-| `reputation.review_window_base` | 1.0 | days | base of τ(M) review window | > 0 | governance |
-| `reputation.review_window_threshold` | 1.0 | magnitude | threshold of τ(M) | > 0 | governance |
+| `reputation.review_window_base` | 1.0 | days | base of τ(M) = base·√(M/threshold) | > 0 | governance |
+| `reputation.review_window_threshold` | 4.0 | magnitude | threshold of τ(M) | > 0 | **INTERIM** (build retune) |
 | `reputation.lambda_r_base` | null | 1/yr | reputation atrophy speed | ≥ 0 | governance |
 | `reputation.lambda_r_target` | baseline_kyc | R | reputation as stock vs. flow | — | **settled** (baseline) |
 | `reputation.saturation_point.small` | 5 | R | log-dampening threshold for niche / sparse domains | > 0 | per-domain governance |
@@ -110,7 +134,16 @@ economics:                       # founder-set at v0, governance-evolved
 | `reputation.dampening_k` | 5 | scalar | compression strength past saturation in `S + k·log(1 + (R−S)/S)` | > 0 | governance |
 | `reputation.outcome_magnitude_beta` | 1.0 | scalar | β in `M_O = min(M_cap, β · S(att, t_issuance) · √cred(reporter))` | ≥ 0 | governance |
 | `reputation.outcome_magnitude_cap_multiplier` | 5 | scalar | `M_cap = (this) · S(att, t_issuance)` — single-outcome ceiling as a multiplier of the original bet | ≥ 1 | governance |
-| `reputation.s_max` | null | S | normalizer in V(w) aggregation | > 0 | governance |
+| `reputation.s_max` | 10.0 | S | normalizer in V(w) aggregation | > 0 | **INTERIM** (build-chosen) |
+| `reputation.coattestor_weight` | 0.25 | fraction | outcome propagation to co-attestors (× specificity) | [0, 1] | **INTERIM** |
+| `reputation.attest_bet_scale` | 0.1 | scalar | unvalidated-bet R-move magnitude | ≥ 0 | **INTERIM** |
+| `reputation.lambda_endorsement` | 0.08 | 1/yr | endorsement-contribution decay | ≥ 0 | **INTERIM** |
+| `attest.type_weight.use` | 0.5 | fraction | Use-proof strength weight (others 1.0) | [0, 1] | **INTERIM** |
+| `attest.partial_outcome_refute_weight` | 0.5 | fraction | PARTIAL outcome's weight in refuted_fraction | [0, 1] | **INTERIM** |
+| `attest.max_coattestors` | 64 | count | propagation fan-out cap | ≥ 1 | **INTERIM** |
+| `attest.citation_uplift_lambda` | 1.0 | scalar | creation-credit-forward strength (hardcoded; promote = backtest M2) | ≥ 0 | **INTERIM** |
+| `seeds.max_batch_new_count` | 1000000 | count | per-batch mint cap | ≥ 1 | ratified 2026-07-15 |
+| `photons.mintable_kinds` | record, kg_claim | set | leaf kinds whose NEW atoms mint | — | **INTERIM** (peg gate) |
 | `decay.proof_origin` | 0.0 | 1/yr | Proof-of-Origin aging | = 0 | **settled** (permanent) |
 | `decay.proof_replication` | 0.015 | 1/yr | Proof-of-Replication aging (~45 yr ½) | ≥ 0 | governance |
 | `decay.proof_rigor` | 0.04 | 1/yr | Proof-of-Rigor aging (~17 yr ½) | ≥ 0 | governance |
@@ -137,7 +170,7 @@ economics:                       # founder-set at v0, governance-evolved
 ## Invariants (fixed, never tunable)
 
 - **`creator_equality_within_type`** — `p(c1,s,a) = p(c2,s,a) = p(c3,s,a)`. Within a data type, every creator is priced identically. The market discovers value *across* types at the margin; the protocol guarantees equality *across creators* of the same type. The protocol never prices the person. (This replaces the earlier global "1 seed = 1 photon" rule — value is now marginal and market-set per type; what survives is creator-equality-within-type.)
-- **`photons = seeds`** — the photon supply is pegged 1:1 to the seed count. One photon mints per seed recorded (to the storer-validators of that seed). No halving schedule, no inflation curve; supply tracks the corpus. Not a tunable parameter — it's the monetary-policy invariant.
+- **`photons = seeds`** — the photon supply is pegged 1:1 to the count of **distinct atoms** (seed = atom, ratified 2026-07-15): one photon mints per NEW leaf-seed at ingestion, to the storer recipient; converged re-observations accrue sigma and never re-mint. No halving schedule, no inflation curve; supply IS the corpus. Caveat pending ratification (DT-21 M6/B3): the `photons.mintable_kinds` gate means only whitelisted leaf kinds mint — the peg as built reads "photons = mintable-kind seeds".
 
 ---
 
@@ -161,3 +194,4 @@ Some values that look like levers are deliberately **not** in this registry:
 - **2026-05-22 — v0.5.0.** `marketplace_toll` reconciled to **5%**. `access_duration_days` set to **1**. Storage rewards resolved: one-time ingestion mint (peg-preserving) + ongoing rent from circulating photons (access cuts + treasury subsidy), never new emission — added `economics.access_cut_to_storers`. Open: ingestion-photon split among storers, access-cut value.
 - **2026-06-24 — v0.6.0.** Outcome magnitude `M_O` resolved (formula + 5 clarifications, see `protocol-spec.md` §Reputation Dynamics). Replaced `reputation.outcome_magnitude: null` with `reputation.outcome_magnitude_beta: 1.0` and `reputation.outcome_magnitude_cap_multiplier: 5`. Uses `S(att, t_issuance)` (not current); multiple reporters aggregate paper-shape; self-reports cred ≈ 0; outcomes are attestations of `dt.outcome.*`; outcome refutation reverses + 2× penalty.
 - **2026-06-24 — v0.7.0.** Saturation point resolved (two-piece linear + log dampening). Replaced `reputation.saturation_point: null` with per-domain tiered structure: `small=5`, `standard=10`, `large=50` (each domain node tagged with a tier; v0 default `standard`). Added global `reputation.dampening_k: 5`. Per-domain from day zero (mirrors `domain.obsolescence_multiplier`), not deferred to v1+.
+- **2026-07-16 — v0.8.0 (DT-21 reconciliation).** The registry catches up with the build — closing the comb's "unregistered-lever cluster" (comb item 10). Review window corrected to the **ratified √ curve** (owner, 2026-07-10, `docs/specs/x-reputation-p2-review-windows.md`; parameters.md had drifted) with the build's threshold retune (4.0, INTERIM). Registered, all **INTERIM = build-chosen, pending owner ratification and backtest sensitivity study**: `reputation.{s_max: 10, coattestor_weight: 0.25, attest_bet_scale: 0.1, lambda_endorsement: 0.08}`, new `attest.*` section (type weights incl. Use=0.5, partial-outcome 0.5, max_coattestors 64, citation_uplift_lambda 1.0), `photons.mintable_kinds`, `seeds.*` bounds (`max_batch_new_count` ratified 2026-07-15). `photons = seeds` invariant restated for the leaf model (distinct atoms; mintable-kinds caveat flagged for ratification). INTERIM rows are exactly the values `docs/specs/measurement-backtest.md`'s sensitivity curves exist to study — registration is not ratification.

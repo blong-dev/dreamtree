@@ -53,7 +53,7 @@ The protocol has six layers. Each is sketched below, then expanded in its own se
 | Network | Chain, validators, consensus | Direction settled (open chain, progressive decentralization); design open |
 | Identity | Human-rooted DIDs, KYC-bound recovery | Direction settled; provider integration open |
 | Work & Reputation | Attestation-as-work consensus; signature weight | Direction settled; decay/appreciation math is the hardest open problem |
-| Currency & Records | Photons (P, fungible currency) + Seeds (S, non-fungible records); 1 S-access = 1 P | Two-token model settled; issuance/ramp economics open |
+| Currency & Records | Photons (P, fungible currency; the bond denom since 2026-07-15) + Seeds (S, non-fungible records); access market-priced per type (N_a) | Two-token model settled; leaf model live; issuance/ramp economics open |
 | Records | On-chain encrypted user data | Direction settled; storage primitives open |
 | Access | License-mediated reads; marketplace | Four hard rules settled; cryptographic primitives open |
 
@@ -100,7 +100,7 @@ Justification: the consensus mechanism (attestation-as-work under reputation sta
 
 **Framework: RESOLVED (2026-05-22) — Cosmos SDK + CometBFT.** App-chain framework, Go. CometBFT provides BFT consensus, p2p, instant finality, validator-set management. The ABCI boundary gives the consensus/value separation for free. The `gov` module gives on-chain parameter governance (the path for moving levers in `parameters.md` from founder-set to community-voted). IBC provides cross-chain messaging (relevant to settlement).
 
-**Consensus layer vs. value layer: RESOLVED (2026-05-22) — separate.** CometBFT validators order events and provide finality (the consensus layer). The reputation/attestation/record/license/coin logic runs in the ABCI app (the value layer). Reputation determines what attestations are *worth*, never who orders blocks — this decouples reputation-capture from chain-capture. The Door #3 validator progression maps onto CometBFT's validator set: solo (v0) → federated (v1) → permissioned-open (v2) → open (v3). Validator Sybil-resistance is *permissioning* through v2 (no staking token needed, preserving no-ICO); economic staking for a permissionless set is a v3-only question, deferred.
+**Consensus layer vs. value layer: RESOLVED (2026-05-22) — separate.** CometBFT validators order events and provide finality (the consensus layer). The reputation/attestation/record/license/coin logic runs in the ABCI app (the value layer). Reputation determines what attestations are *worth*, never who orders blocks — this decouples reputation-capture from chain-capture. The Door #3 validator progression maps onto CometBFT's validator set: solo (v0) → federated (v1) → permissioned-open (v2) → open (v3). Validator Sybil-resistance is *permissioning* through v2; since 2026-07-15 the validator bonds genesis-corpus **photons** (`bond_denom = uphoton` — see the seed=atom decision-log entry; no-ICO preserved: nothing is sold into existence). Economic staking for a permissionless set is a v3-only question, deferred.
 
 ### Block structure & the data fabric (RESOLVED 2026-05-22)
 
@@ -253,7 +253,7 @@ Trivial events (a single citation): τ ≈ instant. Large events (fraud claim): 
 
 A endorses B → B inherits 0.25 × R(A, k) at hop 1. Multi-hop geometric decay: 25% / 6.25% / 1.56% / 0.39%. Saturates by hop 4.
 
-### Outcome propagation (both directions, 2× asymmetric)
+### Outcome propagation (both directions; the 2× asymmetry lives only at the contributor R-update — resolved 2026-07-11)
 
 Outcomes are themselves attestations — no central truth oracle. An entity with standing to observe an outcome attests it, staking its own R. When an outcome validates or refutes a contributor's work, the signal propagates up the attestation chain:
 
@@ -486,7 +486,7 @@ A same-size swath of a higher-value type (say `N_a = 5 P`) clears at 5× the pho
 ### Photon circulation
 
 ```
-Validators mint photons (block reward)
+Ingestion mints photons (one per NEW leaf-seed, to the storer recipient — the only mint; no block reward)
   → buyers acquire photons (fiat → P at the on-ramp, or from validators / market)
   → buyers spend photons buying seed-access
   → producers receive photons (N_a per seed sold)
@@ -566,7 +566,7 @@ The encrypted seed *bodies* live in the fabric (not in consensus blocks); the co
 **Marketplace mechanics**:
 - Buyers post data-wanted requests (datasets for research, hiring access, identity verification, etc.)
 - Users see requests matching their wallet contents
-- Users grant scoped licenses; payments flow in stablecoin
+- Users grant scoped licenses; payments flow in photons (internal settlement — §Settlement; no stablecoin)
 - The platform takes a brokerage toll (§Economics)
 - License is registered on chain; access is mediated via the chosen cryptographic primitive; decay enforced by license expiration
 
@@ -578,9 +578,9 @@ The encrypted seed *bodies* live in the fabric (not in consensus blocks); the co
 
 The protocol distinguishes **three economic flows**, and the distinction matters. Mechanics are in §Currency & Records; this is the principle layer.
 
-1. **Producer compensation** — producers receive **one photon per seed sold**, fixed (the 1:1 invariant). **The protocol does not set a per-record price; there is none to set.** The market sets total compensation through *volume* — how many of a producer's seeds get bought — not through price negotiation. Founder-dictating compensation would replicate the extraction pattern at a new layer; the manifesto Part IV refuses this. The 1:1 invariant is the opposite of dictation: every contribution is worth exactly the same per access, and the market decides which contributions get accessed.
+1. **Producer compensation** — producers receive **`N_a` per seed sold** (the per-type market rate; creator-equality-within-type invariant). **The protocol does not set `N_a`; the market does.** Total compensation moves through *volume* — how many of a producer's seeds get bought — not through price negotiation. Founder-dictating compensation would replicate the extraction pattern at a new layer; the manifesto Part IV refuses this. Within-type equality is the opposite of dictation: every contribution of a kind is worth exactly the same per access, and the market decides which contributions get accessed.
 
-2. **Marketplace toll** — a fraction of every transaction goes to the infrastructure fund (the 30,000 P in the worked example). Pays for storage, validator operations, KYC integration, human dispute resolution. An *infrastructure fee*, not compensation distribution.
+2. **Marketplace toll** — a fraction of every transaction goes to the infrastructure fund (the 15,000 P in the worked example — 5%). Pays for storage, validator operations, KYC integration, human dispute resolution. An *infrastructure fee*, not compensation distribution.
 
 3. **Value-creation tax** — when work is issued onto the chain (a credential signed, an attestation made, a record verified), a small fee flows to the infrastructure fund. Taxing positive externalities is what makes shared infrastructure self-sustaining.
 
@@ -661,7 +661,7 @@ Every numeric parameter in the protocol is a **lever**, not a constant (heuristi
 | Aggregation normalizer | `reputation.s_max` | TBD | governance |
 | KYC baseline | `reputation.baseline_kyc` | 1.0 | settled (concept) |
 | Marketplace toll | `economics.marketplace_toll` | 5% | founder → governance |
-| Value-creation tax | `economics.value_creation_tax` | 1.5% | founder → governance |
+| Value-creation tax | `economics.value_creation_tax` | 0.5% (parameters.md wins) | founder → governance |
 | Seed-access duration | `economics.access_duration_days` | 1 day | founder → governance |
 | Access cut to storers | `economics.access_cut_to_storers` | TBD | founder → governance |
 | Storage replication factor | `economics.storage_replication_factor` | TBD | founder → governance |
@@ -743,7 +743,8 @@ In rough order of difficulty:
 - **2026-06-24 — Saturation point resolved (reputation math 2/3).** Two-piece linear + log dampening: `effective_R = R` if `R ≤ S`, `effective_R = S + k · log(1 + (R−S)/S)` if `R > S`. **Per-domain `S` from day zero** (mirrors `domain.obsolescence_multiplier`), three tiers: `small=5`, `standard=10`, `large=50`. Global `k = 5`. Each domain node in the 5-level taxonomy tagged with one tier; v0 default `standard`. Prevents unbounded R accumulation while preserving rank-ordering at high R. parameters.md → v0.7.0.
 - **2026-07-11 — Refutation-window integration + zero floor resolved (reputation math 3/3).** A review window integrates a **signed** verdict `M_O_net = V_pool − R_pool`, where each pool is a 1× paper-shape aggregate of its direction's reports, each capped at `M_cap`. The **2× negative asymmetry lives only at the contributor R-update** (`+M_O_net` validated / `2·M_O_net` refuted), never inside the window integration — so a defending report counts 1×, and a **false accusation is neutralized by an equal defense (1:1), not 2:1**. Co-attestors, endorsers, and the reversal penalty move at 1× (signed by the verdict). Fixes a latent double-2× (defenses in a fraud-claim window would have counted 4×, inverting Akerlof). **Zero floor made explicit and debtless**: every R move is capped at the recipient's current standing, so R can reach 0 but never go negative and no debt is stored — recovery is from 0. Paper-shape's `M_cap` (bounds crowd pile-on) plus the zero floor are the two load-bearing anti-assassination bounds. Implemented in `x/reputation/keeper/window.go` (`netVerdict` + `applyFloored`), deterministic unit tests in `window_test.go`. §"The floor is zero" rewritten to match.
 - **2026-07-15 — Seed = atom ratified; the leaf model; photon becomes the bond denom; dtvp retired; chain-id `dreamtree` (owner-directed, DT-18).** The seed and the data-model atom are the same object: one data contribution = one seed = one photon = one unit of priced access. Contributions are never collapsed into one seed — **batching is a commitment strategy, not a unit change**: `MsgCommitBatch` registers `new_count` leaf-seeds `[first, first+new_count)` under one Merkle root in one tx (`batch_root` retired as a kind; kind names the LEAF; single commits are batches of one). **Convergence rule**: re-observed atoms count in `leaf_count` (provable against the root) but never in `new_count` — sigma accrues, supply doesn't; `photons = seeds` counts **distinct atoms** exactly. `new_count == 0` is a legal pure-convergence provenance batch. **dtvp retired**: it entered the build 2026-07-10 as staking expedience, was never in this spec, and squatted on the photon's designed native-asset role. Base denom `uphoton` (1 photon = 10⁶; display metadata in bank genesis); `bond_denom = uphoton`; validators bond genesis-corpus photons (the corpus IS the money supply from block 0); voting power = whole photons at default PowerReduction. No slashing/evidence modules are wired, so nothing can burn bonded photons — the peg holds structurally (wiring slashing for external validators must slash-to-treasury or document the deviation). Supply-griefing bounded by `seeds.max_batch_new_count` (default 1,000,000; committer authorization is the long-term gate). The live `dreamtree-1` devnet is wiped once and relaunched as chain-id **`dreamtree`** (no suffix, ever) with the reflow corpus (~11.7M atoms / ~62K generation-batches) carried in genesis; roots re-anchors post-launch via its proven cron path. Proven on live nodes: `scripts/leaf-proof.sh` (batch alloc, photon arithmetic, leaf resolution, pure convergence, roots path, batch_root rejection), `gov-proof.sh`, `e2e-loop.sh` (full economy photon-native). Design + cutover runbook: `docs/specs/seed-atom-conformance.md`. Commits `07367cf`, `2f2ba76`.
+- **2026-07-16 — DT-21 canon reconciliation (drift paydown, phase 1).** The conformance comb (`docs/specs/comb-spec-vs-chain.md`, primary-verified) found the build and the documents of record had drifted through four mechanisms: constraint-driven substitutions never surfaced for ratification, sub-spec decisions never flowed up to canon, unlabeled multi-writer documents, and specs living away from their code. This entry records the clear-path repairs: **(1) the √ review window is ratified into canon** — τ(M) = base·√(M/threshold), threshold 4.0 interim (owner-decided 2026-07-10 in `x-reputation-p2-review-windows.md` for consensus determinism; protocol-spec and parameters.md had kept the log curve); **(2) parameters.md v0.8.0** registers every value the build actually runs (s_max 10, type weights incl. Use 0.5, coattestor_weight 0.25, attest_bet_scale 0.1, λ_endorsement 0.08, partial-outcome 0.5, max_coattestors 64, citation_uplift_λ 1.0, mintable_kinds, seeds bounds) — **marked INTERIM: registration is not ratification**, and these are the backtest's first sensitivity targets; **(3) the zero floor is debtless for real** (reversal negations floored + running floor in both read paths — commit `4c69cc6`); **(4) the peg burn hole is being closed by governance** (proposal: burn_vote_veto/prevote/quorum burns off — deposits always return; the chain's first live param-change proposal); **(5) seven spec-internal drift spots fixed** in place (staking-token body text, block-reward circulation line, stablecoin payments line, 1:1 pricing, 30K toll example, 1.5% tax, 2×-heading), plus stale `launch-readiness.md` / `deploy/anchord.service`. **Still open for owner ratification (DT-21 triage, Group 3):** value-creation-tax event (sale vs issuance), the interim cred baseline (unverified = baseline until identity lands), authority-set N_a as a v0 stand-in with exit, the mintable-kinds peg gate, ENDORSEMENT as a proof type, citation uplift itself, evaluation_factor/multi-hop propagation (open-flagged), and the MISSING class (meta-attestation pre-population, C2PA, four-hard-rules objects — now honestly flagged rather than silently asserted).
 
 ---
 
-*Last updated: 2026-07-15 — seed = atom ratified (leaf model + photon-native chain, DT-18); reputation math 3/3 closed 2026-07-11. Open beyond: seed-size cap, storage-cost-oracle, endowment per-seed-vs-pooled, ingestion/endowment split among storers, access_cut_to_storers, on/off ramps, uptime/durability bond design, TEE-specifics, dual-license boundary, governance evolution, formal per-type JSON Schemas, receiver-key handoff API.*
+*Last updated: 2026-07-16 — DT-21 canon reconciliation phase 1 (drift paydown); seed = atom ratified 2026-07-15 (DT-18); reputation math 3/3 closed 2026-07-11. Open beyond: seed-size cap, storage-cost-oracle, endowment per-seed-vs-pooled, ingestion/endowment split among storers, access_cut_to_storers, on/off ramps, uptime/durability bond design, TEE-specifics, dual-license boundary, governance evolution, formal per-type JSON Schemas, receiver-key handoff API.*

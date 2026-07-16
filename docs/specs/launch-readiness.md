@@ -104,4 +104,6 @@ required for the core value loop to run.
   creator, `P` to storer). The strict tokenomics (2026-07-10) collapsed this:
   one photon mints per seed to the storer-validators; the **creator earns only
   from marketplace sales**, never at ingestion. Selective purchasing is the
-  demand signal. `photon` is not the staking/gas token — `dtvp` bonds validators.
+  demand signal. *(STALE as of 2026-07-15 — dtvp is retired; the photon IS the
+  bond denom (`uphoton`), and the mint is per NEW leaf-seed under the leaf
+  model. See protocol-spec.md's seed=atom decision-log entry.)*
