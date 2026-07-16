@@ -159,7 +159,7 @@ economics:                       # founder-set at v0, governance-evolved
 | `coldstart.ramp_factor` | null | multiplier | newcomer early-win amplification | > 1 | governance |
 | `coldstart.ramp_count` | null | integer | N early attestations amplified | ≥ 0 | governance |
 | `economics.marketplace_toll` | 0.05 | fraction | infrastructure funding from transactions | [0, 1] | founder→governance |
-| `economics.value_creation_tax` | 0.005 | fraction | infrastructure funding from work issuance | [0, 1] | founder→governance |
+| `economics.value_creation_tax` | 0.005 | fraction | infrastructure funding from producer SALE revenue (ratified 2026-07-16: sale, not issuance) | [0, 1] | founder→governance |
 | `economics.access_duration_days` | 1 | days | how long one photon buys access to a seed | > 0 | founder→governance |
 | `economics.access_cut_to_storers` | null | fraction | slice of an access payment funding ongoing storage | [0, 1] | founder→governance |
 | `economics.storage_replication_factor` | null | count | how many nodes hold each shard | ≥ 1 | founder→governance |
