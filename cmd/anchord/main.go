@@ -148,6 +148,9 @@ type anchorReq struct {
 	Commitment string `json:"commitment"`
 	Kind       string `json:"kind"`
 	SourceRef  string `json:"source_ref"`
+	// DataType is the dt.*@v marketplace pricing type of the leaves (optional;
+	// empty anchors unpriceable — DT-21 comb item 8).
+	DataType string `json:"data_type,omitempty"`
 	// Batch fields (leaf model). Both zero => single-seed path (batch of one).
 	LeafCount uint32 `json:"leaf_count,omitempty"`
 	NewCount  uint32 `json:"new_count,omitempty"`
@@ -222,6 +225,9 @@ func (c config) commitArgs(req anchorReq) []string {
 	}
 	if req.SourceRef != "" {
 		args = append(args, "--source-ref", req.SourceRef)
+	}
+	if req.DataType != "" {
+		args = append(args, "--data-type", req.DataType)
 	}
 	args = append(args, c.txArgs()...)
 	// Everything past `--` is positional; values can never be read as flags.
@@ -373,6 +379,11 @@ func (s *idemStore) persistLocked() error {
 // Batch requests are new, so their counts join the key without collision.
 func deriveIdemKey(req anchorReq) string {
 	base := req.Subject + "\n" + req.Commitment + "\n" + req.Kind + "\n" + req.SourceRef
+	if req.DataType != "" {
+		// data_type joins the key only when present, so every pre-existing
+		// (empty-data_type) record keeps its legacy derivation.
+		base += "\n" + req.DataType
+	}
 	if req.isBatch() {
 		base += "\n" + strconv.FormatUint(uint64(req.LeafCount), 10) +
 			"\n" + strconv.FormatUint(uint64(req.NewCount), 10)
@@ -541,6 +552,10 @@ func (s *server) handleAnchor(w http.ResponseWriter, r *http.Request) {
 	}
 	if !validField(req.SourceRef, maxField) {
 		http.Error(w, "source_ref invalid (too long, leading '-', or control chars)", http.StatusBadRequest)
+		return
+	}
+	if !validField(req.DataType, 128) {
+		http.Error(w, "data_type invalid (too long, leading '-', or control chars)", http.StatusBadRequest)
 		return
 	}
 	if req.isBatch() {
