@@ -29,7 +29,7 @@ Every numeric value in the protocol is a named variable, not a hardcoded constan
 ```yaml
 # DreamTree Protocol Parameters — canonical source of truth
 # All values are stand-ins unless noted settled in the reference table.
-version: 0.8.0
+version: 0.9.0
 updated: 2026-07-16   # DT-21 reconciliation: registry catches up with the build
 
 reputation:
@@ -79,7 +79,7 @@ seeds:
   max_batch_new_count: 1000000   # per-batch mint cap (supply-griefing bound; ratified 2026-07-15)
 
 photons:
-  mintable_kinds: [record, kg_claim]  # INTERIM — kinds whose NEW leaves mint (peg gate; ratification = DT-21 M6/B3)
+  mintable_kinds: [record, kg_claim]  # RETIRING (owner 2026-07-16: ALL kinds mint — every atom is an observation); gate removed at first governed upgrade
 
 domain:
   attenuation:                   # R spillover UP the 5-level taxonomy
@@ -143,7 +143,7 @@ economics:                       # founder-set at v0, governance-evolved
 | `attest.max_coattestors` | 64 | count | propagation fan-out cap | ≥ 1 | **INTERIM** |
 | `attest.citation_uplift_lambda` | 1.0 | scalar | creation-credit-forward strength (hardcoded; promote = backtest M2) | ≥ 0 | **INTERIM** |
 | `seeds.max_batch_new_count` | 1000000 | count | per-batch mint cap | ≥ 1 | ratified 2026-07-15 |
-| `photons.mintable_kinds` | record, kg_claim | set | leaf kinds whose NEW atoms mint | — | **INTERIM** (peg gate) |
+| `photons.mintable_kinds` | record, kg_claim | set | RETIRING — all kinds mint (owner 2026-07-16); gate removed at first upgrade | — | superseded |
 | `decay.proof_origin` | 0.0 | 1/yr | Proof-of-Origin aging | = 0 | **settled** (permanent) |
 | `decay.proof_replication` | 0.015 | 1/yr | Proof-of-Replication aging (~45 yr ½) | ≥ 0 | governance |
 | `decay.proof_rigor` | 0.04 | 1/yr | Proof-of-Rigor aging (~17 yr ½) | ≥ 0 | governance |
@@ -170,7 +170,7 @@ economics:                       # founder-set at v0, governance-evolved
 ## Invariants (fixed, never tunable)
 
 - **`creator_equality_within_type`** — `p(c1,s,a) = p(c2,s,a) = p(c3,s,a)`. Within a data type, every creator is priced identically. The market discovers value *across* types at the margin; the protocol guarantees equality *across creators* of the same type. The protocol never prices the person. (This replaces the earlier global "1 seed = 1 photon" rule — value is now marginal and market-set per type; what survives is creator-equality-within-type.)
-- **`photons = seeds`** — the photon supply is pegged 1:1 to the count of **distinct atoms** (seed = atom, ratified 2026-07-15): one photon mints per NEW leaf-seed at ingestion, to the storer recipient; converged re-observations accrue sigma and never re-mint. No halving schedule, no inflation curve; supply IS the corpus. Caveat pending ratification (DT-21 M6/B3): the `photons.mintable_kinds` gate means only whitelisted leaf kinds mint — the peg as built reads "photons = mintable-kind seeds".
+- **`photons = seeds`** — the photon supply is pegged 1:1 to the count of **distinct atoms** (seed = atom, ratified 2026-07-15): one photon mints per NEW leaf-seed at ingestion, to the storer recipient; converged re-observations accrue sigma and never re-mint. No halving schedule, no inflation curve; supply IS the corpus. Ruled 2026-07-16 (owner): **ALL kinds mint** — every atom is an observation. The `mintable_kinds` gate is a retiring build artifact (removed at first governed upgrade); the peg is photons = distinct atoms, unqualified.
 
 ---
 
@@ -178,8 +178,8 @@ economics:                       # founder-set at v0, governance-evolved
 
 Some values that look like levers are deliberately **not** in this registry:
 
-- **Per-type data prices (`N_a`).** Market outcomes — supply and demand set what access to a data type costs, in photons. The protocol injects verified information so the market prices accurately (heuristic #8), but never sets the price. Never appears here.
-- **Producer compensation.** Equals volume × `N_a` — how many of a creator's seeds sell, at their type's market price. A market outcome, not a parameter. Never appears here.
+- **Access price.** SUPERSEDED 2026-07-16 (owner): access costs a CONSTANT **1 photon per seed per day** — an invariant, not a lever and not a market mechanism. Scarcity allocates: photons = seeds means the corpus rents at most once per day at full velocity; buyers choose which seeds to spend on; differentiation across types expresses as VOLUME, never price; the photon's real-world value finds its own equilibrium at the edges. The v0.3.0 per-type `N_a` model is retired with `MsgSetTypePrice` at the first governed upgrade.
+- **Producer compensation.** Equals sale volume — how many seed-days of a creator's work sell, at the constant 1 photon each (2026-07-16 ruling). A market outcome, not a parameter. Never appears here.
 - **Domain taxonomy contents.** The taxonomy (which classes/fields/disciplines/specialties exist) is a governance-maintained dataset, not a numeric lever. Seeded at v0 from LCC + ISCED + ONET/ISCO-08.
 - **The pre-population unsigned discount** — currently lives in protocol-spec §Identity; should be promoted here as a lever once its shape firms up. Flagged for migration.
 
@@ -194,4 +194,5 @@ Some values that look like levers are deliberately **not** in this registry:
 - **2026-05-22 — v0.5.0.** `marketplace_toll` reconciled to **5%**. `access_duration_days` set to **1**. Storage rewards resolved: one-time ingestion mint (peg-preserving) + ongoing rent from circulating photons (access cuts + treasury subsidy), never new emission — added `economics.access_cut_to_storers`. Open: ingestion-photon split among storers, access-cut value.
 - **2026-06-24 — v0.6.0.** Outcome magnitude `M_O` resolved (formula + 5 clarifications, see `protocol-spec.md` §Reputation Dynamics). Replaced `reputation.outcome_magnitude: null` with `reputation.outcome_magnitude_beta: 1.0` and `reputation.outcome_magnitude_cap_multiplier: 5`. Uses `S(att, t_issuance)` (not current); multiple reporters aggregate paper-shape; self-reports cred ≈ 0; outcomes are attestations of `dt.outcome.*`; outcome refutation reverses + 2× penalty.
 - **2026-06-24 — v0.7.0.** Saturation point resolved (two-piece linear + log dampening). Replaced `reputation.saturation_point: null` with per-domain tiered structure: `small=5`, `standard=10`, `large=50` (each domain node tagged with a tier; v0 default `standard`). Added global `reputation.dampening_k: 5`. Per-domain from day zero (mirrors `domain.obsolescence_multiplier`), not deferred to v1+.
+- **2026-07-16 — v0.9.0 (owner rulings — the Group 3 walk).** Standing starts at **0**; `baseline_kyc` is granted by a verification/ratification mechanism, not by default (chain change at first governed upgrade). **Access pricing is the constant 1 photon per seed per day** — supersedes v0.3.0 per-type `N_a`; `MsgSetTypePrice` retires; creator equality becomes absolute across creators and types. **All kinds mint** — `mintable_kinds` retiring; the peg is photons = distinct atoms, unqualified. ENDORSEMENT ratified with its linear-stacking defect flagged (paper-shape aggregation fix rides the reputation review). Citation uplift ratified (`citation_uplift_lambda` stays INTERIM; backtest M2 promotes). Value-creation tax levied at SALE ratified. `evaluation_factor` superseded: consequence flows from USE attestation + co-attestor propagation. C2PA committed.
 - **2026-07-16 — v0.8.0 (DT-21 reconciliation).** The registry catches up with the build — closing the comb's "unregistered-lever cluster" (comb item 10). Review window corrected to the **ratified √ curve** (owner, 2026-07-10, `docs/specs/x-reputation-p2-review-windows.md`; parameters.md had drifted) with the build's threshold retune (4.0, INTERIM). Registered, all **INTERIM = build-chosen, pending owner ratification and backtest sensitivity study**: `reputation.{s_max: 10, coattestor_weight: 0.25, attest_bet_scale: 0.1, lambda_endorsement: 0.08}`, new `attest.*` section (type weights incl. Use=0.5, partial-outcome 0.5, max_coattestors 64, citation_uplift_lambda 1.0), `photons.mintable_kinds`, `seeds.*` bounds (`max_batch_new_count` ratified 2026-07-15). `photons = seeds` invariant restated for the leaf model (distinct atoms; mintable-kinds caveat flagged for ratification). INTERIM rows are exactly the values `docs/specs/measurement-backtest.md`'s sensitivity curves exist to study — registration is not ratification.
