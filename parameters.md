@@ -72,7 +72,7 @@ attest:                          # DT-21 reconciliation — values the build run
   partial_outcome_refute_weight: 0.5   # INTERIM — dt.outcome.partial's weight in refuted_fraction
   max_coattestors: 64            # INTERIM — outcome-propagation fan-out cap (2× for endorsers)
   obsolescence_default: 1.0      # attest-side global multiplier; per-domain wiring pending (DT-21 W4)
-  citation_uplift_lambda: 1.0    # INTERIM, hardcoded const — promotion to param = backtest M2
+  citation_uplift_lambda: 1.0    # governable param at upgrade-1 (M2 done); value INTERIM pending M4 evidence
 
 seeds:
   max_commitment_bytes: 512      # commitment digest bound (bodies never enter consensus)
@@ -143,7 +143,7 @@ economics:                       # founder-set at v0, governance-evolved
 | `attest.type_weight.use` | 0.5 | fraction | Use-proof strength weight (others 1.0) | [0, 1] | **INTERIM** |
 | `attest.partial_outcome_refute_weight` | 0.5 | fraction | PARTIAL outcome's weight in refuted_fraction | [0, 1] | **INTERIM** |
 | `attest.max_coattestors` | 64 | count | propagation fan-out cap | ≥ 1 | **INTERIM** |
-| `attest.citation_uplift_lambda` | 1.0 | scalar | creation-credit-forward strength (hardcoded; promote = backtest M2) | ≥ 0 | **INTERIM** |
+| `attest.citation_uplift_lambda` | 1.0 | scalar | creation-credit-forward strength (param at upgrade-1; M2 done) | ≥ 0 | **value INTERIM** (M4 evidence pending) |
 | `seeds.max_batch_new_count` | 1000000 | count | per-batch mint cap | ≥ 1 | ratified 2026-07-15 |
 | `photons.mintable_kinds` | record, kg_claim | set | RETIRING — all kinds mint (owner 2026-07-16); gate removed at first upgrade | — | superseded |
 | `decay.proof_origin` | 0.0 | 1/yr | Proof-of-Origin aging | = 0 | **settled** (permanent) |
