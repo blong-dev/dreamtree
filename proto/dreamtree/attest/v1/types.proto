@@ -97,6 +97,11 @@ message Params {
   // reputation stand-ins consumed by the projection until x/reputation lands.
   string baseline_kyc = 11;  // "1.0" — flat R for every attestor, for now
   string s_max = 12;         // "10.0" — normalization ceiling for V + refutation
+
+  // creation-credit-forward strength (backtest M2, promoted from a compile-time
+  // const): how much a maximally-valuable citing work amplifies a USE citation's
+  // contribution to the source it builds on. Read-projection only — never mints.
+  string citation_uplift_lambda = 13;  // "1.0"
 }
 
 // GenesisState.

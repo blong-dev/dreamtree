@@ -28,6 +28,10 @@ func DefaultParams() Params {
 		ObsolescenceDefault: "1.0",
 		BaselineKyc:         "1.0",
 		SMax:                "10.0",
+
+		// creation-credit-forward (backtest M2): promoted from a compile-time
+		// const; a citation from a top-value work counts up to (1 + this)x.
+		CitationUpliftLambda: "1.0",
 	}
 }
 
@@ -61,6 +65,13 @@ func (p Params) Validate() error {
 	}
 	if sMax, _ := strconv.ParseFloat(p.SMax, 64); sMax <= 0 {
 		return fmt.Errorf("s_max must be > 0")
+	}
+	// citation_uplift_lambda: empty tolerated (pre-upgrade state; readers fall
+	// back to the pre-M2 const 1.0), else must parse >= 0.
+	if p.CitationUpliftLambda != "" {
+		if _, err := parsePos("citation_uplift_lambda", p.CitationUpliftLambda); err != nil {
+			return err
+		}
 	}
 	return nil
 }

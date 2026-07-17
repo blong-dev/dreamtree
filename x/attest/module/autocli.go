@@ -16,6 +16,8 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				{RpcMethod: "AttestationsByAttestor", Use: "by-attestor [attestor]", Short: "List attestations by a signer", PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "attestor"}}},
 				{RpcMethod: "Strength", Use: "strength [id]", Short: "Compute S(att,t) for an attestation (projection)", PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "id"}}},
 				{RpcMethod: "WorkValue", Use: "work-value [subject]", Short: "Compute V(w,t) for a subject (projection)", PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "subject"}}},
+				{RpcMethod: "StrengthAt", Use: "strength-at [id]", Short: "S(att,t) under override params and/or an as-of clock (the dial; flags --as-of, gRPC for params_override)", PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "id"}}},
+				{RpcMethod: "WorkValueAt", Use: "work-value-at [subject]", Short: "V(w,t) under override params and/or an as-of clock (the dial)", PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "subject"}}},
 				{RpcMethod: "Params", Use: "params", Short: "Get the attest module parameters"},
 			},
 		},

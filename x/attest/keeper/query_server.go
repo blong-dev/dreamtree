@@ -12,6 +12,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/blong-dev/dreamtree/x/attest"
+	"github.com/blong-dev/dreamtree/x/attest/projection"
 )
 
 var _ attest.QueryServer = queryServer{}
@@ -73,9 +74,15 @@ func (qs queryServer) Strength(ctx context.Context, req *attest.QueryStrengthReq
 	if err != nil {
 		return nil, err
 	}
-	pf := loadParamsF(params)
+	pf := projection.LoadParamsF(params)
 	now := sdk.UnwrapSDKContext(ctx).BlockTime().Unix()
-	s, rf, err := qs.k.strength(ctx, a, pf, now)
+	return qs.strengthResponse(ctx, a, pf, now)
+}
+
+// strengthResponse computes the decomposed strength reading — shared by
+// Strength (live params, block clock) and StrengthAt (the M3 dial).
+func (qs queryServer) strengthResponse(ctx context.Context, a attest.Attestation, pf projection.ParamsF, now int64) (*attest.QueryStrengthResponse, error) {
+	s, rf, err := qs.k.projector(ctx, pf).Strength(a, now)
 	if err != nil {
 		return nil, err
 	}
@@ -83,12 +90,29 @@ func (qs queryServer) Strength(ctx context.Context, req *attest.QueryStrengthReq
 		Id:              a.Id,
 		Strength:        dec(s),
 		Reputation:      dec(qs.k.reputationOf(ctx, pf, a.Attestor, a.Domain)),
-		Specificity:     dec(specificityFactor(a.SpecificityBps)),
-		TypeWeight:      dec(pf.weight[a.ProofType]),
-		Decay:           dec(pf.decay(a, now)),
+		Specificity:     dec(projection.SpecificityFactor(a.SpecificityBps)),
+		TypeWeight:      dec(pf.Weight[a.ProofType]),
+		Decay:           dec(pf.Decay(a, now)),
 		RefutedFraction: dec(rf),
 		AgeSeconds:      now - a.IssuedAt,
 	}, nil
+}
+
+// StrengthAt is the dial (backtest M3): the same reading under caller-supplied
+// params and/or an as-of clock. Read-only; never on a consensus path.
+func (qs queryServer) StrengthAt(ctx context.Context, req *attest.QueryStrengthAtRequest) (*attest.QueryStrengthResponse, error) {
+	a, err := qs.k.Attestations.Get(ctx, req.Id)
+	if err != nil {
+		if errors.Is(err, collections.ErrNotFound) {
+			return nil, status.Errorf(codes.NotFound, "attestation %d not found", req.Id)
+		}
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	pf, now, err := qs.dial(ctx, req.ParamsOverride, req.AsOf)
+	if err != nil {
+		return nil, err
+	}
+	return qs.strengthResponse(ctx, a, pf, now)
 }
 
 func (qs queryServer) WorkValue(ctx context.Context, req *attest.QueryWorkValueRequest) (*attest.QueryWorkValueResponse, error) {
@@ -96,13 +120,50 @@ func (qs queryServer) WorkValue(ctx context.Context, req *attest.QueryWorkValueR
 	if err != nil {
 		return nil, err
 	}
-	pf := loadParamsF(params)
+	pf := projection.LoadParamsF(params)
 	now := sdk.UnwrapSDKContext(ctx).BlockTime().Unix()
-	v, count, err := qs.k.workValue(ctx, req.Subject, pf, now)
+	v, count, err := qs.k.projector(ctx, pf).WorkValue(req.Subject, now)
 	if err != nil {
 		return nil, err
 	}
 	return &attest.QueryWorkValueResponse{Subject: req.Subject, Value: dec(v), AttestationCount: count}, nil
+}
+
+// WorkValueAt is the dial (backtest M3) for V(w,t).
+func (qs queryServer) WorkValueAt(ctx context.Context, req *attest.QueryWorkValueAtRequest) (*attest.QueryWorkValueResponse, error) {
+	pf, now, err := qs.dial(ctx, req.ParamsOverride, req.AsOf)
+	if err != nil {
+		return nil, err
+	}
+	v, count, err := qs.k.projector(ctx, pf).WorkValue(req.Subject, now)
+	if err != nil {
+		return nil, err
+	}
+	return &attest.QueryWorkValueResponse{Subject: req.Subject, Value: dec(v), AttestationCount: count}, nil
+}
+
+// dial resolves the (params, clock) pair for the At queries: override params
+// when supplied (validated), live params otherwise; as_of when supplied, block
+// time otherwise.
+func (qs queryServer) dial(ctx context.Context, override *attest.Params, asOf int64) (projection.ParamsF, int64, error) {
+	var p attest.Params
+	if override != nil {
+		if err := override.Validate(); err != nil {
+			return projection.ParamsF{}, 0, status.Errorf(codes.InvalidArgument, "params_override: %v", err)
+		}
+		p = *override
+	} else {
+		var err error
+		p, err = qs.k.Params.Get(ctx)
+		if err != nil {
+			return projection.ParamsF{}, 0, err
+		}
+	}
+	now := asOf
+	if now == 0 {
+		now = sdk.UnwrapSDKContext(ctx).BlockTime().Unix()
+	}
+	return projection.LoadParamsF(p), now, nil
 }
 
 func (qs queryServer) Params(ctx context.Context, _ *attest.QueryParamsRequest) (*attest.QueryParamsResponse, error) {

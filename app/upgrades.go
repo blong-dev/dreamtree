@@ -7,6 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 
+	"github.com/blong-dev/dreamtree/x/attest"
 	"github.com/blong-dev/dreamtree/x/reputation"
 )
 
@@ -43,6 +44,20 @@ func (app *DreamtreeApp) RegisterUpgradeHandlers() {
 				}
 				readBack, _ := app.ReputationKeeper.Params.Get(ctx)
 				logger.Info("R5: e_cap_mult migrated", "now", readBack.ECapMult)
+			}
+			// Backtest M2 (rides upgrade-1): citation_uplift_lambda promoted
+			// from a compile-time const to a governable attest param — fill
+			// the ratified default on stored params.
+			ap, err := app.AttestKeeper.Params.Get(ctx)
+			if err != nil {
+				return nil, err
+			}
+			if ap.CitationUpliftLambda == "" {
+				ap.CitationUpliftLambda = attest.DefaultParams().CitationUpliftLambda
+				if err := app.AttestKeeper.Params.Set(ctx, ap); err != nil {
+					return nil, err
+				}
+				logger.Info("M2: citation_uplift_lambda promoted", "value", ap.CitationUpliftLambda)
 			}
 			// R1 (Z2 floor) and R3 (all kinds mint) are pure logic changes —
 			// they ship with the binary and need no state migration.

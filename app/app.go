@@ -32,6 +32,7 @@ import (
 	govkeeper "github.com/cosmos/cosmos-sdk/x/gov/keeper"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 
+	attestkeeper "github.com/blong-dev/dreamtree/x/attest/keeper"
 	licenseskeeper "github.com/blong-dev/dreamtree/x/licenses/keeper"
 	reputationkeeper "github.com/blong-dev/dreamtree/x/reputation/keeper"
 
@@ -92,6 +93,7 @@ type DreamtreeApp struct {
 	ConsensusParamsKeeper consensuskeeper.Keeper
 	LicensesKeeper        licenseskeeper.Keeper
 	ReputationKeeper      reputationkeeper.Keeper
+	AttestKeeper          attestkeeper.Keeper
 
 	// simulation manager
 	sm *module.SimulationManager
@@ -156,6 +158,7 @@ func NewDreamtreeApp(
 		&app.ConsensusParamsKeeper,
 		&app.LicensesKeeper,
 		&app.ReputationKeeper,
+		&app.AttestKeeper,
 	); err != nil {
 		return nil, err
 	}

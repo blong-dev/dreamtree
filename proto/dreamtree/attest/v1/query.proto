@@ -39,6 +39,15 @@ service Query {
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
     option (google.api.http).get = "/dreamtree/attest/v1/params";
   }
+  // The dial (backtest M3): the same projections under caller-supplied params
+  // and/or an as-of clock. Read-only counterfactuals — reprojection is exactly
+  // rerunning the reading with different levers; the log never changes.
+  rpc StrengthAt(QueryStrengthAtRequest) returns (QueryStrengthResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+  }
+  rpc WorkValueAt(QueryWorkValueAtRequest) returns (QueryWorkValueResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+  }
 }
 
 message QueryAttestationRequest { uint64 id = 1; }
@@ -83,6 +92,17 @@ message QueryWorkValueResponse {
   string subject = 1;
   string value = 2;            // V(w,t)
   uint32 attestation_count = 3; // non-outcome attestations counted
+}
+
+message QueryStrengthAtRequest {
+  uint64 id = 1;
+  Params params_override = 2;  // optional; unset => live params
+  int64 as_of = 3;             // optional unix seconds; 0 => block time
+}
+message QueryWorkValueAtRequest {
+  string subject = 1;
+  Params params_override = 2;
+  int64 as_of = 3;
 }
 
 message QueryParamsRequest {}

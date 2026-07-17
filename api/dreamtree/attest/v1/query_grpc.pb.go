@@ -25,6 +25,8 @@ const (
 	Query_Strength_FullMethodName               = "/dreamtree.attest.v1.Query/Strength"
 	Query_WorkValue_FullMethodName              = "/dreamtree.attest.v1.Query/WorkValue"
 	Query_Params_FullMethodName                 = "/dreamtree.attest.v1.Query/Params"
+	Query_StrengthAt_FullMethodName             = "/dreamtree.attest.v1.Query/StrengthAt"
+	Query_WorkValueAt_FullMethodName            = "/dreamtree.attest.v1.Query/WorkValueAt"
 )
 
 // QueryClient is the client API for Query service.
@@ -43,6 +45,11 @@ type QueryClient interface {
 	// strengths of all non-outcome attestations on it.
 	WorkValue(ctx context.Context, in *QueryWorkValueRequest, opts ...grpc.CallOption) (*QueryWorkValueResponse, error)
 	Params(ctx context.Context, in *QueryParamsRequest, opts ...grpc.CallOption) (*QueryParamsResponse, error)
+	// The dial (backtest M3): the same projections under caller-supplied params
+	// and/or an as-of clock. Read-only counterfactuals — reprojection is exactly
+	// rerunning the reading with different levers; the log never changes.
+	StrengthAt(ctx context.Context, in *QueryStrengthAtRequest, opts ...grpc.CallOption) (*QueryStrengthResponse, error)
+	WorkValueAt(ctx context.Context, in *QueryWorkValueAtRequest, opts ...grpc.CallOption) (*QueryWorkValueResponse, error)
 }
 
 type queryClient struct {
@@ -113,6 +120,26 @@ func (c *queryClient) Params(ctx context.Context, in *QueryParamsRequest, opts .
 	return out, nil
 }
 
+func (c *queryClient) StrengthAt(ctx context.Context, in *QueryStrengthAtRequest, opts ...grpc.CallOption) (*QueryStrengthResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(QueryStrengthResponse)
+	err := c.cc.Invoke(ctx, Query_StrengthAt_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) WorkValueAt(ctx context.Context, in *QueryWorkValueAtRequest, opts ...grpc.CallOption) (*QueryWorkValueResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(QueryWorkValueResponse)
+	err := c.cc.Invoke(ctx, Query_WorkValueAt_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueryServer is the server API for Query service.
 // All implementations must embed UnimplementedQueryServer
 // for forward compatibility.
@@ -129,6 +156,11 @@ type QueryServer interface {
 	// strengths of all non-outcome attestations on it.
 	WorkValue(context.Context, *QueryWorkValueRequest) (*QueryWorkValueResponse, error)
 	Params(context.Context, *QueryParamsRequest) (*QueryParamsResponse, error)
+	// The dial (backtest M3): the same projections under caller-supplied params
+	// and/or an as-of clock. Read-only counterfactuals — reprojection is exactly
+	// rerunning the reading with different levers; the log never changes.
+	StrengthAt(context.Context, *QueryStrengthAtRequest) (*QueryStrengthResponse, error)
+	WorkValueAt(context.Context, *QueryWorkValueAtRequest) (*QueryWorkValueResponse, error)
 	mustEmbedUnimplementedQueryServer()
 }
 
@@ -156,6 +188,12 @@ func (UnimplementedQueryServer) WorkValue(context.Context, *QueryWorkValueReques
 }
 func (UnimplementedQueryServer) Params(context.Context, *QueryParamsRequest) (*QueryParamsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Params not implemented")
+}
+func (UnimplementedQueryServer) StrengthAt(context.Context, *QueryStrengthAtRequest) (*QueryStrengthResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method StrengthAt not implemented")
+}
+func (UnimplementedQueryServer) WorkValueAt(context.Context, *QueryWorkValueAtRequest) (*QueryWorkValueResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method WorkValueAt not implemented")
 }
 func (UnimplementedQueryServer) mustEmbedUnimplementedQueryServer() {}
 func (UnimplementedQueryServer) testEmbeddedByValue()               {}
@@ -286,6 +324,42 @@ func _Query_Params_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_StrengthAt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryStrengthAtRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).StrengthAt(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Query_StrengthAt_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).StrengthAt(ctx, req.(*QueryStrengthAtRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_WorkValueAt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryWorkValueAtRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).WorkValueAt(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Query_WorkValueAt_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).WorkValueAt(ctx, req.(*QueryWorkValueAtRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Query_ServiceDesc is the grpc.ServiceDesc for Query service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -316,6 +390,14 @@ var Query_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Params",
 			Handler:    _Query_Params_Handler,
+		},
+		{
+			MethodName: "StrengthAt",
+			Handler:    _Query_StrengthAt_Handler,
+		},
+		{
+			MethodName: "WorkValueAt",
+			Handler:    _Query_WorkValueAt_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -103,6 +103,11 @@ grep -q 'applying upgrade "upgrade-1"' "$HOME_DIR/node-new.log" || die "handler 
 ok "new binary applied upgrade-1 and resumed (h=$(height))"
 
 # ---- rider verification ----------------------------------------------------
+# M2 (rides upgrade-1): citation_uplift_lambda promoted onto stored params.
+CUL=$("$BIN" q attest params "${Q[@]}" | jq -r '.params.citation_uplift_lambda // .params.citationUpliftLambda')
+[ "$CUL" = "1.0" ] || die "citation_uplift_lambda not migrated: '$CUL'"
+ok "M2: citation_uplift_lambda=1.0 on migrated params"
+
 # R5: migration filled e_cap_mult on stored params.
 ECM=$("$BIN" q reputation params "${Q[@]}" | jq -r '.params.e_cap_mult')
 [ "$ECM" = "2.0" ] || die "e_cap_mult not migrated: '$ECM'"
