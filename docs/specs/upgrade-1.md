@@ -22,9 +22,11 @@ history, seeds preserved. This spec defines the mechanism and the first payload.
    Submitted and voted by dt-validator. GOTCHA (proven on proposal #1): anchord signs with
    the same account continuously — every tx needs the sequence-retry loop (query sequence,
    pass `--sequence` explicitly, retry on code 32).
-3. **Halt + swap**: at the height, the old binary halts with `UPGRADE "upgrade-1" NEEDED`.
-   Ops: build new binary on m1, ship to m3, replace `/home/b/dreamtree/bin/dreamtreed`,
-   `systemctl restart dreamtree`. New binary sees the upgrade info, runs the handler,
+3. **Halt + swap**: at the height, FinalizeBlock panics with `UPGRADE "upgrade-1"
+   NEEDED` and CometBFT logs `CONSENSUS FAILURE` — **the process hangs rather than
+   exits** (proven in rehearsal). Ops: watch the journal for the NEEDED line, then
+   `systemctl stop dreamtree`, build new binary on m1, ship to m3, replace
+   `/home/b/dreamtree/bin/dreamtreed`, `systemctl start dreamtree`. New binary sees the upgrade info, runs the handler,
    resumes. No cosmovisor (single validator, native systemd; the actuator recipe
    `restart_dreamtree` — add alongside existing verbs if absent — is the ops-fabric hook).
 4. **Verify**: peg intact (photons = distinct atoms), anchord loop resumes (SEED commits),

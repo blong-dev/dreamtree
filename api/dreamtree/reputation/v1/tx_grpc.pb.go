@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	Msg_UpdateParams_FullMethodName    = "/dreamtree.reputation.v1.Msg/UpdateParams"
 	Msg_SetDomainConfig_FullMethodName = "/dreamtree.reputation.v1.Msg/SetDomainConfig"
+	Msg_SetVerified_FullMethodName     = "/dreamtree.reputation.v1.Msg/SetVerified"
 )
 
 // MsgClient is the client API for Msg service.
@@ -33,6 +34,7 @@ const (
 type MsgClient interface {
 	UpdateParams(ctx context.Context, in *MsgUpdateParams, opts ...grpc.CallOption) (*MsgUpdateParamsResponse, error)
 	SetDomainConfig(ctx context.Context, in *MsgSetDomainConfig, opts ...grpc.CallOption) (*MsgSetDomainConfigResponse, error)
+	SetVerified(ctx context.Context, in *MsgSetVerified, opts ...grpc.CallOption) (*MsgSetVerifiedResponse, error)
 }
 
 type msgClient struct {
@@ -63,6 +65,16 @@ func (c *msgClient) SetDomainConfig(ctx context.Context, in *MsgSetDomainConfig,
 	return out, nil
 }
 
+func (c *msgClient) SetVerified(ctx context.Context, in *MsgSetVerified, opts ...grpc.CallOption) (*MsgSetVerifiedResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MsgSetVerifiedResponse)
+	err := c.cc.Invoke(ctx, Msg_SetVerified_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MsgServer is the server API for Msg service.
 // All implementations must embed UnimplementedMsgServer
 // for forward compatibility.
@@ -73,6 +85,7 @@ func (c *msgClient) SetDomainConfig(ctx context.Context, in *MsgSetDomainConfig,
 type MsgServer interface {
 	UpdateParams(context.Context, *MsgUpdateParams) (*MsgUpdateParamsResponse, error)
 	SetDomainConfig(context.Context, *MsgSetDomainConfig) (*MsgSetDomainConfigResponse, error)
+	SetVerified(context.Context, *MsgSetVerified) (*MsgSetVerifiedResponse, error)
 	mustEmbedUnimplementedMsgServer()
 }
 
@@ -88,6 +101,9 @@ func (UnimplementedMsgServer) UpdateParams(context.Context, *MsgUpdateParams) (*
 }
 func (UnimplementedMsgServer) SetDomainConfig(context.Context, *MsgSetDomainConfig) (*MsgSetDomainConfigResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SetDomainConfig not implemented")
+}
+func (UnimplementedMsgServer) SetVerified(context.Context, *MsgSetVerified) (*MsgSetVerifiedResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SetVerified not implemented")
 }
 func (UnimplementedMsgServer) mustEmbedUnimplementedMsgServer() {}
 func (UnimplementedMsgServer) testEmbeddedByValue()             {}
@@ -146,6 +162,24 @@ func _Msg_SetDomainConfig_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_SetVerified_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgSetVerified)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).SetVerified(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Msg_SetVerified_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).SetVerified(ctx, req.(*MsgSetVerified))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Msg_ServiceDesc is the grpc.ServiceDesc for Msg service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -160,6 +194,10 @@ var Msg_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SetDomainConfig",
 			Handler:    _Msg_SetDomainConfig_Handler,
+		},
+		{
+			MethodName: "SetVerified",
+			Handler:    _Msg_SetVerified_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

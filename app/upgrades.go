@@ -4,6 +4,7 @@ import (
 	"context"
 
 	upgradetypes "cosmossdk.io/x/upgrade/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 
 	"github.com/blong-dev/dreamtree/x/reputation"
@@ -19,11 +20,13 @@ const Upgrade1 = "upgrade-1"
 func (app *DreamtreeApp) RegisterUpgradeHandlers() {
 	app.UpgradeKeeper.SetUpgradeHandler(Upgrade1,
 		func(ctx context.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			logger := sdk.UnwrapSDKContext(ctx).Logger().With("upgrade", Upgrade1)
 			// R4 (constant pricing): the per-type price table is retired —
 			// access is 1 photon per seed per day, a protocol constant.
 			if err := app.LicensesKeeper.TypePrices.Clear(ctx, nil); err != nil {
 				return nil, err
 			}
+			logger.Info("R4: TypePrices cleared")
 			// R5 (endorsement paper-shape): stored params predate the
 			// e_cap_mult field; write the ratified default so readers don't
 			// ride the fallback forever. R2's verified set starts EMPTY by
@@ -32,11 +35,14 @@ func (app *DreamtreeApp) RegisterUpgradeHandlers() {
 			if err != nil {
 				return nil, err
 			}
+			logger.Info("R5: reputation params read", "e_cap_mult_before", p.ECapMult)
 			if p.ECapMult == "" {
 				p.ECapMult = reputation.DefaultECapMult
 				if err := app.ReputationKeeper.Params.Set(ctx, p); err != nil {
 					return nil, err
 				}
+				readBack, _ := app.ReputationKeeper.Params.Get(ctx)
+				logger.Info("R5: e_cap_mult migrated", "now", readBack.ECapMult)
 			}
 			// R1 (Z2 floor) and R3 (all kinds mint) are pure logic changes —
 			// they ship with the binary and need no state migration.
