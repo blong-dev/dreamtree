@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"time"
 
 	upgradetypes "cosmossdk.io/x/upgrade/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -59,6 +60,24 @@ func (app *DreamtreeApp) RegisterUpgradeHandlers() {
 				}
 				logger.Info("M2: citation_uplift_lambda promoted", "value", ap.CitationUpliftLambda)
 			}
+			// Gov clock (owner 2026-07-17): the 48h/24h genesis defaults made
+			// same-day governed deploys impossible on a single-validator
+			// chain. Shorten to 1h voting / 30m expedited. Done HERE (not a
+			// parallel MsgUpdateParams) because gov params are full-replace:
+			// proposal #1's burn-flag update executes first and would revert
+			// a duration change that landed before it — the plan height is
+			// chosen after #1's execution so this ordering holds.
+			gp, err := app.GovKeeper.Params.Get(ctx)
+			if err != nil {
+				return nil, err
+			}
+			hour, half := time.Hour, 30*time.Minute
+			gp.VotingPeriod = &hour
+			gp.ExpeditedVotingPeriod = &half
+			if err := app.GovKeeper.Params.Set(ctx, gp); err != nil {
+				return nil, err
+			}
+			logger.Info("gov clock shortened", "voting", hour, "expedited", half)
 			// R1 (Z2 floor) and R3 (all kinds mint) are pure logic changes —
 			// they ship with the binary and need no state migration.
 			return app.ModuleManager.RunMigrations(ctx, app.Configurator(), fromVM)
