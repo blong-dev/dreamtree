@@ -13,7 +13,7 @@ func ld(s string) math.LegacyDec { return math.LegacyMustNewDecFromStr(s) }
 
 func params() reputation.Params {
 	return reputation.Params{
-		NegAsymmetry:  "2.0",
+		NegAsymmetry:   "2.0",
 		OutcomeCapMult: "5.0",
 	}
 }

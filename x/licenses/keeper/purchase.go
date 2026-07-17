@@ -11,11 +11,15 @@ import (
 	"github.com/blong-dev/dreamtree/x/licenses"
 )
 
-// Purchase buys time-bound access to a swath. For each priced seed the buyer
-// pays that type's N_a to the seed's producer; a marketplace toll (atop N_a)
-// goes to the treasury. All seeds of a type pay the same N_a
-// (creator_equality_within_type). Non-exclusive: the same seed sells to any
-// number of buyers. The protocol records + routes; it never sets N_a.
+// Purchase buys time-bound access to a swath at the protocol CONSTANT: one
+// photon per seed per day (upgrade-1 R4, owner 2026-07-16 — supersedes the
+// per-type N_a market). The constant is a unit definition, not a price
+// control: scarcity allocates (photons = seeds), differentiation across types
+// expresses as volume, and the photon's real-world value finds its own
+// equilibrium at the edges. Creator equality is absolute — across creators AND
+// types. Each seed's payment routes to its producer; a marketplace toll (atop)
+// goes to the treasury. Non-exclusive: the same seed sells to any number of
+// buyers.
 func (k Keeper) Purchase(ctx context.Context, buyer string, seedIDs []uint64) (*licenses.MsgPurchaseResponse, error) {
 	params, err := k.Params.Get(ctx)
 	if err != nil {
@@ -27,6 +31,8 @@ func (k Keeper) Purchase(ctx context.Context, buyer string, seedIDs []uint64) (*
 	}
 	now := sdk.UnwrapSDKContext(ctx).BlockTime().Unix()
 	expires := now + int64(params.AccessDurationDays)*86400
+	// 1 photon per seed per day of access, in base units.
+	pricePerSeed := uint64(params.AccessDurationDays) * licenses.UphotonPerPhoton
 
 	producerTotals := map[string]uint64{}
 	var totalSale uint64
@@ -43,18 +49,14 @@ func (k Keeper) Purchase(ctx context.Context, buyer string, seedIDs []uint64) (*
 			continue // dedup: a seed in the swath twice is bought (and paid) once
 		}
 		seen[id] = struct{}{}
-		dataType, producer, found := k.seeds.SeedInfo(ctx, id)
-		if !found || dataType == "" || producer == "" {
-			continue
+		_, producer, found := k.seeds.SeedInfo(ctx, id)
+		if !found || producer == "" {
+			continue // unresolvable seed → not purchasable (nobody to pay)
 		}
-		price, err := k.TypePrices.Get(ctx, dataType)
-		if err != nil || price == 0 {
-			continue // unpriced type → not purchasable
-		}
-		producerTotals[producer] += price
-		totalSale += price
+		producerTotals[producer] += pricePerSeed
+		totalSale += pricePerSeed
 		bought++
-		grants = append(grants, grant{id: id, price: price})
+		grants = append(grants, grant{id: id, price: pricePerSeed})
 	}
 	if bought == 0 {
 		return nil, licenses.ErrNoPricedSeeds

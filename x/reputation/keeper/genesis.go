@@ -49,7 +49,15 @@ func (k *Keeper) InitGenesis(ctx context.Context, data *reputation.GenesisState)
 	if nextPending == 0 {
 		nextPending = 1
 	}
-	return k.PendingSeq.Set(ctx, nextPending)
+	if err := k.PendingSeq.Set(ctx, nextPending); err != nil {
+		return err
+	}
+	for _, addr := range data.Verified {
+		if err := k.Verified.Set(ctx, addr); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (k *Keeper) ExportGenesis(ctx context.Context) (*reputation.GenesisState, error) {
@@ -86,5 +94,12 @@ func (k *Keeper) ExportGenesis(ctx context.Context) (*reputation.GenesisState, e
 	if err != nil {
 		return nil, err
 	}
-	return &reputation.GenesisState{Params: params, Contributions: contribs, DomainConfigs: cfgs, NextId: next, PendingEvents: pending, NextPendingId: nextPending}, nil
+	var verified []string
+	if err := k.Verified.Walk(ctx, nil, func(addr string) (bool, error) {
+		verified = append(verified, addr)
+		return false, nil
+	}); err != nil {
+		return nil, err
+	}
+	return &reputation.GenesisState{Params: params, Contributions: contribs, DomainConfigs: cfgs, NextId: next, PendingEvents: pending, NextPendingId: nextPending, Verified: verified}, nil
 }

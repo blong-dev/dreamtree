@@ -16,6 +16,7 @@ service Msg {
   option (cosmos.msg.v1.service) = true;
   rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
   rpc SetDomainConfig(MsgSetDomainConfig) returns (MsgSetDomainConfigResponse);
+  rpc SetVerified(MsgSetVerified) returns (MsgSetVerifiedResponse);
 }
 
 message MsgUpdateParams {
@@ -25,6 +26,19 @@ message MsgUpdateParams {
   Params params = 2 [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
 }
 message MsgUpdateParamsResponse {}
+
+// SetVerified — governance grants (or revokes) an address's membership in the
+// verified-identity set (upgrade-1 R2). Verified addresses carry the
+// baseline_kyc floor; everyone else's standing starts at zero. This IS the
+// v0 ratification mechanism — each grant is an explicit governed act.
+message MsgSetVerified {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "dreamtree/x/reputation/MsgSetVerified";
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  string address = 2 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  bool verified = 3;
+}
+message MsgSetVerifiedResponse {}
 
 // SetDomainConfig — governance sets a domain's saturation/obsolescence tiers.
 message MsgSetDomainConfig {

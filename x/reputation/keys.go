@@ -17,4 +17,5 @@ var (
 	CloseTimeIndexKey  = collections.NewPrefix(8)  // (close_time, id) — EndBlock drains matured
 	PendingByTargetKey = collections.NewPrefix(9)  // target_att_id -> open outcome pending id
 	ReversedKey        = collections.NewPrefix(10) // set of overturned outcome att ids (idempotent reversal)
+	VerifiedKey        = collections.NewPrefix(11) // verified-identity set (upgrade-1 R2): addr -> member
 )

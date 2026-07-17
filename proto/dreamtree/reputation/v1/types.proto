@@ -94,6 +94,11 @@ message Params {
   // multi-hop decay + 2-hop cred recursion fall out of standing including
   // endorsement contributions).
   string endorse_inherit = 18;          // "0.25"
+  // endorsement breadth cap (ratified 2026-07-17): per (endorsee, domain) the
+  // ENDORSEMENT-bucket contributions aggregate paper-shape with
+  // E_cap = e_cap_mult × max(e_i) — a crowd of endorsers can at most double
+  // the strongest single endorsement. INTERIM value; backtest tunes.
+  string e_cap_mult = 19;               // "2.0"
 }
 
 // PendingKind — what a pending event settles into.
@@ -187,4 +192,9 @@ message GenesisState {
   uint64 next_id = 4;
   repeated PendingEvent pending_events = 5 [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
   uint64 next_pending_id = 6;
+  // verified — the verified-identity set (upgrade-1 R2): addresses granted the
+  // baseline_kyc floor. Standing for everyone else starts at ZERO. Managed by
+  // the governance authority via MsgSetVerified (v0 stand-in; the identity
+  // layer is the durable home).
+  repeated string verified = 7;
 }

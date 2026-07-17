@@ -29,6 +29,11 @@ type Keeper struct {
 	CloseTimeIndex  collections.KeySet[collections.Pair[int64, uint64]]
 	PendingByTarget collections.Map[uint64, uint64]
 	Reversed        collections.KeySet[uint64] // overturned outcome att ids (idempotent reversal)
+
+	// Verified — the verified-identity set (upgrade-1 R2). Standing starts at
+	// ZERO; members carry the baseline_kyc floor. Governance-managed via
+	// MsgSetVerified (v0 stand-in for the identity layer).
+	Verified collections.KeySet[string]
 }
 
 func NewKeeper(cdc codec.BinaryCodec, addressCodec address.Codec, storeService storetypes.KVStoreService, authority string) Keeper {
@@ -52,6 +57,7 @@ func NewKeeper(cdc codec.BinaryCodec, addressCodec address.Codec, storeService s
 		CloseTimeIndex:  collections.NewKeySet(sb, reputation.CloseTimeIndexKey, "close_time_index", collections.PairKeyCodec(collections.Int64Key, collections.Uint64Key)),
 		PendingByTarget: collections.NewMap(sb, reputation.PendingByTargetKey, "pending_by_target", collections.Uint64Key, collections.Uint64Value),
 		Reversed:        collections.NewKeySet(sb, reputation.ReversedKey, "reversed", collections.Uint64Key),
+		Verified:        collections.NewKeySet(sb, reputation.VerifiedKey, "verified", collections.StringKey),
 	}
 	schema, err := sb.Build()
 	if err != nil {

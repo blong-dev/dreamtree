@@ -101,14 +101,59 @@ func effectiveR(raw, S, kDamp float64) float64 {
 	return S + kDamp*math.Log(1+(raw-S)/S)
 }
 
+// endorseFold is the float mirror of standing.go's endorseFoldDec: positive
+// ENDORSEMENT contributions (already relevance- and decay-attenuated) aggregate
+// paper-shape with E_cap = e_cap_mult × max(eᵢ); reversal negations subtract
+// linearly from the folded total, floored at zero.
+func endorseFold(p reputation.Params, pos []float64, neg float64) float64 {
+	total := 0.0
+	if len(pos) > 0 {
+		max := pos[0]
+		for _, e := range pos[1:] {
+			if e > max {
+				max = e
+			}
+		}
+		mult := pf(p.ECapMult)
+		if mult < 1 {
+			mult, _ = strconv.ParseFloat(reputation.DefaultECapMult, 64)
+		}
+		if cap := mult * max; cap > 0 {
+			prod := 1.0
+			for _, e := range pos {
+				frac := e / cap
+				if frac > 1 {
+					frac = 1
+				}
+				prod *= 1 - frac
+			}
+			total = cap * (1 - prod)
+		}
+	}
+	total -= neg
+	if total < 0 {
+		total = 0
+	}
+	return total
+}
+
 // ReputationRaw returns the pre-saturation raw R and the contribution count.
+// The baseline term applies ONLY to verified-set members (upgrade-1 R2:
+// standing starts at zero); ENDORSEMENT-bucket contributions fold paper-shape
+// after the walk instead of summing inline (upgrade-1 R5).
 func (k Keeper) reputationRaw(ctx context.Context, signer, domain string, now int64) (float64, float64, uint32, error) {
 	p, err := k.Params.Get(ctx)
 	if err != nil {
 		return 0, 0, 0, err
 	}
 	obsolescence, saturation := k.domainShaping(ctx, p, domain)
+	base := 0.0
+	if ok, _ := k.Verified.Has(ctx, signer); ok {
+		base = pf(p.BaselineKyc)
+	}
 	sum := 0.0
+	var endorsePos []float64
+	endorseNeg := 0.0
 	var count uint32
 	rng := collections.NewPrefixedPairRange[string, uint64](signer)
 	err = k.SignerIndex.Walk(ctx, rng, func(key collections.Pair[string, uint64]) (bool, error) {
@@ -130,21 +175,30 @@ func (k Keeper) reputationRaw(ctx context.Context, signer, domain string, now in
 			decay = math.Exp(-lam * years)
 		}
 		mag, _ := strconv.ParseFloat(c.Magnitude.String(), 64)
-		sum += mag * rel * decay
+		count++
+		v := mag * rel * decay
+		if c.RateBucket == reputation.RateBucket_RATE_BUCKET_ENDORSEMENT {
+			if v > 0 {
+				endorsePos = append(endorsePos, v)
+			} else {
+				endorseNeg += -v
+			}
+			return false, nil
+		}
+		sum += v
 		// Running floor (Z2, mirrors standing.go): id order = settlement
 		// order; a below-zero excursion is forgiven where it happened, so
 		// later work recovers from zero, not from a hole. (Read-time float
 		// projection — the rational consensus path applies the same rule.)
-		if pf(p.BaselineKyc)+sum < 0 {
-			sum = -pf(p.BaselineKyc)
+		if base+sum < 0 {
+			sum = -base
 		}
-		count++
 		return false, nil
 	})
 	if err != nil {
 		return 0, 0, 0, err
 	}
-	raw := pf(p.BaselineKyc) + sum
+	raw := base + sum + endorseFold(p, endorsePos, endorseNeg)
 	return raw, saturation, count, nil
 }
 

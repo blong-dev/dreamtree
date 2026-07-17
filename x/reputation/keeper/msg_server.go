@@ -40,6 +40,28 @@ func (ms msgServer) SetDomainConfig(ctx context.Context, msg *reputation.MsgSetD
 	return &reputation.MsgSetDomainConfigResponse{}, nil
 }
 
+// SetVerified — governance grants or revokes membership in the verified set
+// (upgrade-1 R2). Each grant is an explicit governed act: this IS the v0
+// ratification mechanism that hands out the baseline_kyc floor.
+func (ms msgServer) SetVerified(ctx context.Context, msg *reputation.MsgSetVerified) (*reputation.MsgSetVerifiedResponse, error) {
+	if err := ms.assertAuthority(msg.Authority); err != nil {
+		return nil, err
+	}
+	if _, err := ms.k.addressCodec.StringToBytes(msg.Address); err != nil {
+		return nil, fmt.Errorf("invalid address: %w", err)
+	}
+	if msg.Verified {
+		if err := ms.k.Verified.Set(ctx, msg.Address); err != nil {
+			return nil, err
+		}
+	} else {
+		if err := ms.k.Verified.Remove(ctx, msg.Address); err != nil {
+			return nil, err
+		}
+	}
+	return &reputation.MsgSetVerifiedResponse{}, nil
+}
+
 func (ms msgServer) assertAuthority(authority string) error {
 	if _, err := ms.k.addressCodec.StringToBytes(authority); err != nil {
 		return fmt.Errorf("invalid authority address: %w", err)

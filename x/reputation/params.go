@@ -5,6 +5,12 @@ import (
 	"strconv"
 )
 
+// DefaultECapMult — the ratified endorsement breadth-cap multiple (2026-07-17):
+// E_cap = e_cap_mult × max(eᵢ) in the paper-shape endorsement fold. Value
+// INTERIM (backtest tunes); also the fallback when stored params predate
+// upgrade-1.
+const DefaultECapMult = "2.0"
+
 // Default parameters — parameters.md stand-ins. Decimal strings are read-side
 // (decay/saturation) inputs parsed in the projection.
 func DefaultParams() Params {
@@ -27,6 +33,7 @@ func DefaultParams() Params {
 		ReviewWindowThreshold: "4.0", // tuned up: √ has a fat tail near 0, so a higher threshold shortens trivial-event windows toward "instant" (bets ~hours). √ can't fully match log's trivial-instant/large-weeks spread — revisit the curve or route bets around the window if the spread matters.
 		CoattestorWeight:      "0.25",
 		EndorseInherit:        "0.25",
+		ECapMult:              DefaultECapMult,
 	}
 }
 
@@ -59,6 +66,18 @@ func (p Params) Validate() error {
 	}
 	if s, _ := strconv.ParseFloat(p.SaturationStandard, 64); s <= 0 {
 		return fmt.Errorf("saturation_standard must be > 0")
+	}
+	// e_cap_mult: empty tolerated (pre-upgrade-1 state; readers fall back to
+	// the default), but if set it must be >= 1 — a cap below the strongest
+	// single endorsement is nonsensical.
+	if p.ECapMult != "" {
+		m, err := strconv.ParseFloat(p.ECapMult, 64)
+		if err != nil {
+			return fmt.Errorf("e_cap_mult: %w", err)
+		}
+		if m < 1 {
+			return fmt.Errorf("e_cap_mult must be >= 1")
+		}
 	}
 	return nil
 }

@@ -23,9 +23,10 @@ func (k Keeper) OnRecordBatch(ctx context.Context, kind string, newCount uint32)
 	if err != nil {
 		return err
 	}
-	if !p.Mintable(kind) {
-		return nil
-	}
+	// ALL kinds mint (upgrade-1 R3, owner 2026-07-16: "every atom is an
+	// observation"). The mintable_kinds param is a retired pre-DT-18 artifact;
+	// the field survives in the proto for wire compatibility but gates nothing.
+	// The peg is photons = distinct atoms, unqualified.
 	amt := math.NewInt(int64(newCount)).MulRaw(photons.UphotonPerPhoton)
 	coins := sdk.NewCoins(sdk.NewCoin(photons.PhotonDenom, amt))
 	if err := k.bank.MintCoins(ctx, photons.ModuleName, coins); err != nil {

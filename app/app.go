@@ -32,6 +32,9 @@ import (
 	govkeeper "github.com/cosmos/cosmos-sdk/x/gov/keeper"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 
+	licenseskeeper "github.com/blong-dev/dreamtree/x/licenses/keeper"
+	reputationkeeper "github.com/blong-dev/dreamtree/x/reputation/keeper"
+
 	appv1alpha1 "cosmossdk.io/api/cosmos/app/v1alpha1"
 	_ "cosmossdk.io/api/cosmos/tx/config/v1"          // import for side-effects
 	_ "cosmossdk.io/x/upgrade"                        // import for side-effects
@@ -87,6 +90,8 @@ type DreamtreeApp struct {
 	GovKeeper             *govkeeper.Keeper
 	UpgradeKeeper         *upgradekeeper.Keeper
 	ConsensusParamsKeeper consensuskeeper.Keeper
+	LicensesKeeper        licenseskeeper.Keeper
+	ReputationKeeper      reputationkeeper.Keeper
 
 	// simulation manager
 	sm *module.SimulationManager
@@ -149,11 +154,15 @@ func NewDreamtreeApp(
 		&app.GovKeeper,
 		&app.UpgradeKeeper,
 		&app.ConsensusParamsKeeper,
+		&app.LicensesKeeper,
+		&app.ReputationKeeper,
 	); err != nil {
 		return nil, err
 	}
 
 	app.App = appBuilder.Build(db, traceStore, baseAppOptions...)
+
+	app.RegisterUpgradeHandlers()
 
 	// register streaming services
 	if err := app.RegisterStreamingServices(appOpts, app.kvStoreKeys()); err != nil {

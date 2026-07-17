@@ -24,17 +24,11 @@ func (ms msgServer) Purchase(ctx context.Context, msg *licenses.MsgPurchase) (*l
 	return ms.k.Purchase(ctx, msg.Buyer, msg.SeedIds)
 }
 
+// SetTypePrice is RETIRED (upgrade-1 R4, owner 2026-07-16): access costs a
+// constant 1 photon per seed per day — there is no price to set. The msg type
+// stays registered so pre-upgrade history still decodes; the handler refuses.
 func (ms msgServer) SetTypePrice(ctx context.Context, msg *licenses.MsgSetTypePrice) (*licenses.MsgSetTypePriceResponse, error) {
-	if err := ms.assertAuthority(msg.Authority); err != nil {
-		return nil, err
-	}
-	if strings.TrimSpace(msg.DataType) == "" {
-		return nil, licenses.ErrEmptyDataType
-	}
-	if err := ms.k.TypePrices.Set(ctx, msg.DataType, msg.Price); err != nil {
-		return nil, err
-	}
-	return &licenses.MsgSetTypePriceResponse{}, nil
+	return nil, licenses.ErrRetired
 }
 
 func (ms msgServer) UpdateParams(ctx context.Context, msg *licenses.MsgUpdateParams) (*licenses.MsgUpdateParamsResponse, error) {
