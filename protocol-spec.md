@@ -249,9 +249,19 @@ Every event enters a review window before final application:
 
 Trivial events (a single citation): τ ≈ instant. Large events (fraud claim): τ ≈ weeks. During τ, the event accumulates corroboration, refutation, context. Final ΔR is the integrated signal over τ, not the raw claim. Prevents single-point character assassination while keeping small-stakes signal fast.
 
-### Endorsement inheritance (25%, lever)
+### Endorsement inheritance (25%, lever) — breadth bounded paper-shape (ratified 2026-07-17)
 
-A endorses B → B inherits 0.25 × R(A, k) at hop 1. Multi-hop geometric decay: 25% / 6.25% / 1.56% / 0.39%. Saturates by hop 4.
+A endorses B → B inherits 0.25 × R(A, k) at hop 1. Multi-hop geometric decay: 25% / 6.25% / 1.56% / 0.39%. Saturates by hop 4 — that bounds **depth**.
+
+**Breadth is bounded by the same one law as every other crowd.** Endorsement contributions to one endorsee in one domain do NOT sum; they aggregate paper-shape:
+
+```
+e_i     = 0.25 × R(endorser_i, k)                    // each endorsement's contribution
+E_cap   = e_cap_mult × max_i(e_i)                    // cap tied to the strongest single endorsement
+E_total = E_cap · [1 − Π(1 − e_i / E_cap)]
+```
+
+`e_cap_mult = 2.0` (lever, INTERIM — backtest target): a genuinely diverse set of strong endorsers can at most double what the single strongest endorsement grants; the forty-first rubber-stamp rec adds almost nothing. This closes the mass-endorsement hole (the prep-school shape: enforced recommendations from every teacher for every student stacking linearly to the saturation knee) that the sum form left open — depth decay alone does nothing against a wide coordinated crowd. The liability mirror (endorsers move when their endorsee's outcomes settle) stands unchanged; it disincentivizes rubber-stamping after the fact, but only this bound stops the boost up front.
 
 ### Outcome propagation (both directions; the 2× asymmetry lives only at the contributor R-update — resolved 2026-07-11)
 
@@ -308,7 +318,7 @@ No single entity is "the" outcome authority. Multiple reputation networks coexis
 
 ```
 R_initial(j,k) = baseline_KYC                           // verified-human floor
-               + Σ inherited_endorsements(j,k)          // education/employment chain @ 25%
+               + E_total(j,k)                          // endorsements @ 25%, paper-shape breadth (see above)
                + Σ early_validated_attestations × ramp  // ramp > 1 for first N attestations
 ```
 
@@ -751,6 +761,7 @@ In rough order of difficulty:
 - **2026-07-16 — ENDORSEMENT ratified as a proof type — WITH a flagged defect to fix.** Endorsement inheritance currently SUMS linearly per endorsement (`x/reputation/keeper/hooks.go OnEndorsement` → one independent contribution per endorser), so a coordinated mass-endorsement (the prep-school shape: enforced recommendations from every teacher for every student) stacks unboundedly up to the saturation knee — the one crowd in the system not bounded by the paper-shape law. Fix direction: endorsement contributions to one endorsee aggregate paper-shape (1−Π(1−mᵢ/cap)), the same law as outcome corroboration and work value. Lands with the owner-requested reputation-documentation review + first upgrade.
 - **2026-07-16 — Citation uplift ratified.** The `used_by` creation-credit-forward mechanism (`docs/specs/citation-value.md`) is canon — the paper's organizational-creation channel (∂V_out/∂A) instrumented. `citation_uplift_lambda = 1.0` stays INTERIM; promotion is backtest M2's job.
 - **2026-07-16 — evaluation_factor RESHAPED: consequence flows from the equations, not from enumerated party-types.** Owner intent: provenance and consequence emerge from strong keys and the attestation graph, not from special objects. A party that ACTS on a work attests to it (a USE attestation), and outcome propagation already reaches attestors through the co-attestor line — the "hiring/evaluating party" is a special case the general mechanism should subsume. §Outcome-propagation's evaluating-party line is superseded pending the reputation review confirming the equations carry it; the institution chain stays single-hop (conservative) under the same review.
+- **2026-07-17 — Endorsement breadth bounded: paper-shape ratified (owner).** The reputation review found the linear sum was in the SPEC (cold-start `Σ inherited_endorsements`), not just the build — the one crowd never run through the paper-shape law. Ratified fix: endorsement contributions per (endorsee, domain) aggregate `E_cap·[1−Π(1−eᵢ/E_cap)]` with `E_cap = e_cap_mult × max(eᵢ)`, `e_cap_mult = 2.0` INTERIM (backtest tunes). §Endorsement inheritance and §Cold start amended; the build change rides DT-20's first-upgrade manifest. The evaluation_factor supersession was review-confirmed and executed (evaluating parties are direct attestors via their USE attestations — the propagation already reaches them).
 - **2026-07-16 — C2PA is COMMITTED, not deferred** (records-layer: manifest verification at wallet intake; the artifact's provenance joins its on-chain record). Carded on the dreamtree board. The remaining silent assertions (meta-attestation pre-population, four-hard-rules enforcement objects, use declarations, VC issuer restrictions) stay honestly OPEN-flagged in place — planned, not built.
 
 ---
