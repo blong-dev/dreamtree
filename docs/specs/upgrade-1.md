@@ -93,7 +93,11 @@ Verify: devnet — two endorsers vs forty endorsers of equal R; forty ≤ 2× th
 2. **Backtest M1–M4** (`measurement-backtest.md`) — promotes every INTERIM lever
    (review threshold 4.0, s_max, coattestor_weight, e_cap_mult, citation λ) and tests
    whether volume alone carries the value signal under constant pricing.
-3. **DT-1 roots wallet** (the moat), then **DT-22 C2PA** (after DT-1 stabilizes intake).
+3. **DT-22 C2PA** at roots intake — roots itself is LIVE in production (DT-1 epic
+   closed complete 2026-07-17; intake shapes are already stable), so C2PA is the
+   next real product build. Roots' remaining cards: DT-6 custody handoff (owner-
+   parked until real users), DT-8 auth fix, DT-4 did:webvh (also the verified
+   set's durable home).
 4. Planned-not-built spec items, as they come due: meta-attestation pre-population
    (rides taxonomy seeding), four-hard-rules enforcement stack, use declarations,
    VC issuer restrictions.
