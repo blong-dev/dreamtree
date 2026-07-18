@@ -392,34 +392,56 @@ func deriveIdemKey(req anchorReq) string {
 	return hex.EncodeToString(h[:])
 }
 
+// tryReplay handles the two no-broadcast idempotency outcomes: a confirmed
+// entry (replay the stored result) and a pending entry whose broadcast landed
+// but whose earlier poll timed out (re-poll `query tx`, never re-broadcast).
+// A non-nil return means "handled" (possibly with an error); nil means the
+// caller must broadcast. Safe to call without s.mu — it neither broadcasts nor
+// reads the account sequence.
+func (s *server) tryReplay(idemKey string) (*anchorResp, bool, error) {
+	e, ok := s.store.get(idemKey)
+	if !ok {
+		return nil, false, nil
+	}
+	switch e.Status {
+	case statusDone:
+		return &anchorResp{ID: e.ID, BatchID: e.BatchID, NewCount: e.NewCount, TxHash: e.TxHash, Height: e.Height}, true, nil
+	case statusPending:
+		if e.TxHash != "" {
+			resp, err := s.pollInclusion(e.TxHash)
+			if err != nil {
+				return &anchorResp{}, true, err
+			}
+			if err := s.store.put(idemKey, idemRecord{ID: resp.ID, BatchID: resp.BatchID, NewCount: resp.NewCount, TxHash: resp.TxHash, Height: resp.Height, Status: statusDone}); err != nil {
+				return &anchorResp{}, true, err
+			}
+			return &resp, true, nil
+		}
+	}
+	return nil, false, nil
+}
+
 // commit turns a validated request into (at most) one on-chain seed. The bool
 // return reports whether the result was replayed from cache (true) rather than
 // freshly broadcast (false).
 func (s *server) commit(req anchorReq, idemKey string) (anchorResp, bool, error) {
+	// Fast paths that never broadcast — a cached replay or an inclusion re-poll
+	// touch only read-only `query tx` and the idem store (own mutex), never the
+	// account sequence. Handle them WITHOUT the broadcast mutex so they can't be
+	// starved behind an in-flight broadcast+poll (audit 4b). Only a genuinely
+	// new broadcast takes s.mu.
+	if r, replayed, err := s.tryReplay(idemKey); r != nil {
+		return *r, replayed, err
+	}
+
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	// Idempotency check under the broadcast mutex.
-	if e, ok := s.store.get(idemKey); ok {
-		switch e.Status {
-		case statusDone:
-			// Already confirmed: replay, never broadcast again.
-			return anchorResp{ID: e.ID, BatchID: e.BatchID, NewCount: e.NewCount, TxHash: e.TxHash, Height: e.Height}, true, nil
-		case statusPending:
-			if e.TxHash != "" {
-				// The previous attempt broadcast successfully but its inclusion
-				// poll timed out. The tx may well have landed. Re-poll — do NOT
-				// re-broadcast (that would mint the photons a second time).
-				resp, err := s.pollInclusion(e.TxHash)
-				if err != nil {
-					return anchorResp{}, true, err
-				}
-				if err := s.store.put(idemKey, idemRecord{ID: resp.ID, BatchID: resp.BatchID, NewCount: resp.NewCount, TxHash: resp.TxHash, Height: resp.Height, Status: statusDone}); err != nil {
-					return anchorResp{}, true, err
-				}
-				return resp, true, nil
-			}
-		}
+	// Re-check under the lock: a concurrent first-request for the same idem key
+	// may have broadcast while we waited for the mutex (TOCTOU with the fast
+	// path above) — replay or re-poll it instead of broadcasting a duplicate.
+	if r, replayed, err := s.tryReplay(idemKey); r != nil {
+		return *r, replayed, err
 	}
 
 	args := s.cfg.commitArgs(req)

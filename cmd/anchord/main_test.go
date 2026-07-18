@@ -214,3 +214,40 @@ func TestBroadcastThenPollTimeoutRetryRepolls(t *testing.T) {
 		t.Errorf("record status after retry = %q, want done", rec.Status)
 	}
 }
+
+// TestReplayNotBlockedByInFlightBroadcast proves the audit-4b fix: a cached
+// (statusDone) replay returns via the no-broadcast fast path even while s.mu is
+// held by an in-flight broadcast+poll. Before the fix, commit acquired s.mu
+// unconditionally, so a replay blocked behind a 20s poll.
+func TestReplayNotBlockedByInFlightBroadcast(t *testing.T) {
+	f := &fakeRunner{}
+	s := newTestServer(t, f)
+	// Seed a confirmed entry for this idem key.
+	const key = "IDEMKEY"
+	if err := s.store.put(key, idemRecord{ID: 7, BatchID: 3, NewCount: 1, TxHash: "ABC", Height: 42, Status: statusDone}); err != nil {
+		t.Fatalf("seed store: %v", err)
+	}
+	// Simulate an in-flight broadcast holding the broadcast mutex.
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	done := make(chan anchorResp, 1)
+	go func() {
+		resp, _, err := s.commit(anchorReq{Commitment: "deadbeef", Kind: "record"}, key)
+		if err == nil {
+			done <- resp
+		}
+	}()
+
+	select {
+	case resp := <-done:
+		if resp.ID != 7 || resp.Height != 42 {
+			t.Fatalf("replay returned wrong result: %+v", resp)
+		}
+		if f.broadcasts != 0 {
+			t.Fatalf("replay must not broadcast; got %d broadcasts", f.broadcasts)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("replay blocked behind the held broadcast mutex (regression of audit-4b fix)")
+	}
+}
