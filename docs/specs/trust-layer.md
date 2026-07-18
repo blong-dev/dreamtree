@@ -157,17 +157,39 @@ reputation hook path.
 **Owner decisions:** what the digest commits to (raw content hash vs a canonical
 claim descriptor) — a protocol-doctrine call, not just engineering.
 
-### W7 — Mint-authority key custody · ~1–2d
-**What:** move the anchor/mint key off the unencrypted `test` keyring
-(`deploy/anchord.service:11-13`) to `file` (passphrase via systemd credential)
-or a hardware/OS keyring; the key currently sits in plaintext under
-`/home/b/.dreamtree` on the internet-facing host. Optionally mirror the
-hwsignd TPM-LUKS pattern already deployed for the C2PA signer.
-**Why:** the anchor key is the mint authority. Host compromise = key compromise =
-unbounded mint. Highest-value residual risk that is also cheap to fix.
-**Depends on:** nothing. **Recommend doing this now**, independent of everything
-else.
-**Owner decisions:** custody mechanism (file+passphrase vs TPM-sealed vs KMS).
+### W7 — Mint-authority key custody · ✅ DONE 2026-07-18
+**What (done):** the `dt-validator` account/mint key (`dream10ahjsyp8…`) was
+moved off the plaintext `test` keyring onto a dedicated TPM-unlocked LUKS2
+vault, mirroring the hwsignd pattern:
+- Vault `/var/lib/anchord/keys.luks` (LUKS2), TPM2 auto-unlock (PCR 7, sha256),
+  mounted at `/opt/anchord/secure`; `crypttab`+`fstab` `nofail`.
+- The keyring moved to the vault; `<ANCHORD_HOME>/keyring-test` is now a symlink
+  to `/opt/anchord/secure/keyring-test`. The plaintext original was shredded
+  from the unencrypted disk — the key exists **only** inside the vault.
+- `anchord.service` gained `RequiresMountsFor=/opt/anchord/secure` so the
+  symlink resolves at boot; backup.sh tars the **encrypted** container only.
+- Recovery key enrolled (keyslot 2) and stored off-host at
+  `infra/anchord-luks-recovery.txt` (0600) on m1; **verified** it unlocks the
+  volume (wrong-key control fails). Same verified for the hwsign vault.
+- Proven: TPM boot-unlock cycle works with no passphrase; a live anchor after
+  migration minted a seed with committer `dream10ahjsyp8…` (unchanged address).
+
+**Residual (owner decisions, not blockers):**
+1. **Rotation.** The key was plaintext-at-rest historically (and in old
+   backups). Encrypt-at-rest fixes it *going forward*; the only true
+   remediation for the historical exposure is rotating to a fresh
+   mint/validator account key — a chain-governance operation
+   (`StorerRewardRecipient` routing + validator operator account), not a
+   custody swap. Deferred as a separate decision.
+2. **`file`-backend hardening.** The vault keeps the `test` backend (key
+   plaintext *within* the encrypted volume, readable while mounted — same model
+   as hwsignd). If the threat model tightens (multi-operator, live-compromise
+   resistance), upgrade to the Cosmos `file` backend (key blob always encrypted,
+   decrypted only transiently per-sign) with a TPM-sealed systemd credential fed
+   to dreamtreed on stdin. Requires an anchord code change; scoped, not done.
+3. **Consensus key.** `config/priv_validator_key.json` (block-signing) is still
+   plaintext at rest. Lower value on a single-validator chain (double-sign
+   slashing is moot), but the same vault could hold it later.
 
 ### W8 — did:webvh history verification · ~3–5d
 **What:** verify the SCID + entry-hash chain in `resolve.ts` /
@@ -184,8 +206,12 @@ honestly), but required before did:webvh is load-bearing.
 ## 4. Sequencing
 
 Two independent quick wins ship immediately, no dependencies, high value:
-- **W7 (key custody, 1–2d)** — closes the single highest residual risk.
-- **W3 cap (1d slice)** — bounds fabricated-mint blast radius while the rest lands.
+- **W7 (key custody)** — ✅ DONE 2026-07-18. The mint key is off plaintext, on a
+  TPM-LUKS vault; recovery verified.
+- **W3 cap (1d slice)** — bounds fabricated-mint blast radius while the rest
+  lands. **Now the top remaining quick win** — with the key encrypted at rest,
+  the residual mint risk is a leaked `ANCHORD_TOKEN` minting against a fabricated
+  root; a supply/epoch cap bounds that blast radius. Recommend next.
 
 Then the substrate:
 - **W5 (Go JCS, 3–5d)** — everything signed depends on it.

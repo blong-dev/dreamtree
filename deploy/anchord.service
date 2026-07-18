@@ -2,6 +2,12 @@
 Description=dreamtree anchor seam (HTTP -> MsgCommitSeed)
 After=network-online.target dreamtreed.service
 Wants=dreamtreed.service
+# The account/mint key (keyring-backend test) lives ONLY on a TPM-unlocked
+# LUKS2 vault (/var/lib/anchord/keys.luks), symlinked from
+# <ANCHORD_HOME>/keyring-test → /opt/anchord/secure/keyring-test. Wait for
+# the vault mount so the symlink resolves at boot. Never store the keyring
+# in plaintext on an unencrypted disk (trust-layer.md W7, 2026-07-18).
+RequiresMountsFor=/opt/anchord/secure
 
 [Service]
 Type=simple
