@@ -18,4 +18,10 @@ const (
 var (
 	ParamsKey = collections.NewPrefix(0)
 	MintedKey = collections.NewPrefix(1)
+	// Per-block mint-ceiling accumulator (trust-layer W3). MintHeightKey holds
+	// the block height the accumulator is for; BlockMintedKey holds the photons
+	// minted so far in that block. Both default to zero when absent, so they
+	// are safe to introduce on a running chain with no migration.
+	MintHeightKey  = collections.NewPrefix(2)
+	BlockMintedKey = collections.NewPrefix(3)
 )
