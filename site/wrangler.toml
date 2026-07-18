@@ -1,0 +1,15 @@
+name = "dreamtree-site"
+compatibility_date = "2026-06-01"
+
+# The dreamtree.org platform site — static, built in the open, served from the
+# public protocol repo (owner ruling 2026-07-18: dreamtree-app is a time
+# capsule; the site moved here). No accounts, no backend: every dynamic number
+# on these pages is fetched client-side from the live public surfaces
+# (id.dreamtree.org, roots.dreamtree.org, verify.dreamtree.org).
+#
+# Route NOTE: dreamtree.org custom domain is attached to the OLD worker until
+# the flip — deploy to workers.dev first, verify, then move the domain.
+[assets]
+directory = "public"
+html_handling = "auto-trailing-slash"
+not_found_handling = "404-page"
