@@ -17,7 +17,5 @@ not_found_handling = "404-page"
 [[routes]]
 pattern = "dreamtree.org"
 custom_domain = true
-
-[[routes]]
-pattern = "www.dreamtree.org"
-custom_domain = true
+# www: left on its existing externally-managed DNS record (apex is the served
+# surface; www was never worker-served). Attach later by clearing that record.
