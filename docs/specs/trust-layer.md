@@ -107,14 +107,36 @@ opaque.
 off-chain proof (the SCITT/Rekor "auditable not oracle" line verify-service
 already takes).
 
-### W3 — Mint integrity · ~2–3d
-**What:** a global photon supply cap (or a per-epoch mint ceiling) enforced in
-`x/photons`, and mint tied to verified new leaves from W1/W2 rather than the
-bare asserted `new_count`. At minimum, ship the cap now (small, independent).
-**Why:** caps the blast radius of a fabricated commitment from 1M/tx-unbounded
-to a governed ceiling — property 3.
-**Depends on:** nothing for the cap; W1/W2 for full "mint follows verified work."
-**Owner decisions:** cap value / epoch schedule (governance param).
+### W3 — Mint integrity · CODE DONE 2026-07-18 · deploys with upgrade-1
+**What (done):** a per-block photon mint ceiling in `x/photons` (commit
+`a9b360f`). Photons stay inflationary by design (one per atom — a global supply
+cap would break the peg), so the defense is a per-block ceiling that bounds a
+leaked-`ANCHORD_TOKEN` flood: an over-ceiling `MsgCommitBatch` fails wholesale,
+each hit is an on-chain rejection, and a soft-warn event fires well below the
+limit. `MaxMintPerBlock=100_000`, `MintCeilingSoftWarn=25_000` — sized from live
+data (largest observed batch new_count=732; anchord serializes ~1 batch/6s
+block; honest per-block mint <1k), so ~137× the largest real batch: unreachable
+by honest ingestion, bounding a flood. Lazily-reset accumulator (new store
+prefixes, default 0, no migration, no ConsensusVersion bump). Fully unit-tested
+(accumulation, over-ceiling rejection with zero mint, boundary, cross-block
+reset, soft-warn, 100 max-size honest batches pass).
+
+**Deployment reality (⚖️ owner):** a consensus change can only reach the running
+chain through the upgrade mechanism, and `main` IS the pending **upgrade-1**
+binary (governed plan already scheduled at **height 100410**). W3 is now stacked
+on `main`, so it rides upgrade-1 exactly like the handler's R1/R3 pure-logic
+riders — it goes live automatically when upgrade-1 executes. **This bundles W3
+into your rehearsed upgrade-1.** A plain binary swap to ship W3 early is blocked
+by the x/upgrade guard (`BINARY UPDATED BEFORE TRIGGER`) — verified 2026-07-18
+(the swap was attempted, the guard correctly halted, and the chain was rolled
+back to the pre-upgrade binary with no state harm). Owner decides: accept W3
+into upgrade-1 (and ideally re-rehearse the upgrade with it included), or hold it
+for a later upgrade-2.
+
+**Follow-up:** the ceiling is a code constant; promoting `MaxMintPerBlock` to a
+governance param (raise without a redeploy) is the tunability upgrade.
+**Depends on:** W1/W2 for full "mint follows verified work" (this ships the cap
+only).
 
 ### W4 — The verifier, real and running · ~6–10d
 **What:** stand up the verify-service resolver (`verify.dreamtree.org`): the
@@ -208,10 +230,11 @@ honestly), but required before did:webvh is load-bearing.
 Two independent quick wins ship immediately, no dependencies, high value:
 - **W7 (key custody)** — ✅ DONE 2026-07-18. The mint key is off plaintext, on a
   TPM-LUKS vault; recovery verified.
-- **W3 cap (1d slice)** — bounds fabricated-mint blast radius while the rest
-  lands. **Now the top remaining quick win** — with the key encrypted at rest,
-  the residual mint risk is a leaked `ANCHORD_TOKEN` minting against a fabricated
-  root; a supply/epoch cap bounds that blast radius. Recommend next.
+- **W3 cap** — ✅ CODE DONE 2026-07-18 (`a9b360f`), fully tested. Deploys with
+  the scheduled **upgrade-1** at height 100410 (a consensus change can only ship
+  via the upgrade path, and `main` is the upgrade-1 binary). ⚖️ Owner: this
+  bundles W3 into the rehearsed upgrade-1 — accept and re-rehearse, or defer to
+  upgrade-2.
 
 Then the substrate:
 - **W5 (Go JCS, 3–5d)** — everything signed depends on it.
