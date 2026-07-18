@@ -62,6 +62,21 @@ async function lookup(env: Env, hash: string): Promise<{ code: number; body: unk
 
 // ---- MCP (authless, single tool) -------------------------------------------
 
+const C2PA_TOOL = {
+  name: "verify_c2pa_url",
+  description:
+    "Validate C2PA Content Credentials for an asset at a URL (image/video/document). Returns a " +
+    "graded verdict — trusted (chains to the C2PA trust list), valid_untrusted (signature valid, " +
+    "signer unknown), invalid, or no_credentials — with signer details, plus whether the asset " +
+    "bytes are a recorded observation on the dreamtree chain. 'pending' means resolving; retry " +
+    "in a few seconds with the returned verify_key via verify_observation.",
+  inputSchema: {
+    type: "object",
+    properties: { url: { type: "string", description: "http(s) URL of the asset" } },
+    required: ["url"],
+  },
+};
+
 const TOOL = {
   name: "verify_observation",
   description:
@@ -91,16 +106,34 @@ async function mcp(req: Request, env: Env): Promise<Response> {
     case "notifications/initialized":
       return new Response(null, { status: 202 });
     case "tools/list":
-      return reply({ tools: [TOOL] });
+      return reply({ tools: [TOOL, C2PA_TOOL] });
     case "tools/call": {
-      if (rpc.params?.name !== TOOL.name)
-        return json({ jsonrpc: "2.0", id: rpc.id ?? null, error: { code: -32602, message: "unknown tool" } });
-      const { body } = await lookup(env, String(rpc.params?.arguments?.hash ?? "").toLowerCase());
-      return reply({
-        content: [{ type: "text", text: JSON.stringify(body) }],
-        structuredContent: body,
-        isError: false,
-      });
+      const name = rpc.params?.name;
+      if (name === TOOL.name) {
+        const { body } = await lookup(env, String(rpc.params?.arguments?.hash ?? "").toLowerCase());
+        return reply({
+          content: [{ type: "text", text: JSON.stringify(body) }],
+          structuredContent: body, isError: false,
+        });
+      }
+      if (name === C2PA_TOOL.name) {
+        const target = String(rpc.params?.arguments?.url ?? "");
+        if (!/^https?:\/\//.test(target) || target.length > 2048)
+          return json({ jsonrpc: "2.0", id: rpc.id ?? null, error: { code: -32602, message: "url must be http(s)" } });
+        const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(target));
+        const key = [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+        await env.DB.prepare(
+          "INSERT INTO verdicts (hash, status, kind, url) VALUES (?, 'pending', 'c2pa_url', ?) " +
+            "ON CONFLICT(hash) DO NOTHING",
+        ).bind(key, target).run();
+        const { body } = await lookup(env, key);
+        const out = { verify_key: key, ...(body as object) };
+        return reply({
+          content: [{ type: "text", text: JSON.stringify(out) }],
+          structuredContent: out, isError: false,
+        });
+      }
+      return json({ jsonrpc: "2.0", id: rpc.id ?? null, error: { code: -32602, message: "unknown tool" } });
     }
     default:
       return json({ jsonrpc: "2.0", id: rpc.id ?? null, error: { code: -32601, message: "method not found" } });
@@ -119,6 +152,24 @@ export default {
       return json(body, code, code === 202 ? { "retry-after": String(RETRY_AFTER_S) } : {});
     }
 
+    // DT-22: C2PA-by-URL. The job key is sha256(url); the resolver fetches the
+    // asset, validates Content Credentials, and checks the asset bytes against
+    // the observation log in the same verdict.
+    if (req.method === "POST" && path === "/verify/url") {
+      const body = (await req.json().catch(() => null)) as { url?: string } | null;
+      const target = body?.url ?? "";
+      if (!/^https?:\/\//.test(target) || target.length > 2048)
+        return json({ error: "url must be http(s), <= 2048 chars" }, 400);
+      const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(target));
+      const key = [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+      await env.DB.prepare(
+        "INSERT INTO verdicts (hash, status, kind, url) VALUES (?, 'pending', 'c2pa_url', ?) " +
+          "ON CONFLICT(hash) DO NOTHING",
+      ).bind(key, target).run();
+      const { code, body: out } = await lookup(env, key);
+      return json({ verify_key: key, ...(out as object) }, code === 202 ? 202 : code);
+    }
+
     if (req.method === "POST" && path === "/mcp") return mcp(req, env);
 
     if (req.method === "GET" && path === "/healthz") {
@@ -135,9 +186,12 @@ export default {
       if (!authed(req, env)) return json({ error: "unauthorized" }, 401);
       const max = Math.min(Number((await req.json().catch(() => ({})) as any).max ?? 25), 100);
       const rows = await env.DB.prepare(
-        "SELECT hash FROM verdicts WHERE status='pending' ORDER BY requested_at LIMIT ?",
-      ).bind(max).all<{ hash: string }>();
-      return json({ hashes: (rows.results ?? []).map((r) => r.hash) });
+        "SELECT hash, kind, url FROM verdicts WHERE status='pending' ORDER BY requested_at LIMIT ?",
+      ).bind(max).all<{ hash: string; kind: string; url: string | null }>();
+      return json({
+        hashes: (rows.results ?? []).map((r) => r.hash), // v0 resolver compat
+        jobs: rows.results ?? [],
+      });
     }
     if (req.method === "POST" && path === "/queue/resolve") {
       if (!authed(req, env)) return json({ error: "unauthorized" }, 401);
@@ -147,7 +201,9 @@ export default {
       if (!body?.results) return json({ error: "results required" }, 400);
       let n = 0;
       for (const r of body.results) {
-        if (!HEX64.test(r.hash) || !["observed", "converged", "not_found"].includes(r.status)) continue;
+        const STATUSES = ["observed", "converged", "not_found",
+          "trusted", "valid_untrusted", "invalid", "no_credentials", "fetch_failed"];
+        if (!HEX64.test(r.hash) || !STATUSES.includes(r.status)) continue;
         await env.DB.prepare(
           "UPDATE verdicts SET status=?, verdict=?, resolved_at=datetime('now') WHERE hash=?",
         ).bind(r.status, r.verdict ? JSON.stringify(r.verdict) : null, r.hash).run();
