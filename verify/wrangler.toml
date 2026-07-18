@@ -1,0 +1,16 @@
+name = "verify"
+main = "src/index.ts"
+compatibility_date = "2026-06-01"
+
+# The public verification surface (DT-23, docs/specs/verify-service.md).
+# Zero-auth reads; the m3 resolver drains /queue/* with VERIFY_SYNC_TOKEN
+# (wrangler secret). m3 is never dialed — it polls outbound.
+
+[[d1_databases]]
+binding = "DB"
+database_name = "verify"
+database_id = "2c401b10-a8df-4958-b54b-9c335da83553"
+
+[[routes]]
+pattern = "verify.dreamtree.org"
+custom_domain = true

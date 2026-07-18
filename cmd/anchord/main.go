@@ -604,6 +604,46 @@ func (s *server) handleHealth(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(map[string]any{"ok": true, "height": st.SyncInfo.LatestBlockHeight})
 }
 
+// handleStanding — read-only reputation lookup for the verify service (DT-23):
+// GET /standing?address=dream1…&domain=… (Bearer, same token as /anchor).
+// Shells `q reputation reputation`; keeps the chain RPC loopback-only — the
+// resolver reaches the chain THROUGH anchord instead of a new open port.
+func (s *server) handleStanding(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	if !s.authed(r) {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	addr, domain := r.URL.Query().Get("address"), r.URL.Query().Get("domain")
+	if addr == "" {
+		http.Error(w, "address required", http.StatusBadRequest)
+		return
+	}
+	if domain == "" {
+		domain = "general"
+	}
+	out, err := s.run(append([]string{"query", "reputation", "reputation", addr, domain,
+		"--output", "json"}, s.cfg.queryArgs()...)...)
+	w.Header().Set("Content-Type", "application/json")
+	if err != nil {
+		w.WriteHeader(http.StatusBadGateway)
+		_ = json.NewEncoder(w).Encode(map[string]any{"ok": false, "error": err.Error()})
+		return
+	}
+	var rep struct {
+		Reputation string `json:"reputation"`
+		Raw        string `json:"raw"`
+	}
+	_ = json.Unmarshal([]byte(out), &rep)
+	_ = json.NewEncoder(w).Encode(map[string]any{
+		"ok": true, "address": addr, "domain": domain,
+		"reputation": rep.Reputation, "raw": rep.Raw,
+	})
+}
+
 func main() {
 	cfg := loadConfig()
 	store, err := newIdemStore(cfg.state)
@@ -620,6 +660,7 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/anchor", s.handleAnchor)
 	mux.HandleFunc("/healthz", s.handleHealth)
+	mux.HandleFunc("/standing", s.handleStanding)
 
 	if cfg.token == "" {
 		log.Printf("WARNING: ANCHORD_TOKEN unset — /anchor is open (dev only)")
