@@ -232,11 +232,10 @@ honestly), but required before did:webvh is load-bearing.
 Two independent quick wins ship immediately, no dependencies, high value:
 - **W7 (key custody)** — ✅ DONE 2026-07-18. The mint key is off plaintext, on a
   TPM-LUKS vault; recovery verified.
-- **W3 cap** — ✅ CODE DONE 2026-07-18 (`a9b360f`), fully tested. Deploys with
-  the scheduled **upgrade-1** at height 100410 (a consensus change can only ship
-  via the upgrade path, and `main` is the upgrade-1 binary). ⚖️ Owner: this
-  bundles W3 into the rehearsed upgrade-1 — accept and re-rehearse, or defer to
-  upgrade-2.
+- **W3 cap** — ✅ DEPLOYED 2026-07-21 via **upgrade-1** at height 100410 (the
+  chain had halted there awaiting the operator swap; binary swapped, handler
+  applied, chain resumed, live mint verified). Shipped inside the upgrade-1
+  payload.
 
 Then the substrate:
 - **W5 (Go JCS, 3–5d)** — everything signed depends on it.
