@@ -107,7 +107,7 @@ opaque.
 off-chain proof (the SCITT/Rekor "auditable not oracle" line verify-service
 already takes).
 
-### W3 — Mint integrity · CODE DONE 2026-07-18 · deploys with upgrade-1
+### W3 — Mint integrity · ✅ DEPLOYED 2026-07-21 (via upgrade-1 @ h=100410)
 **What (done):** a per-block photon mint ceiling in `x/photons` (commit
 `a9b360f`). Photons stay inflationary by design (one per atom — a global supply
 cap would break the peg), so the defense is a per-block ceiling that bounds a
@@ -121,17 +121,19 @@ prefixes, default 0, no migration, no ConsensusVersion bump). Fully unit-tested
 (accumulation, over-ceiling rejection with zero mint, boundary, cross-block
 reset, soft-warn, 100 max-size honest batches pass).
 
-**Deployment reality (⚖️ owner):** a consensus change can only reach the running
-chain through the upgrade mechanism, and `main` IS the pending **upgrade-1**
-binary (governed plan already scheduled at **height 100410**). W3 is now stacked
-on `main`, so it rides upgrade-1 exactly like the handler's R1/R3 pure-logic
-riders — it goes live automatically when upgrade-1 executes. **This bundles W3
-into your rehearsed upgrade-1.** A plain binary swap to ship W3 early is blocked
-by the x/upgrade guard (`BINARY UPDATED BEFORE TRIGGER`) — verified 2026-07-18
-(the swap was attempted, the guard correctly halted, and the chain was rolled
-back to the pre-upgrade binary with no state harm). Owner decides: accept W3
-into upgrade-1 (and ideally re-rehearse the upgrade with it included), or hold it
-for a later upgrade-2.
+**Deployment (done):** a consensus change can only reach the chain through the
+upgrade mechanism, and `main` was the pending **upgrade-1** binary (governed plan
+at height 100410), so W3 rode upgrade-1 like the handler's R1/R3 pure-logic
+riders. The chain reached 100410 on 2026-07-19 05:17 and halted (`UPGRADE
+upgrade-1 NEEDED`), waiting for the operator swap. On 2026-07-21 the upgrade
+binary (main, incl. W3) was swapped in and the node restarted: the handler
+applied at 100410 (`query upgrade applied upgrade-1` → 100410), all riders
+landed (spot-checked: gov clock now 1h/30m), the chain resumed, and a live anchor
+minted seed 60340624 — confirming the post-upgrade mint path (with the ceiling
+accumulator initializing cleanly) works and W3 does not block honest traffic
+(zero ceiling rejections/warns). A fresh pre-upgrade snapshot was taken at 100410
+as a rollback point before the swap. Note: W3's mint cap shipped inside the
+owner's upgrade-1 payload — it went live with that upgrade, not separately.
 
 **Follow-up:** the ceiling is a code constant; promoting `MaxMintPerBlock` to a
 governance param (raise without a redeploy) is the tunability upgrade.
